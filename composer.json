@@ -28,7 +28,8 @@
             "User\\": "App/Work/User/",
             "Skill\\": "App/Work/Skill/",
             "Occupation\\": "App/Work/Occupation/",
-            "Common\\": "App/Common/"
+            "Common\\": "App/Common/",
+            "Version\\": "App/Work/Version/"
         }
     }
 }
