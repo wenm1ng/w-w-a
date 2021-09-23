@@ -26,6 +26,7 @@
         "psr-4": {
             "App\\": "App/",
             "User\\": "App/Work/User/",
+            "Talent\\": "App/Work/Talent/",
             "Skill\\": "App/Work/Skill/",
             "Occupation\\": "App/Work/Occupation/",
             "Common\\": "App/Common/",

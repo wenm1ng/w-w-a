@@ -26,7 +26,7 @@ class VersionService
             return $versionList;
         }
         $versionList = $this->versionModel->order(['version' => 'ASC'])->all()->toRawArray();
-        redis()->set('version_list', json_encode($versionList));
+        redis()->set('version_list', json_encode($versionList), 3600);
         return $versionList;
     }
 }

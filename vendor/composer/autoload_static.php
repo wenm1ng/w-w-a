@@ -44,6 +44,10 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         array (
             'User\\' => 5,
         ),
+        'T' => 
+        array (
+            'Talent\\' => 7,
+        ),
         'S' => 
         array (
             'Symfony\\Polyfill\\Php80\\' => 23,
@@ -163,6 +167,10 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'User\\' => 
         array (
             0 => __DIR__ . '/../..' . '/App/Work/User',
+        ),
+        'Talent\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/App/Work/Talent',
         ),
         'Symfony\\Polyfill\\Php80\\' => 
         array (

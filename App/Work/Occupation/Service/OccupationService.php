@@ -30,7 +30,7 @@ class OccupationService
         }
         $occupationList = $this->occupationModel->where(['version' => (int)$version])->order(['sort' => 'ASC'])->all()->toArray();
         if(!empty($occupationList)){
-            redis()->set('occupation_list:'.$version, json_encode($occupationList));
+            redis()->set('occupation_list:'.$version, json_encode($occupationList), 3600);
         }
         return $occupationList;
     }

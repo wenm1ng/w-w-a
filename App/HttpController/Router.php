@@ -22,8 +22,15 @@ class Router extends AbstractRouter
             $this->version($collector, $apiBasePathOpenV1);
             //职业模块
             $this->occupation($collector, $apiBasePathOpenV1);
+            //天赋模块
+            $this->talent($collector, $apiBasePathOpenV1);
         });
 
+    }
+
+    public function talent(RouteCollector $collector, string $basePath = ''){
+        //天赋列表
+        $collector->get('/talent/get-talent-list',$basePath.'Talent/Talent/getTalentList');
     }
 
     public function occupation(RouteCollector $collector, string $basePath = '')
