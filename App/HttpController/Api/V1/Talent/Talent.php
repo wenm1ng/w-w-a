@@ -22,12 +22,41 @@ class Talent extends LoginController
         $rs = CodeKey::result();
         try {
             $version = Common::getHttpParams($this->request(), 'version');
+            $version = !empty($version) ? (int)$version : 0;
             $talentService = new TalentService();
             $result = $talentService->getTalentList($version);
             $rs[CodeKey::STATE] = CodeKey::SUCCESS;
             $rs[CodeKey::DATA] = $result;
         } catch (\Exception $e) {
             $rs[CodeKey::MSG] = $e->getMessage();
+        } catch(\Error $e){
+            $rs[CodeKey::MSG] = handleErrorMsg($e);
+        }
+
+        return $this->writeResultJson($rs);
+    }
+
+    /**
+     * @desc       　获取天赋技能树
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function getTalentSkillTree(){
+        $rs = CodeKey::result();
+        try {
+            $params = Common::getHttpParams($this->request());
+            $version = $params['version'] ?? 0;
+            $talentId = $params['talent_id'] ?? 0;
+            $oc = $params['oc'] ?? 0;
+            $talentService = new TalentService();
+            $result = $talentService->getTalentSkillTree($version, $talentId, $oc);
+            $rs[CodeKey::STATE] = CodeKey::SUCCESS;
+            $rs[CodeKey::DATA] = $result;
+        } catch (\Exception $e) {
+            $rs[CodeKey::MSG] = $e->getMessage();
+        } catch(\Error $e){
+            $rs[CodeKey::MSG] = handleErrorMsg($e);
         }
 
         return $this->writeResultJson($rs);

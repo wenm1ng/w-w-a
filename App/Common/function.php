@@ -21,6 +21,16 @@ use App\Pool\RedisPool;
  * @param target_lang String required 目标语种 (zh)
  * @return string/Array
  */
+
+function handleErrorMsg($e){
+    $errMsg = $e->getMessage();
+    $pos = strpos($errMsg, 'called');
+    if($pos !== false){
+        $errMsg = substr($errMsg, 0, $pos);
+    }
+    return $errMsg;
+}
+
 function postPageT($text, $targe_lang = 'en', $from_lang = 'auto')
 {
     $res = '';

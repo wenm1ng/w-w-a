@@ -31,6 +31,8 @@ class Router extends AbstractRouter
     public function talent(RouteCollector $collector, string $basePath = ''){
         //天赋列表
         $collector->get('/talent/get-talent-list',$basePath.'Talent/Talent/getTalentList');
+        //天赋技能树
+        $collector->get('/talent/get-talent-tree-list',$basePath.'Talent/Talent/getTalentSkillTree');
     }
 
     public function occupation(RouteCollector $collector, string $basePath = '')
