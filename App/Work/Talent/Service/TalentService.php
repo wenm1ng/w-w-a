@@ -10,18 +10,24 @@ use Common\Common;
 use Talent\Models\WowTalentModel;
 use Talent\Models\WowTalentTreeModel;
 use Talent\Validator\TalentValidator;
+use Talent\Models\WowUserTalentModel;
+use User\Models\WowUserModel;
 
 class TalentService
 {
 
     protected $talentModel;
     protected $talentTreeModel;
+    protected $userTalentModel;
+    protected $userModel;
     protected $validator;
 
     public function __construct($token = "")
     {
         $this->talentModel = new WowTalentModel();
         $this->talentTreeModel = new WowTalentTreeModel();
+        $this->userTalentModel = new WowUserTalentModel();
+        $this->userModel = new WowUserModel();
         $this->validator = new TalentValidator();
     }
 
@@ -84,19 +90,41 @@ class TalentService
         return $treeList;
     }
 
+    /**
+     * @desc       　保存用户天赋信息
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param $params
+     *
+     * @return array
+     */
     public function saveUserTalent($params){
         $this->validator->checkSaveUserTalent();
         if (!$this->validator->validate($params)) {
             throw new \Exception($this->validator->getError()->__toString());
         }
-
+        //获取用户id
+        $userInfo = $this->userModel->get(['openId' => $params['openId']])->field('user_id')->toRawArray();
         $dbData = [
-            'openId'
+            'user_id' => $userInfo['user_id'] ?? 0,
+            'version' => $params['version'],
+            'occupation' => $params['oc'],
+            'title' => $params['title'],
+            'statis' => $params['statis'],
+            'points' => $params['points'],
+            'actPoints' => $params['actPoints'],
+            'type' => $params['type'],
+            'description' => $params['description'] ?? '',
+            'talent_id' => $params['talent_id'],
         ];
         if(!empty($params['id'])){
             //修改
+            $this->userTalentModel->update($dbData, ['wut_id' => $params['id']]);
         }else{
             //新增
+            $this->userTalentModel->create($dbData)->save();
         }
+
+        return [];
     }
 }

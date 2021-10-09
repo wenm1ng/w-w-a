@@ -61,4 +61,50 @@ class Talent extends LoginController
 
         return $this->writeResultJson($rs);
     }
+
+    /**
+     * @desc       　添加用户天赋信息
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function addUserTalent(){
+        $rs = CodeKey::result();
+        try {
+            $params = Common::getHttpParams($this->request());
+            $talentService = new TalentService();
+            $result = $talentService->saveUserTalent($params);
+            $rs[CodeKey::STATE] = CodeKey::SUCCESS;
+            $rs[CodeKey::DATA] = $result;
+        } catch (\Exception $e) {
+            $rs[CodeKey::MSG] = $e->getMessage();
+        } catch(\Error $e){
+            $rs[CodeKey::MSG] = handleErrorMsg($e);
+        }
+
+        return $this->writeResultJson($rs);
+    }
+
+    /**
+     * @desc       　修改用户天赋信息
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function updateUserTalent(){
+        $rs = CodeKey::result();
+        try {
+            $params = Common::getHttpParams($this->request());
+            $talentService = new TalentService();
+            $result = $talentService->saveUserTalent($params);
+            $rs[CodeKey::STATE] = CodeKey::SUCCESS;
+            $rs[CodeKey::DATA] = $result;
+        } catch (\Exception $e) {
+            $rs[CodeKey::MSG] = $e->getMessage();
+        } catch(\Error $e){
+            $rs[CodeKey::MSG] = handleErrorMsg($e);
+        }
+
+        return $this->writeResultJson($rs);
+    }
 }

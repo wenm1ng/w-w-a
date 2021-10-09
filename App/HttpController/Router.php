@@ -33,6 +33,10 @@ class Router extends AbstractRouter
         $collector->get('/talent/get-talent-list',$basePath.'Talent/Talent/getTalentList');
         //天赋技能树
         $collector->get('/talent/get-talent-tree-list',$basePath.'Talent/Talent/getTalentSkillTree');
+        //添加用户天赋信息
+        $collector->post('/talent/add-user-talent',$basePath.'Talent/Talent/addUserTalent');
+        //修改用户天赋信息
+        $collector->post('/talent/update-user-talent',$basePath.'Talent/Talent/updateUserTalent');
     }
 
     public function occupation(RouteCollector $collector, string $basePath = '')
