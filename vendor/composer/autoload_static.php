@@ -133,6 +133,7 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
             'Doctrine\\Instantiator\\' => 22,
             'Doctrine\\Common\\Lexer\\' => 22,
             'DeepCopy\\' => 9,
+            'Damage\\' => 7,
         ),
         'C' => 
         array (
@@ -420,6 +421,10 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
+        'Damage\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/App/Work/Damage',
         ),
         'Cron\\' => 
         array (

@@ -20,5 +20,6 @@ class TalentValidator extends systemValidate
         $this->addColumn('statis')->notEmpty('天赋点数未用完');
         $this->addColumn('points')->notEmpty('天赋点数未用完');
         $this->addColumn('actPoints')->notEmpty('天赋点数未用完');
+        $this->addColumn('talent_ids')->notEmpty('天赋技能不能为空');
     }
 }

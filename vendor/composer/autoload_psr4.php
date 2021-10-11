@@ -74,6 +74,7 @@ return array(
     'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator'),
     'Doctrine\\Common\\Lexer\\' => array($vendorDir . '/doctrine/lexer/lib/Doctrine/Common/Lexer'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
+    'Damage\\' => array($baseDir . '/App/Work/Damage'),
     'Cron\\' => array($vendorDir . '/dragonmantank/cron-expression/src/Cron'),
     'Common\\' => array($baseDir . '/App/Common'),
     'App\\' => array($baseDir . '/App', $baseDir . '/App', $vendorDir . '/easyswoole/easyswoole/App'),

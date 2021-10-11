@@ -12,6 +12,7 @@ use Talent\Models\WowTalentTreeModel;
 use Talent\Validator\TalentValidator;
 use Talent\Models\WowUserTalentModel;
 use User\Models\WowUserModel;
+use App\Work\Config;
 
 class TalentService
 {
@@ -73,7 +74,7 @@ class TalentService
             throw new \Exception('职业不能为空');
         }
 
-        $redisKey = "talent_tree_list:{$version}:{$oc}:{$talentId}";
+        $redisKey = Config::getTalentSkillTreeRedisKey($version, $talentId, $oc);
         $treeList = redis()->get($redisKey);
         if(!empty($treeList)){
             $treeList = json_decode($treeList, true);
@@ -115,8 +116,9 @@ class TalentService
             'actPoints' => $params['actPoints'],
             'type' => $params['type'],
             'description' => $params['description'] ?? '',
-            'talent_id' => $params['talent_id'],
+            'talent_skill_id_json' => json_encode($params['talent_ids']),
         ];
+
         if(!empty($params['id'])){
             //修改
             $this->userTalentModel->update($dbData, ['wut_id' => $params['id']]);
@@ -124,7 +126,6 @@ class TalentService
             //新增
             $this->userTalentModel->create($dbData)->save();
         }
-
         return [];
     }
 }
