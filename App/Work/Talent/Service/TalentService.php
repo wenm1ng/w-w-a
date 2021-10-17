@@ -40,16 +40,38 @@ class TalentService
      *
      * @return array|mixed
      */
-    public function getTalentList(int $version){
+    public function getTalentList(int $version, string $oc = null){
         if(empty($version)){
             throw new \Exception('版本信息不能为空');
         }
+
         $talentList = redis()->get('talent_list:'.$version);
         if(!empty($talentList)){
             $talentList = json_decode($talentList, true);
+            if(!empty($oc)){
+                $newTalentList = [];
+                foreach ($talentList as $val) {
+                    if($oc != $val['occupation']){
+                        continue;
+                    }
+                    $newTalentList[] = $val;
+                }
+                $talentList = $newTalentList;
+            }
             return $talentList;
         }
-        $talentList = $this->talentModel->field('occupation,talent_id,talent_name,icon,sort')->order(['sort' => 'ASC'])->all(['version' => $version])->toRawArray();
+        $where = ['version' => $version];
+        $talentList = $this->talentModel->field('occupation,talent_id,talent_name,icon,sort')->order(['sort' => 'ASC'])->all($where)->toRawArray();
+        if(!empty($oc)){
+            $newTalentList = [];
+            foreach ($talentList as $val) {
+                if($oc != $val['occupation']){
+                    continue;
+                }
+                $newTalentList[] = $val;
+            }
+            $talentList = $newTalentList;
+        }
         redis()->set('talent_list:'.$version, json_encode($talentList), 3600);
         return $talentList;
     }

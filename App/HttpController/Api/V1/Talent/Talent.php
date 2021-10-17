@@ -21,10 +21,12 @@ class Talent extends LoginController
     public function getTalentList(){
         $rs = CodeKey::result();
         try {
-            $version = Common::getHttpParams($this->request(), 'version');
-            $version = !empty($version) ? (int)$version : 0;
+            $params = Common::getHttpParams($this->request());
+            $version = $params['version'] ?? 0;
+            $oc = $params['oc'] ?? '';
+            dump($params);
             $talentService = new TalentService();
-            $result = $talentService->getTalentList($version);
+            $result = $talentService->getTalentList($version, $oc);
             $rs[CodeKey::STATE] = CodeKey::SUCCESS;
             $rs[CodeKey::DATA] = $result;
         } catch (\Exception $e) {

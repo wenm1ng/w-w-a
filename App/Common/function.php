@@ -8,13 +8,14 @@
 use EasySwoole\EasySwoole\Config;
 use Common\Extend\Warning;
 use EasySwoole\RedisPool\Redis;
+use EasySwoole\RedisPool\RedisPool;
 use EasySwoole\Redis\Config\RedisConfig;
 use App\Lib\AliFanyi\Common as AliFanyCommon;
 use App\Lib\AliFanyi\Validate\TranslateValidate;
 use Common\Code\CodeKey;
 use App\Utility\Company;
 use EasySwoole\HttpClient\HttpClient;
-use App\Pool\RedisPool;
+//use App\Pool\RedisPool;
 /* 谷歌翻译CURL请求（不用代理）
  * @param $text String required  翻译的字符串
  * @param source_text String/Array required 原文 (hello)
@@ -411,7 +412,12 @@ function redis($pool = "cache")
 //        Redis::getInstance()->register('cache', $config);
 //    }
 //    return $redis;
-    return \EasySwoole\Pool\Manager::getInstance()->get($pool)->getObj();
+//    return \EasySwoole\Pool\Manager::getInstance()->get($pool)->getObj();
+    $redis = RedisPool::defer($pool);
+    if(empty($redis)) {
+        return \EasySwoole\Pool\Manager::getInstance()->get($pool)->getObj();
+    }
+    return $redis;
 }
 
 /**
