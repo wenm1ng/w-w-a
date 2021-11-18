@@ -7,8 +7,43 @@
 namespace App\HttpController;
 use EasySwoole\Http\AbstractInterface\Controller;
 use Common\CodeKey;
+use User\Service\LoginService;
+use Common\Common;
 
 Class LoginController extends Controller{
+
+    protected function onRequest(?string $action): ?bool
+    {
+        $status = true;
+
+        try {
+            //验证token
+            $authorization = $this->request()->getHeader('authorization');
+            if (empty($authorization[0])){
+                return $status;
+            }
+
+            $loginService = new LoginService();
+
+            $userId = $loginService->checkToken($authorization[0]);
+            //将用户id写进header头
+            $this->request()->withAddedHeader('user_id', $userId);
+            $body = json_decode($this->request()->getBody()->__toString(), true);
+            $body['user_id'] = $userId;
+            Common::setUserToken($authorization[0]);
+
+            //将解析出来的user_id重新写进body
+            $this->request()->withBody(\GuzzleHttp\Psr7\stream_for(json_encode($body)));
+        } catch (\Exception $exception) {
+            $status = false;
+            $this->writeJson($exception->getCode() ?? CodeKey::EXPIRED_TOKEN, $exception->getMessage(), $exception->getMessage());
+
+            Common::log('刊登BaseController Exception:' . $exception->getMessage(), 'BaseController');
+        }
+
+        return $status;
+    }
+
     /**
      * 解析数组返回值
      * @param array $rs

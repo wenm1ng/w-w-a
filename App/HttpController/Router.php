@@ -24,6 +24,8 @@ class Router extends AbstractRouter
             $this->occupation($collector, $apiBasePathOpenV1);
             //天赋模块
             $this->talent($collector, $apiBasePathOpenV1);
+            //伤害测试模块
+            $this->damage($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -37,6 +39,10 @@ class Router extends AbstractRouter
         $collector->post('/talent/add-user-talent',$basePath.'Talent/Talent/addUserTalent');
         //修改用户天赋信息
         $collector->post('/talent/update-user-talent',$basePath.'Talent/Talent/updateUserTalent');
+        //天赋大厅列表
+        $collector->post('/talent/get-talent-hall-list',$basePath.'Talent/Talent/getTalentHallList');
+        //用户天赋列表
+        $collector->post('/talent/get-user-talent-list',$basePath.'Talent/Talent/getUserTalentList');
     }
 
     public function occupation(RouteCollector $collector, string $basePath = '')
@@ -60,5 +66,10 @@ class Router extends AbstractRouter
         //用户详情
         $collector->get('/user',$basePath.'User/User/getUserInfo');
 
+    }
+
+    public function damage(RouteCollector $collector, string $basePath = ''){
+
+        $collector->post('/test',$basePath.'Damage/Damage/test');
     }
 }

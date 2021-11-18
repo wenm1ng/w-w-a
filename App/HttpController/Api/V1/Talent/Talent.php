@@ -109,4 +109,46 @@ class Talent extends LoginController
 
         return $this->writeResultJson($rs);
     }
+
+    /**
+     * @desc       　获取天赋大厅列表
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function getTalentHallList(){
+        $rs = CodeKey::result();
+        try {
+            $params = Common::getHttpParams($this->request());
+            $talentService = new TalentService();
+            $result = $talentService->getTalentHallList($params);
+            $rs[CodeKey::STATE] = CodeKey::SUCCESS;
+            $rs[CodeKey::DATA] = $result;
+        } catch (\Throwable $e) {
+            $rs[CodeKey::MSG] = $e->getMessage();
+        }
+
+        return $this->writeResultJson($rs);
+    }
+
+    /**
+     * @desc       　获取用户天赋列表
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function getUserTalentList(){
+        $rs = CodeKey::result();
+        try {
+            $params = Common::getHttpParams($this->request());
+            $talentService = new TalentService();
+            $result = $talentService->getUserTalentList($params);
+            $rs[CodeKey::STATE] = CodeKey::SUCCESS;
+            $rs[CodeKey::DATA] = $result;
+        } catch (\Throwable $e) {
+            $rs[CodeKey::MSG] = $e->getMessage();
+        }
+
+        return $this->writeResultJson($rs);
+    }
 }

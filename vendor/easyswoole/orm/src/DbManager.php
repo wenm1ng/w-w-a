@@ -10,6 +10,7 @@ use EasySwoole\ORM\Db\Result;
 use EasySwoole\ORM\Exception\Exception;
 use EasySwoole\Pool\Exception\PoolEmpty;
 use Swoole\Coroutine;
+use Common\Common;
 
 /**
  * Class DbManager
@@ -122,8 +123,8 @@ class DbManager
             });
         }
         $this->lastQueryContext[$cid] = $builder;
-
-        dump($this->getLastQuery()->getLastQuery());
+        Common::log($this->getLastQuery()->getLastQuery(), 'sql_debug');
+//        dump($this->getLastQuery()->getLastQuery());
         $name = null;
         if(is_string($connection)){
             $name = $connection;

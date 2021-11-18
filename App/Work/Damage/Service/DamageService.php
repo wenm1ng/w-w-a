@@ -24,6 +24,36 @@ class DamageService
         $this->talentTreeModel = new WowTalentTreeModel();
     }
 
+    public function test(){
+//        $list = $this->talentTreeModel->all(['content' => ['%技能，%','like']])->toRawArray();;
+//        $id = array_column($list, 'wtr_id');
+//        dump($id);
+//        $this->talentTreeModel->update(['is_active' => 1], ['wtr_id' => [$id, 'in']]);
+        $list = $this->talentTreeModel->all()->toRawArray();
+        $skillList = $this->skillModel->all(['sk'])->toRawArray();
+        $skillList = array_column($skillList, 'ws_id', '');
+        $id = array_column($list, 'wtr_id');
+
+        foreach ($list as $val) {
+            $updateData = [];
+            if(strpos($val['content'], '技能，') !== false){
+                $updateData['is_active'] = 1;
+            }
+            if(preg_match("/.*?你的(.*?)技能.*?减少.*?点/", $val['content'], $match)){
+
+            }elseif(preg_match("/.*?你的(.*?)技能.*?提高.*?%/", $val['content'], $match)){
+                if(strpos($val['content'], '致命一击') !== false){
+
+                }
+            }elseif(preg_match("/.*?你的(.*?)技能.*?提高.*?点/", $val['content'], $match)){
+                if(strpos($val['content'], '致命一击') !== false){
+
+                }
+            }
+        }
+        $this->talentTreeModel->update(['is_active' => 0], ['wtr_id' => [$id, 'in']]);
+
+    }
     /**
      * @desc       　获取进行伤害测试的技能列表
      * @example    　

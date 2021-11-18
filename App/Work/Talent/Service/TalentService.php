@@ -150,4 +150,56 @@ class TalentService
         }
         return [];
     }
+
+    /**
+     * @desc       　获取天赋列表（大厅 or 自己）
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param $params
+     *
+     * @return array
+     */
+    public function getTalentHallList($params, $isMyself = 0){
+        $this->validator->checkgetTalentHallList();
+        if (!$this->validator->validate($params)) {
+            throw new \Exception($this->validator->getError()->__toString());
+        }
+
+        if($isMyself){
+            $userId = Common::getUserId();
+            if(empty($userId)){
+                throw new \Exception('请登录');
+            }
+            $where['user_id'] = $userId;
+        }
+
+        $where = ['version' => $params['version'], 'occupation' => $params['oc']];
+
+        if($params['order_type'] == 1){
+            $where['order'] = 'favorCount desc';
+        }elseif($params['order_type'] == 2){
+            $where['order'] = 'update_at desc';
+        }
+
+        if(!empty($params['title'])){
+            $where['title like'] = '%'. $params['title'] .'%';
+        }
+
+        $list = $this->userTalentModel->getList($where, $params);
+
+        return $list;
+    }
+
+    /**
+     * @desc       　获取用户天赋列表
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param $params
+     *
+     * @return array
+     */
+    public function getUserTalentList($params){
+        return $this->getTalentHallList($params, 1);
+    }
+
 }

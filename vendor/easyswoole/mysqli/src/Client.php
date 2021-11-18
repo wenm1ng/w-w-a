@@ -6,6 +6,7 @@ namespace EasySwoole\Mysqli;
 
 use EasySwoole\Mysqli\Exception\Exception;
 use Swoole\Coroutine\MySQL;
+use Common\Common;
 
 class Client
 {
@@ -56,6 +57,7 @@ class Client
         try{
             $this->connect();
             $stmt = $this->mysqlClient()->prepare($this->queryBuilder()->getLastPrepareQuery(),$timeout);
+            $sql = $this->queryBuilder()->getLastQuery() ?: '';
             $ret = null;
             if($stmt){
                 $ret = $stmt->execute($this->queryBuilder()->getLastBindParams(),$timeout);
@@ -70,6 +72,8 @@ class Client
             }
             return $ret;
         }catch (\Throwable $exception){
+            Common::log($exception->getMessage() . ' error sql' . $sql . " -)", 'error_sql_debug');
+
             throw $exception;
         }finally{
             $this->reset();
