@@ -27,4 +27,17 @@ class TalentValidator extends systemValidate
         $this->addColumn('version')->notEmpty('版本号不能为空');
         $this->addColumn('oc')->notEmpty('职业不能为空');
     }
+
+    public function checkCreateComment(){
+        $this->addColumn('version')->notEmpty('版本号不能为空');
+        $this->addColumn('wut_id')->notEmpty('天赋id不能为空');
+        $this->addColumn('user_id')->notEmpty('用户id不能为空');
+        $this->addColumn('content')->notEmpty('请输入评论内容');
+    }
+
+    public function checkGetTalentCommentList(){
+        $this->addColumn('version')->notEmpty('版本号不能为空');
+        $this->addColumn('wut_id')->notEmpty('天赋id不能为空');
+
+    }
 }

@@ -11,6 +11,7 @@ use Talent\Models\WowTalentModel;
 use Talent\Models\WowTalentTreeModel;
 use Talent\Validator\TalentValidator;
 use Talent\Models\WowUserTalentModel;
+use Talent\Models\WowUserTalentCommentModel;
 use User\Models\WowUserModel;
 use App\Work\Config;
 
@@ -21,6 +22,7 @@ class TalentService
     protected $talentTreeModel;
     protected $userTalentModel;
     protected $userModel;
+    protected $commentModel;
     protected $validator;
 
     public function __construct($token = "")
@@ -29,6 +31,7 @@ class TalentService
         $this->talentTreeModel = new WowTalentTreeModel();
         $this->userTalentModel = new WowUserTalentModel();
         $this->userModel = new WowUserModel();
+        $this->commentModel = new WowUserTalentCommentModel();
         $this->validator = new TalentValidator();
     }
 
@@ -202,4 +205,93 @@ class TalentService
         return $this->getTalentHallList($params, 1);
     }
 
+    /**
+     * @desc       　进行评论
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param $params
+     *
+     * @return array
+     */
+    public function createComment($params){
+        $this->validator->checkCreateComment();
+        if (!$this->validator->validate($params)) {
+            throw new \Exception($this->validator->getError()->__toString());
+        }
+
+        $createData = [
+            'wut_id' => $params['wut_id'],
+            'user_id' => $params['user_id'],
+            'version' => $params['version'],
+            'content' => $params['content'],
+            'to_user_id' => $params['to_user_id'] ?? 0,
+            'to_comment_id' => $params['to_comment_id'] ?? 0
+        ];
+
+        $this->commentModel->create($createData)->save();
+
+        return [];
+    }
+
+    /**
+     * @desc       　获取用户评论列表
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param $params
+     *
+     * @return array
+     */
+    public function getTalentCommentList($params){
+        $this->validator->checkGetTalentCommentList();
+        if (!$this->validator->validate($params)) {
+            throw new \Exception($this->validator->getError()->__toString());
+        }
+
+        if(!empty($params['order_type']) && $params['order_type'] == 2){
+            $this->commentModel->order('like_count','desc')->order('comment_id','desc');
+        }else{
+            $this->commentModel->order('update_at','desc')->order('comment_id','desc');
+        }
+        $list = $this->commentModel->where(['wut_id' => $params['wut_id']])->all()->toRawArray();
+        //取出用户id去取用户信息
+        $userIds = array_unique(array_column($list, 'user_id'));
+
+        $userList = $this->userModel->field('user_id,nickName,avatarUrl')->where(['user_id' => [$userIds, 'in']])->all()->toRawArray();
+        $userList = array_column($userList, null ,'user_id');
+
+        $link = $newList = [];
+        foreach ($list as &$comment) {
+            $comment['avatarUrl'] = $userList[$comment['user_id']]['avatarUrl'] ?? '';
+            $comment['nickName'] = $userList[$comment['user_id']]['nickName'] ?? '';
+            if(empty($comment['to_comment_id'])){
+                $newList[] = $comment;
+                continue;
+            }
+            $link[$comment['to_comment_id']][] = $comment;
+        }
+
+        foreach ($newList as &$comment) {
+            $comment['child'] = $link[$comment['comment_id']] ?? [];
+            krsort($comment['child']);
+            $comment['child'] = array_values($comment['child']);
+        }
+
+        return $newList;
+    }
+
+    public function delComment(int $commentId){
+        if(empty($commentId)){
+            throw new \Exception('评论id不能为空');
+        }
+        $commentInfo = $this->commentModel->field('user_id')->get(['comment_id' => $commentId])->toRawArray();
+        if(empty($commentInfo)){
+            throw new \Exception('评论不存在');
+        }
+        $userId = Common::getUserId();
+        if($userId != $commentInfo['user_id']){
+            throw new \Exception('你只能删除自己的评论');
+        }
+        $this->commentModel->destroy(['comment_id' => $commentId]);
+        return [];
+    }
 }

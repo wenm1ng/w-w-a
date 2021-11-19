@@ -8,6 +8,7 @@ use EasySwoole\Mysqli\Client;
 use EasySwoole\Mysqli\QueryBuilder;
 use EasySwoole\ORM\Exception\Exception;
 use EasySwoole\Pool\ObjectInterface;
+use Common\Common;
 
 class MysqliClient extends Client implements ClientInterface, ObjectInterface
 {
@@ -76,6 +77,7 @@ class MysqliClient extends Client implements ClientInterface, ObjectInterface
                 }
 
                 $exception = new Exception($error . " [{$builder->getLastQuery()}]");
+                Common::log($builder->getLastQuery(), 'error_sql_debug');
                 $exception->setLastQueryResult($result);
                 throw $exception;
             }

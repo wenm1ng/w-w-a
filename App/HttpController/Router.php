@@ -43,6 +43,12 @@ class Router extends AbstractRouter
         $collector->post('/talent/get-talent-hall-list',$basePath.'Talent/Talent/getTalentHallList');
         //用户天赋列表
         $collector->post('/talent/get-user-talent-list',$basePath.'Talent/Talent/getUserTalentList');
+        //进行天赋大厅的评论
+        $collector->post('/talent/create-comment',$basePath.'Talent/Comment/createComment');
+        //获取天赋大厅的评论列表
+        $collector->get('/talent/get-talent-comment-list',$basePath.'Talent/Comment/getTalentCommentList');
+        //删除自己的评论
+        $collector->post('/talent/del-comment',$basePath.'Talent/Comment/delComment');
     }
 
     public function occupation(RouteCollector $collector, string $basePath = '')
