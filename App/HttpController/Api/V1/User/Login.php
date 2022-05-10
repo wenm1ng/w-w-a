@@ -35,5 +35,4 @@ class Login extends LoginController
 
         return $this->writeResultJson($rs);
     }
-
 }

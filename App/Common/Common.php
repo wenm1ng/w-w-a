@@ -24,7 +24,6 @@ Class Common{
         } else {
             $files = File::scanDirectory(EASYSWOOLE_ROOT . '/App/Config');
         }
-
         if (is_array($files)) {
             foreach ($files['files'] as $file) {
                 $fileNameArr = explode('.', $file);
@@ -172,11 +171,19 @@ Class Common{
         $_USER_INFO['token'] = $token;
     }
 
+    public static function setUserId($userId)
+    {
+        global $_USER_INFO;
+        if (!$_USER_INFO instanceof SplContextArray) {
+            $_USER_INFO = new SplContextArray();
+        }
+        $_USER_INFO['user_id'] = $userId;
+    }
 
     public static function getUserInfo()
     {
         $token = Common::getUserToken();
-        if($token == 'test_php'){
+        if($token === 'test_php'){
             $userId = self::getFixUserId();
             $userInfo = ['user_id' => $userId, 'parent_id' => $userId, 'user_name' => 'test_user', 'agent_id' => 3];
         }else{

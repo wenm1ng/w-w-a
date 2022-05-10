@@ -29,6 +29,12 @@ class Logger
 
     use Singleton;
 
+    const LOG_LEVEL_DEBUG = 0;
+    const LOG_LEVEL_INFO = 1;
+    const LOG_LEVEL_NOTICE = 2;
+    const LOG_LEVEL_WARNING = 3;
+    const LOG_LEVEL_ERROR = 4;
+
     function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;

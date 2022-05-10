@@ -16,4 +16,13 @@ class UserValidate extends Validate
         $this->addColumn('functionName')->notEmpty();
         $this->addColumn('functionStatus')->notEmpty();
     }
+
+    public function checkFavorites(){
+        $this->addColumn('type')->notEmpty('类型不能为空');
+        $this->addColumn('link_id')->notEmpty('id不能为空');
+    }
+
+    public function checkoutLikes(){
+        $this->checkFavorites();
+    }
 }

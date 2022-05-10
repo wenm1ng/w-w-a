@@ -405,19 +405,18 @@ function warnings($msg = '', $webhook = '')
  */
 function redis($pool = "cache")
 {
-
-//    $redis = Redis::defer($pool);
-//    if (empty($redis)) {
-//        $config = new RedisConfig(Config::getInstance()->getConf('redis.' . $pool));
-//        Redis::getInstance()->register('cache', $config);
-//    }
-//    return $redis;
-//    return \EasySwoole\Pool\Manager::getInstance()->get($pool)->getObj();
     $redis = RedisPool::defer($pool);
     if(empty($redis)) {
-        return \EasySwoole\Pool\Manager::getInstance()->get($pool)->getObj();
+        $config = new RedisConfig(Config::getInstance()->getConf('redis.'.$pool));
+        RedisPool::getInstance()->register($config, $pool);
+        $redis = RedisPool::getInstance()->getPool($pool)->getObj();
     }
     return $redis;
+//    $redis = RedisPool::defer($pool);
+//    if(empty($redis)) {
+//        return \EasySwoole\Pool\Manager::getInstance()->get($pool)->getObj();
+//    }
+//    return $redis;
 }
 
 /**
@@ -1218,5 +1217,42 @@ function multiRequest($urlArr, $headers, $param)
     curl_multi_close($mh); #关闭curl_multi句柄
 
     return $result;
+}
+
+/**
+ * @notes:经常用于sqk主表和扩展表的拼接。根据同一个key，将第二个二维数组拆分并归纳到第一个二维数组的对应元素下面，注意两个二维数组的每一个元素都要有同一个key名。
+ * @param string $list1_Name 组装依据的数组一key名
+ * @param string $list2_Name 组装依据的数组二key名
+ * @param array $list1 第一个二维数组
+ * @param array $list2 第二个二维数组
+ * @param string $mergeKeyName 归纳的方式，空字符串表示两个素组的元素都在同一级，不为空则表示用一个字段去归纳第二个二维数组的元素
+ * @param bool $one2Batch 第一个二维数组和第二个二维数组的对应关系是否是一对多
+ * @return array
+ */
+function mergeList(string $list1_Name = 'id', string $list2_Name = 'id', array $list1 = [], array $list2 = [], string $mergeKeyName = '', bool $one2Batch = false, int $isString = 0)
+{
+    //两个二维数组的键名替换成对应元素的归纳依据key的值
+    $tmpList1 = array_column($list1, null, $list1_Name);
+    if ($one2Batch) {
+        $tmpList2 = [];
+        foreach ($list2 as $v) {
+            if (isset($v[$list2_Name])) {
+                $tmpList2[$v[$list2_Name]][] = $v;
+            }
+        }
+        $mergeKeyName == '' && $mergeKeyName = 'children';
+    } else {
+        $tmpList2 = array_column($list2, null, $list2_Name);
+    }
+    //将第二个二维数组元素归纳到第一个二维数组里面去
+    foreach ($tmpList1 as $k => $v) {
+        if ($mergeKeyName === '') {
+            isset($tmpList2[$k]) && is_array($tmpList2[$k]) && $tmpList1[$k] = array_merge($v, $tmpList2[$k]);
+        } else {
+            $tmpList1[$k][$mergeKeyName] = $isString ? implode('#', array_column($tmpList2[$k],$mergeKeyName) ?? []) : $tmpList2[$k] ?? [];
+        }
+    }
+
+    return is_array($tmpList1) ? array_values($tmpList1) : [];
 }
 

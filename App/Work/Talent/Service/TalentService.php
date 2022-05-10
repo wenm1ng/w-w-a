@@ -88,7 +88,7 @@ class TalentService
      *
      * @return array
      */
-    public function getTalentSkillTree($version, $talentId, $oc):array{
+    public function getTalentSkillTree($version, array $talentId, $oc):array{
         if(empty($version)){
             throw new \Exception('版本号不能为空');
         }
@@ -99,7 +99,7 @@ class TalentService
             throw new \Exception('职业不能为空');
         }
 
-        $redisKey = Config::getTalentSkillTreeRedisKey($version, $talentId, $oc);
+        $redisKey = Config::getTalentSkillTreeRedisKey($version, $oc);
         $treeList = redis()->get($redisKey);
         if(!empty($treeList)){
             $treeList = json_decode($treeList, true);
@@ -108,10 +108,11 @@ class TalentService
 
         $where = [
             'version' => $version,
-            'talent_id' => $talentId,
+            'talent_id' => [$talentId, 'in'],
             'occupation' => $oc
         ];
         $treeList = $this->talentTreeModel->all($where)->toRawArray();
+        $treeList = Common::arrayGroup($treeList, 'talent_id');
         redis()->set($redisKey, json_encode($treeList), 3600);
         return $treeList;
     }

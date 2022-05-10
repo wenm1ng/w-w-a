@@ -15,6 +15,11 @@ use Common\CodeKey;
 use User\Validator\UserValidate;
 use User\Service\LoginService;
 use User\Models\WowUserModel;
+use User\Models\WowUserModelNew;
+use User\Models\WowUserLikesModel;
+use Wa\Models\WowWaContentModel;
+use Wa\Service\WaService;
+use App\Exceptions\CommonException;
 
 class UserService{
 
@@ -88,4 +93,158 @@ class UserService{
         return $data['userInfo'];
     }
 
+    /**
+     * @desc       　合并用户名称
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array  $list 要合并的列表
+     * @param string $originColumnName 原始用户id字段
+     * @param string $targetColumnName 目标用户名称字段
+     *
+     * @return array
+     */
+    public function mergeUserName(array $list, string $originColumnName = 'user_id', string $targetColumnName = 'user_name'){
+        $userIds = array_unique(array_filter(array_column($list, $originColumnName)));
+        $link = [];
+        if(!empty($userIds)){
+            $link = WowUserModelNew::query()->whereIn('user_id', $userIds)->pluck('nickName', 'user_id');
+        }
+        foreach ($list as &$val) {
+            $val[$targetColumnName] = $link[$val['user_id']] ?? \App\Work\Config::ADMIN_NAME;
+        }
+        return $list;
+    }
+
+    /**
+     * @desc       　获取收藏的内容列表
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $params
+     *
+     * @return array|mixed
+     */
+    public function getFavoritesList(array $params){
+        $userId = Common::getUserId();
+        $linkIds = WowUserLikesModel::query()->where('user_id', $userId)->pluck('link_id');
+        if($linkIds === null){
+            return [];
+        }
+        $tableLink = [
+            1 => (new WaService())->getWaList(['id' => $linkIds, 'page' => $params['page']])
+        ];
+        $type = (int)$params['type'];
+        return $tableLink[$type];
+    }
+
+    /**
+     * @desc       　添加收藏
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $params
+     */
+    public function addFavorites(array $params){
+        $this->validate->checkFavorites();
+        if (!$this->validate->validate($params)) {
+            CommonException::msgException($this->validate->getError()->__toString());
+        }
+        $id = (int)$params['link_id'];
+        (new WaService())->incrementWaFavorites($id, 1);
+
+        $userId = Common::getUserId();
+        $addData = [
+            'type' => $params['type'],
+            'link_id' => $params['link_id'],
+            'user_id' => $userId
+        ];
+        WowUserLikesModel::query()->insert($addData);
+        return null;
+    }
+
+    /**
+     * @desc       　点赞||取消点赞
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $params
+     *
+     * @return null
+     */
+    public function addLikes(array $params){
+        $this->validate->checkoutLikes();
+        if (!$this->validate->validate($params)) {
+            CommonException::msgException($this->validate->getError()->__toString());
+        }
+        $id = (int)$params['link_id'];
+        (new WaService())->incrementWaLikes($id, 1);
+        $userId = Common::getUserId();
+        $addData = [
+            'type' => $params['type'],
+            'link_id' => $params['link_id'],
+            'user_id' => $userId
+        ];
+        WowUserLikesModel::query()->insert($addData);
+        return null;
+    }
+
+    /**
+     * @desc       　取消收藏
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $params
+     */
+    public function cancelFavorites(array $params){
+        $this->validate->checkFavorites();
+        if (!$this->validate->validate($params)) {
+            CommonException::msgException($this->validate->getError()->__toString());
+        }
+        $id = (int)$params['link_id'];
+        (new WaService())->incrementWaFavorites($id, -1);
+        $where = [
+            ['link_id','=', $params['link_id']],
+            ['type','=', $params['type']],
+            ['user_id','=', Common::getUserId()],
+        ];
+        WowUserLikesModel::query()->where($where)->delete();
+        return null;
+    }
+
+    /**
+     * @desc       　取消点赞
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $params
+     */
+    public function cancelLikes(array $params){
+        $this->validate->checkoutLikes();
+        if (!$this->validate->validate($params)) {
+            CommonException::msgException($this->validate->getError()->__toString());
+        }
+        $id = (int)$params['link_id'];
+        (new WaService())->incrementWaLikes($id, -1);
+        $where = [
+            ['link_id','=', $params['link_id']],
+            ['type','=', $params['type']],
+            ['user_id','=', Common::getUserId()],
+        ];
+        WowUserLikesModel::query()->where($where)->delete();
+        return null;
+    }
+
+    /**
+     * @desc       　获取当前用户是否有点赞收藏
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param int    $id
+     * @param string $likeColumn
+     * @param string $favoritesColumn
+     *
+     * @return int[]
+     */
+    public function getIsLikes(int $id, string $likeColumn = 'is_like', string $favoritesColumn = 'is_favorites'){
+        $return = [$likeColumn => 0, $favoritesColumn => 0];
+        if(!Common::getUserId()){
+            return $return;
+        }
+        $likesLink = WowUserLikesModel::query()->where('link_id', $id)->whereIn('type', [1,2])->pluck('link_id', 'type');
+        return [$likeColumn => !empty($likesLink[2]) ? 1 : 0, $favoritesColumn => !empty($likesLink[1]) ? 1 : 0];
+    }
 }

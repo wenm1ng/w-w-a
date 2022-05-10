@@ -26,6 +26,8 @@ class Router extends AbstractRouter
             $this->talent($collector, $apiBasePathOpenV1);
             //伤害测试模块
             $this->damage($collector, $apiBasePathOpenV1);
+            //wa模块
+            $this->wa($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -34,7 +36,7 @@ class Router extends AbstractRouter
         //天赋列表
         $collector->get('/talent/get-talent-list',$basePath.'Talent/Talent/getTalentList');
         //天赋技能树
-        $collector->get('/talent/get-talent-tree-list',$basePath.'Talent/Talent/getTalentSkillTree');
+        $collector->post('/talent/get-talent-tree-list',$basePath.'Talent/Talent/getTalentSkillTree');
         //添加用户天赋信息
         $collector->post('/talent/add-user-talent',$basePath.'Talent/Talent/addUserTalent');
         //修改用户天赋信息
@@ -71,11 +73,29 @@ class Router extends AbstractRouter
         $collector->post('/user',$basePath.'User/Login/saveUserInfo');
         //用户详情
         $collector->get('/user',$basePath.'User/User/getUserInfo');
-
+        //用户收藏列表
+        $collector->get('/user/favorites/list',$basePath.'User/User/getFavoritesList');
+        //用户添加收藏
+        $collector->post('/user/favorites/add',$basePath.'User/User/addFavorites');
+        //用户取消收藏
+        $collector->post('/user/favorites/cancel',$basePath.'User/User/cancelFavorites');
+        //点赞
+        $collector->post('/user/likes/add',$basePath.'User/User/addLikes');
+        //取消点赞
+        $collector->post('/user/likes/cancel',$basePath.'User/User/cancelLikes');
     }
 
     public function damage(RouteCollector $collector, string $basePath = ''){
 
         $collector->post('/test',$basePath.'Damage/Damage/test');
+    }
+
+    public function wa(RouteCollector $collector, string $basePath = ''){
+        //获取wa tab列表信息
+        $collector->get('/wa/get-tab-list',$basePath.'Wa/Wa/getTabList');
+        //获取wa内容列表
+        $collector->get('/wa/get-wa-list',$basePath.'Wa/Wa/getWaList');
+        //获取wa详情
+        $collector->get('/wa/get-wa-info',$basePath.'Wa/Wa/getWaInfo');
     }
 }

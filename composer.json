@@ -14,7 +14,9 @@
         "easyswoole/http-client": "^1.3",
         "easyswoole/jwt": "^1.2",
         "guzzlehttp/guzzle": "^6.5",
-        "easyswoole/orm": "^1.4"
+        "easyswoole/orm": "^1.4",
+        "hyperf/database": "^2.2",
+        "hyperf/paginator": "^2.2"
     },
     "autoload": {
         "psr-4": {
@@ -31,7 +33,8 @@
             "Occupation\\": "App/Work/Occupation/",
             "Common\\": "App/Common/",
             "Version\\": "App/Work/Version/",
-            "Damage\\": "App/Work/Damage/"
+            "Damage\\": "App/Work/Damage/",
+            "Wa\\": "App/Work/Wa/"
         }
     }
 }

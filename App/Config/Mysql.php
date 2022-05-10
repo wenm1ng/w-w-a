@@ -27,5 +27,23 @@ return [
         'minObjectNum' => 5, // 设置 连接池最小数量
         'getObjectTimeout' => 3.0, // 设置 获取连接池的超时时间
         'loadAverageTime' => 0.001, // 设置 负载阈值
-    ]
+    ],
+    'product'  => [
+        'host'          => '10.10.7.6',
+        'port'          => 3306,
+        'user'          => 'root',
+        'password'      => 'wycIblla5u(;',
+        'database'      => 'yixiaobao_product',
+        'timeout'       => 5,
+        'charset'       => 'utf8mb4',
+        'table_prefix' => '',
+        'debug' => true, // 调试，记录 SQL
+        'pool' => [
+            'maxnum' => 8, // 最大连接数
+            'minnum' => 2, // 最小连接数
+            'timeout' => 3, // 获取对象超时时间，单位秒
+            'idletime' => 30, // 连接池对象存活时间，单位秒
+            'checktime' => 10000, // 多久执行一次回收检测，单位毫秒
+        ]
+    ],
 ];

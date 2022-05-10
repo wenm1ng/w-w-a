@@ -8,6 +8,8 @@ namespace Occupation\Service;
 
 use Common\Common;
 use Occupation\Models\WowOccupationModel;
+use Occupation\Models\WowOccupationModelNew;
+use Talent\Models\WowTalentModelNew;
 
 class OccupationService
 {
@@ -33,5 +35,25 @@ class OccupationService
             redis()->set('occupation_list:'.$version, json_encode($occupationList), 3600);
         }
         return $occupationList;
+    }
+
+    /**
+     * @desc       　根据版本号获取职业列表（包含天赋信息）
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param int $version
+     *
+     * @return array
+     */
+    public function getOcListByVersion(int $version){
+        $where = [
+            'where' => [
+                ['version', '=', $version]
+            ]
+        ];
+        $ocList = WowOccupationModelNew::getList($where, 'version,occupation,1 as type,name as title,"" as image_url');
+        $talentList = WowTalentModelNew::getList($where, 'occupation,talent_name as description');
+        $ocList = mergeList('occupation', 'occupation', $ocList, $talentList, 'description', true, 1);
+        return $ocList;
     }
 }

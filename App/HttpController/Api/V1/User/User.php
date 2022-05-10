@@ -32,4 +32,70 @@ class User extends BaseController
 
         return $this->writeResultJson($rs);
     }
+
+    /**
+     * @desc       　获取用户收藏列表
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function getFavoritesList(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->getFavoritesList($params);
+        });
+    }
+
+    /**
+     * @desc       　用户添加收藏
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function addFavorites(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->addFavorites($params);
+        });
+    }
+
+    /**
+     * @desc       　用户取消收藏
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function cancelFavorites(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->cancelFavorites($params);
+        });
+    }
+
+    /**
+     * @desc       　点赞
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function addLikes(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->addLikes($params);
+        });
+    }
+
+    /**
+     * @desc       　取消点赞
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function cancelLikes(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->cancelLikes($params);
+        });
+    }
+
 }

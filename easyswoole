@@ -20,7 +20,7 @@ $realCwd = substr(realpath($file),0,-strlen("/vendor/autoload.php"));
 defined('IN_PHAR') or define('IN_PHAR', boolval(\Phar::running(false)));
 defined('RUNNING_ROOT') or define('RUNNING_ROOT', $realCwd);
 defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT', IN_PHAR ? \Phar::running() : $realCwd);
-echo 1;
+
 if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
     require_once EASYSWOOLE_ROOT.'/bootstrap.php';
 }

@@ -12,17 +12,24 @@ use EasySwoole\ORM\DbManager;
 use EasySwoole\ORM\Db\Connection;
 use EasySwoole\ORM\Db\Config;
 use EasySwoole\EasySwoole\Config as SettingConfig;
+use App\Utility\Common;
+
 class EasySwooleEvent implements Event
 {
     public static function initialize()
     {
         date_default_timezone_set('Asia/Shanghai');
-        $config = new Config(SettingConfig::getInstance()->getConf('mysql'));
-//        DbManager::getInstance()->addConnection(new Connection($config), 'read');
-//        DbManager::getInstance()->addConnection(new Connection($config), 'write');
-        DbManager::getInstance()->addConnection(new Connection($config));
-        $redisConfig1 = new \EasySwoole\Redis\Config\RedisConfig(SettingConfig::getInstance()->getConf('redis.cache'));
-        \EasySwoole\Pool\Manager::getInstance()->register(new \App\Pool\RedisPool($config, $redisConfig1), 'cache');
+//        $config = new Config(SettingConfig::getInstance()->getConf('mysql.service'));
+//        DbManager::getInstance()->addConnection(new Connection($config));
+//        $redisConfig1 = new \EasySwoole\Redis\Config\RedisConfig(SettingConfig::getInstance()->getConf('redis.cache'));
+//        \EasySwoole\Pool\Manager::getInstance()->register(new \App\Pool\RedisPool($config, $redisConfig1), 'cache');
+//        // 载入Config文件夹中的配置文件
+//        Common::loadConf();
+
+        // 载入Config文件夹中的配置文件
+        Common::loadConf();
+        // 注册 Redis 连接池
+        Common::registerRedisPool('cache');
 
     }
 
@@ -32,13 +39,13 @@ class EasySwooleEvent implements Event
         require_once "App/Common/function.php";
 
         self::hotReload();
-        $register->add($register::onWorkerStart,function (){
-            // 链接预热
-            // ORM 1.4.31 版本之前请使用 getClientPool()
-            // DbManager::getInstance()->getConnection()->getClientPool()->keepMin();
-
-            DbManager::getInstance()->getConnection()->__getClientPool()->keepMin();
-        });
+//        $register->add($register::onWorkerStart,function (){
+//            // 链接预热
+//            // ORM 1.4.31 版本之前请使用 getClientPool()
+//            // DbManager::getInstance()->getConnection()->getClientPool()->keepMin();
+//
+//            DbManager::getInstance()->getConnection()->__getClientPool()->keepMin();
+//        });
 //        $config = new Config();
 //        $config->setDatabase(SettingConfig::getInstance()->getConf('mysql.service.database'));
 //        $config->setUser(SettingConfig::getInstance()->getConf('mysql.service.host'));
@@ -62,6 +69,19 @@ class EasySwooleEvent implements Event
 
 //        // 设置指定连接名称 后期可通过连接名称操作不同的数据库
 //        DbManager::getInstance()->addConnection(new Connection($config),'write');
+
+//        $processConfig = new \EasySwoole\Component\Process\Config([
+//            'processName' => 'TestProcess', // 设置 进程名称为 TickProcess
+//        ]);
+//
+//        // 【推荐】使用 \EasySwoole\Component\Process\Manager 类注册自定义进程
+//        $testProcess1 = new \App\Process\TestProcess($processConfig);
+//        $testProcess2 = new \App\Process\TestProcess($processConfig);
+//
+//        ### 正确的注册进程的示例：重新使用 new 实例化另外 1 个新的自定义进程对象，然后进行注册
+//        // 注册进程
+//        \EasySwoole\Component\Process\Manager::getInstance()->addProcess($testProcess1);
+//        \EasySwoole\Component\Process\Manager::getInstance()->addProcess($testProcess2);
     }
 
 

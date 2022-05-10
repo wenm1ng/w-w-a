@@ -15,13 +15,16 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-        '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
-        '538ca81a9a966a6716601ecf48f4eaef' => __DIR__ . '/..' . '/opis/closure/functions.php',
-        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
-        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
-        'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
+        '538ca81a9a966a6716601ecf48f4eaef' => __DIR__ . '/..' . '/opis/closure/functions.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        'bbeb7603826cb9296dde3ca1a840af47' => __DIR__ . '/..' . '/hyperf/utils/src/Functions.php',
+        'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
+        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
         '3a37ebac017bc098e9a86b35401e7a68' => __DIR__ . '/..' . '/mongodb/mongodb/src/functions.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
     );
@@ -35,6 +38,7 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'W' => 
         array (
             'Webmozart\\Assert\\' => 17,
+            'Wa\\' => 3,
         ),
         'V' => 
         array (
@@ -56,12 +60,16 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
             'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
             'Symfony\\Polyfill\\Ctype\\' => 23,
+            'Symfony\\Contracts\\Translation\\' => 30,
             'Symfony\\Component\\VarDumper\\' => 28,
+            'Symfony\\Component\\Translation\\' => 30,
             'Skill\\' => 6,
         ),
         'P' => 
         array (
             'Psr\\Http\\Message\\' => 17,
+            'Psr\\EventDispatcher\\' => 20,
+            'Psr\\Container\\' => 14,
             'Prophecy\\' => 9,
             'PhpParser\\' => 10,
             'PhpAmqpLib\\' => 11,
@@ -75,6 +83,16 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'M' => 
         array (
             'MongoDB\\' => 8,
+        ),
+        'H' => 
+        array (
+            'Hyperf\\Utils\\' => 13,
+            'Hyperf\\Paginator\\' => 17,
+            'Hyperf\\Macroable\\' => 17,
+            'Hyperf\\Engine\\' => 14,
+            'Hyperf\\Database\\' => 16,
+            'Hyperf\\Contract\\' => 16,
+            'Hyperf\\Context\\' => 15,
         ),
         'G' => 
         array (
@@ -131,6 +149,7 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'D' => 
         array (
             'Doctrine\\Instantiator\\' => 22,
+            'Doctrine\\Inflector\\' => 19,
             'Doctrine\\Common\\Lexer\\' => 22,
             'DeepCopy\\' => 9,
             'Damage\\' => 7,
@@ -139,6 +158,7 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         array (
             'Cron\\' => 5,
             'Common\\' => 7,
+            'Carbon\\' => 7,
         ),
         'A' => 
         array (
@@ -160,6 +180,10 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'Webmozart\\Assert\\' => 
         array (
             0 => __DIR__ . '/..' . '/webmozart/assert/src',
+        ),
+        'Wa\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/App/Work/Wa',
         ),
         'Version\\' => 
         array (
@@ -197,9 +221,17 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
+        'Symfony\\Contracts\\Translation\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/translation-contracts',
+        ),
         'Symfony\\Component\\VarDumper\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/var-dumper',
+        ),
+        'Symfony\\Component\\Translation\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/translation',
         ),
         'Skill\\' => 
         array (
@@ -208,6 +240,14 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
+        ),
+        'Psr\\EventDispatcher\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/event-dispatcher/src',
+        ),
+        'Psr\\Container\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/container/src',
         ),
         'Prophecy\\' => 
         array (
@@ -236,6 +276,34 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'MongoDB\\' => 
         array (
             0 => __DIR__ . '/..' . '/mongodb/mongodb/src',
+        ),
+        'Hyperf\\Utils\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/hyperf/utils/src',
+        ),
+        'Hyperf\\Paginator\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/hyperf/paginator/src',
+        ),
+        'Hyperf\\Macroable\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/hyperf/macroable/src',
+        ),
+        'Hyperf\\Engine\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/hyperf/engine/src',
+        ),
+        'Hyperf\\Database\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/hyperf/database/src',
+        ),
+        'Hyperf\\Contract\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/hyperf/contract/src',
+        ),
+        'Hyperf\\Context\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/hyperf/context/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (
@@ -414,6 +482,10 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
         ),
+        'Doctrine\\Inflector\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Inflector',
+        ),
         'Doctrine\\Common\\Lexer\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/lexer/lib/Doctrine/Common/Lexer',
@@ -433,6 +505,10 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'Common\\' => 
         array (
             0 => __DIR__ . '/../..' . '/App/Common',
+        ),
+        'Carbon\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon',
         ),
         'App\\' => 
         array (

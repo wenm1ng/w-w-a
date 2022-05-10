@@ -60,6 +60,7 @@ class Core
     use Singleton;
 
     protected $runMode = 'dev';
+    protected $isDev = true;
 
     function __construct()
     {
@@ -82,6 +83,11 @@ class Core
             $this->runMode = $mode;
         }
         return $this->runMode;
+    }
+
+    function isDev():bool
+    {
+        return $this->isDev;
     }
 
     function initialize()
@@ -344,7 +350,7 @@ class Core
         if (!file_exists($file)) {
             die(Color::error("can not load config file {$this->runMode}.php") . "\n");
         }
-        Config::getInstance()->loadFile($file);
+        Config::getInstance()->loadFile($file, true);
     }
 
     private function extraHandler()
