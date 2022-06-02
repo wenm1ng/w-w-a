@@ -14,12 +14,12 @@ use Common\Common;
 use Common\CodeKey;
 use User\Validator\UserValidate;
 use User\Service\LoginService;
-use User\Models\WowUserModel;
 use User\Models\WowUserModelNew;
 use User\Models\WowUserLikesModel;
 use Wa\Models\WowWaContentModel;
 use Wa\Service\WaService;
 use App\Exceptions\CommonException;
+use App\Utility\Database\Db;
 
 class UserService{
 
@@ -31,7 +31,6 @@ class UserService{
     public function __construct($token = "")
     {
         $this->validate = new UserValidate();
-        $this->userModel = new WowUserModel();
     }
 
     private function getSessionKey($code){
@@ -44,7 +43,11 @@ class UserService{
 
     public function getUserInfo($userId){
         $fields = 'nickName,gender,language,city,province,country,avatarUrl';
-        $userInfo = $this->userModel->get(['user_id' => $userId], $fields);
+        $userInfo = WowUserModelNew::query()->where('user_id', $userId)->select(Db::raw($fields))->first();
+        dump($userInfo);
+        if(!empty($userInfo)){
+            $userInfo = $userInfo->toArray();
+        }
         if(empty($userInfo)){
             throw new \Exception('用户信息不存在');
         }
@@ -65,8 +68,10 @@ class UserService{
         $data = $params;
 //        $this->userModel::create()->connection('default')
         //保存用户信息
-        $userInfo = $this->userModel->get(['openId' => $sessionInfo['openid']], 'user_id');
-
+        $userInfo = WowUserModelNew::query()->where('openId', $sessionInfo['openid'])->select(['user_id'])->first();
+        if(!empty($userInfo)){
+            $userInfo = $userInfo->toArray();
+        }
         $dbData = [
             'nickName' => $data['userInfo']['nickName'],
             'gender' => $data['userInfo']['gender'],
@@ -79,11 +84,11 @@ class UserService{
         ];
         if(empty($userInfo)){
             //新增用户
-            $userInfo['user_id'] = $this->userModel->create($dbData);
+            $userInfo['user_id'] = WowUserModelNew::query()->insertGetId($dbData);
         }else{
             //修改用户
             $dbData['update_at'] = date('Y-m-d H:i:s');
-            $this->userModel->update(['user_id' => $userInfo['user_id']],$dbData);
+            WowUserModelNew::query()->where('user_id', $userInfo['user_id'])->update($dbData);
         }
 
         $loginService = new LoginService();

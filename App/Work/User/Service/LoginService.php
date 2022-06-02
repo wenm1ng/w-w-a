@@ -10,7 +10,7 @@ namespace User\Service;
 use Common\Common;
 use Common\CodeKey;
 use EasySwoole\Jwt\Jwt;
-use User\Models\WowUserModel;
+use User\Models\WowUserModelNew;
 
 class LoginService
 {
@@ -21,7 +21,6 @@ class LoginService
 
     public function __construct()
     {
-        $this->userModel = new WowUserModel();
     }
 
     /**
@@ -39,7 +38,7 @@ class LoginService
             throw new \Exception('用户信息不能为空');
         }
 
-        $userInfo = $this->userModel->get(['user_id' => $params['user_id']]);
+        $userInfo = WowUserModelNew::query()->where('user_id', $params['user_id'])->first()->toArray();
         if (empty($userInfo)) {
             throw new \Exception('用户不存在');
         }
