@@ -97,5 +97,7 @@ class Router extends AbstractRouter
         $collector->get('/wa/get-wa-list',$basePath.'Wa/Wa/getWaList');
         //获取wa详情
         $collector->get('/wa/get-wa-info',$basePath.'Wa/Wa/getWaInfo');
+        //获取wa标签
+        $collector->get('/wa/get-wa-label',$basePath.'Wa/Wa/getLabels');
     }
 }

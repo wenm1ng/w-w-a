@@ -7,17 +7,12 @@
 namespace Version\Service;
 
 use Common\Common;
-use Version\Models\WowVersionModel;
+use Version\Models\WowVersionModelNew;
 
 class VersionService
 {
 
     protected $versionModel;
-
-    public function __construct($token = "")
-    {
-        $this->versionModel = new WowVersionModel();
-    }
 
     public function getVersionList(){
         $versionList = redis()->get('version_list');
@@ -25,7 +20,7 @@ class VersionService
             $versionList = json_decode($versionList, true);
             return $versionList;
         }
-        $versionList = $this->versionModel->order(['version' => 'ASC'])->all()->toRawArray();
+        $versionList = WowVersionModelNew::query()->get()->toArray();
         redis()->set('version_list', json_encode($versionList), 3600);
         return $versionList;
     }

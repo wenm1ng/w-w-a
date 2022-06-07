@@ -26,4 +26,11 @@ class WaValidator extends systemValidate
         }
         $this->addColumn('page')->notEmpty('页数不能为空');
     }
+
+    public function checkgetLabels(array $params){
+        $this->checkVerision();
+        if(empty($params['oc']) && empty($params['tt_id'])){
+            throw new \Exception('职业和tabId必填一项');
+        }
+    }
 }

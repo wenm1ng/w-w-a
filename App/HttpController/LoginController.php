@@ -44,10 +44,7 @@ Class LoginController extends Controller{
             //将解析出来的user_id重新写进body
             $this->request()->withBody(\GuzzleHttp\Psr7\stream_for(json_encode($body)));
         } catch (\Exception $exception) {
-            $status = false;
-            $this->writeJson($exception->getCode() ?? CodeKey::EXPIRED_TOKEN, $exception->getMessage(), $exception->getMessage());
-
-            Common::log('刊登BaseController Exception:' . $exception->getMessage(), 'BaseController');
+            return $status;
         }
 
         return $status;

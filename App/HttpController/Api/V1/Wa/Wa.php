@@ -51,4 +51,11 @@ class Wa extends LoginController
             return (new WaService())->getWaInfo($id);
         });
     }
+
+    public function getLabels(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new WaService())->getLabels($params);
+        });
+    }
 }

@@ -18,6 +18,8 @@ use App\Work\Validator\WaValidator;
 use Occupation\Models\WowOccupationModelNew;
 use Occupation\Service\OccupationService;
 use User\Service\UserService;
+use App\Utility\Database\Db;
+use Talent\Models\WowTalentModelNew;
 
 class WaService
 {
@@ -49,14 +51,23 @@ class WaService
             ]
         ];
         $ocList = (new OccupationService())->getOcListByVersion($version);
-        $titleList = WowWaTabTitleModel::getList($where, 'version,type,title,image_url,description');
+        $titleList = WowWaTabTitleModel::getList($where, 'id as tt_id,version,type,title,image_url,description');
+        $newTitleList = [];
+        foreach ($titleList as &$val) {
+            $temp = explode('#', $val['description']);
+            $val['description'] = [];
+            $val['occupation'] = '';
+            foreach ($temp as $description) {
+                $val['description'][] = ['description' => $description];
+            }
+            $newTitleList[$val['type']][] = $val;
+        }
 
-        $titleList = Common::arrayGroup($titleList, 'type');
         foreach ($tabList as &$tabVal) {
             if($tabVal['type'] == 1){
                 $tabVal['child'] = $ocList;
             }else{
-                $tabVal['child'] = $titleList[$tabVal['type']] ?? [];
+                $tabVal['child'] = $newTitleList[$tabVal['type']] ?? [];
             }
         }
         return $tabList;
@@ -88,6 +99,9 @@ class WaService
                     ['occupation', '=', $params['oc']],
                 ],
             ];
+            if(!empty($params['talent_name']) && $params['talent_name'] !== '全部'){
+                $where['where'][] = ['talent_name', '=', $params['talent_name']];
+            }
         }elseif(!empty($params['id'])){
             $where = [
                 'whereIn' => [
@@ -102,6 +116,9 @@ class WaService
         $list = WowWaContentModel::getPageOrderList($where, $params['page'], 'id,title,user_id,update_at,description');
         $list = (new UserService())->mergeUserName($list);
         $list = $this->mergeWaImage($list);
+        foreach ($list as &$val) {
+            $val['flod'] = false;
+        }
         return ['list' => $list, 'page' => (int)$params['page']];
     }
 
@@ -131,6 +148,33 @@ class WaService
     }
 
     /**
+     * @desc       　获取wa标签
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $params
+     *
+     * @return array
+     */
+    public function getLabels(array $params){
+        $this->validator->checkgetLabels($params);
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        if(!empty($params['oc'])){
+            $labels = WowTalentModelNew::getTalentByVersionOc($params['version'], $params['oc']);
+        }elseif(!empty($params['tt_id'])){
+            $info = WowWaTabTitleModel::query()->where('tt_id', $params['tt_id'])->first();
+            $labels = [];
+            if(!empty($info)){
+                $labels = explode('#', $info->toArray()['description']);
+            }
+        }
+
+        return ['oc' => $params['oc'], 'labels' => $labels];
+    }
+
+    /**
      * @desc       　合并wa图片
      * @example    　
      * @author     　文明<wenming@ecgtool.com>
@@ -142,7 +186,7 @@ class WaService
         $waIds = array_column($list, 'id');
         $imageLink = [];
         if(!empty($waIds)){
-            $imageLink = WowWaImageModel::query()->whereIn('wa_id', $waIds)->get(['image_url', 'wa_id'])->toArray();
+            $imageLink = WowWaImageModel::query()->whereIn('wa_id', $waIds)->select(Db::raw('origin_image_url as image_url, wa_id'))->get()->toArray();
             $imageLink = Common::arrayGroup($imageLink, 'wa_id');
         }
 
