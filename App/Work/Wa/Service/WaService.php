@@ -116,6 +116,10 @@ class WaService
         $list = WowWaContentModel::getPageOrderList($where, $params['page'], 'id,title,user_id,update_at,description');
         $list = (new UserService())->mergeUserName($list);
         $list = $this->mergeWaImage($list);
+        $userId = Common::getUserId();
+        if(!empty($userId)){
+            //获取点赞、评论高亮
+        }
         foreach ($list as &$val) {
             $val['flod'] = false;
         }
