@@ -58,4 +58,17 @@ class Wa extends LoginController
             return (new WaService())->getLabels($params);
         });
     }
+
+    /**
+     * @desc       　获取wa评论列表
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function getWaComment(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new WaService())->getWaComment($params);
+        });
+    }
 }

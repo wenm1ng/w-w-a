@@ -98,4 +98,16 @@ class User extends BaseController
         });
     }
 
+    /**
+     * @desc       　点赞和取消点赞
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @return bool
+     */
+    public function toLikes(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->toLikes($params);
+        });
+    }
 }

@@ -83,6 +83,8 @@ class Router extends AbstractRouter
         $collector->post('/user/likes/add',$basePath.'User/User/addLikes');
         //取消点赞
         $collector->post('/user/likes/cancel',$basePath.'User/User/cancelLikes');
+        //点赞和取消点赞
+        $collector->post('/user/likes',$basePath.'User/User/toLikes');
     }
 
     public function damage(RouteCollector $collector, string $basePath = ''){
@@ -99,5 +101,8 @@ class Router extends AbstractRouter
         $collector->get('/wa/get-wa-info',$basePath.'Wa/Wa/getWaInfo');
         //获取wa标签
         $collector->get('/wa/get-wa-label',$basePath.'Wa/Wa/getLabels');
+        //获取wa评论
+        $collector->get('/wa/get-comment',$basePath.'Wa/Wa/getWaComment');
+
     }
 }

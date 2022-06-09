@@ -10,7 +10,7 @@ use EasySwoole\Utility\File;
 use EasySwoole\EasySwoole\Logger;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\Config;
-use CloudKit\Login\LoginManage;
+use User\Service\LoginService;
 use EasySwoole\Spl\SplContextArray;
 
 Class Common{
@@ -187,7 +187,7 @@ Class Common{
             $userId = self::getFixUserId();
             $userInfo = ['user_id' => $userId, 'parent_id' => $userId, 'user_name' => 'test_user', 'agent_id' => 3];
         }else{
-            $userInfo = $token ? (new LoginManage())->checkToken($token) : '';
+            $userInfo = $token ? (new LoginService())->checkToken($token) : '';
         }
         return $userInfo ?? [];
     }

@@ -2733,6 +2733,11 @@ class Builder
      */
     protected function runSelect()
     {
+        $bindStr = $this->getBindings();
+        $sql = str_replace('?', '%s', $this->toSql());
+        $sql = sprintf($sql, ...$bindStr);
+//        echo $sql.PHP_EOL;
+        \EasySwoole\EasySwoole\Logger::getInstance()->log($sql . " - ", \EasySwoole\EasySwoole\Logger::LOG_LEVEL_INFO, 'sql_debug');
         return $this->connection->select($this->toSql(), $this->getBindings(), ! $this->useWritePdo);
     }
 

@@ -24,7 +24,7 @@ class WaValidator extends systemValidate
                 return true;
             });
         }
-        $this->addColumn('page')->notEmpty('页数不能为空');
+        $this->checkPage();
     }
 
     public function checkgetLabels(array $params){
@@ -32,5 +32,15 @@ class WaValidator extends systemValidate
         if(empty($params['oc']) && empty($params['tt_id'])){
             throw new \Exception('职业和tabId必填一项');
         }
+    }
+
+    public function checkWaId(){
+        $this->addColumn('id')->notEmpty('id不能为空');
+        $this->checkPage();
+    }
+
+    public function checkPage(){
+        $this->addColumn('page')->notEmpty('页数不能为空');
+        $this->addColumn('pageSize')->notEmpty('每页数量不能为空');
     }
 }

@@ -121,6 +121,27 @@ class UserService{
     }
 
     /**
+     * @desc       　合并用户名称and头像
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $list
+     *
+     * @return array
+     */
+    public static function mergeUserNameAvatarUrl(array $list){
+        $userIds = array_unique(array_filter(array_column($list, 'user_id')));
+        $link = [];
+        if(!empty($userIds)){
+            $link = WowUserModelNew::query()->whereIn('user_id', $userIds)->get(['nickName', 'user_id', 'avatarUrl'])->toArray();
+            $link = Common::arrayGroup($link, 'user_id');
+        }
+        foreach ($list as &$val) {
+            $val['user_name'] = $link[$val['user_id']]['nickName'] ?? \App\Work\Config::ADMIN_NAME;
+            $val['avatar_url'] = $link[$val['user_id']]['avatarUrl'] ?? '';
+        }
+        return $list;
+    }
+    /**
      * @desc       　获取收藏的内容列表
      * @example    　
      * @author     　文明<wenming@ecgtool.com>
@@ -162,6 +183,31 @@ class UserService{
             'user_id' => $userId
         ];
         WowUserLikesModel::query()->insert($addData);
+        return null;
+    }
+
+    /**
+     * @desc       　喜欢和取消喜欢操作
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $params
+     *
+     * @return null
+     */
+    public function toLikes(array $params){
+        $this->validate->checkoutLikes();
+        if (!$this->validate->validate($params)) {
+            CommonException::msgException($this->validate->getError()->__toString());
+        }
+        dump(Common::getUserInfo());
+
+        $id = (int)$params['link_id'];
+        $count = WowUserLikesModel::query()->where('link_id', $id)->where('type', $params['type'])->count();
+        if(!$count){
+            $this->addLikes($params);
+        }else{
+            $this->cancelFavorites($params);
+        }
         return null;
     }
 

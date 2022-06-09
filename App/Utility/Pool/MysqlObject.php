@@ -48,6 +48,7 @@ class MysqlObject extends Client implements ObjectInterface
             $ret = null;
             if($stmt){
                 $ret = $stmt->execute($this->queryBuilder()->getLastBindParams(),$timeout);
+                dump($sql);
                 Logger::getInstance()->log($sql . " - cid({$cid})", Logger::LOG_LEVEL_INFO, 'sql_debug');
             }else{
                 $ret = false;

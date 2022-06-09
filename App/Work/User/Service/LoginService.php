@@ -38,10 +38,11 @@ class LoginService
             throw new \Exception('用户信息不能为空');
         }
 
-        $userInfo = WowUserModelNew::query()->where('user_id', $params['user_id'])->first()->toArray();
+        $userInfo = WowUserModelNew::query()->where('user_id', $params['user_id'])->first();
         if (empty($userInfo)) {
             throw new \Exception('用户不存在');
         }
+        $userInfo = $userInfo->toArray();
 
         $jwtObject = Jwt::getInstance()
             ->setSecretKey($this->secretKey)// 秘钥
@@ -58,7 +59,8 @@ class LoginService
 
         // 自定义数据
         $jwtObject->setData([
-            'test_data' => 'test'
+            'user_name' => $userInfo['nickName'],
+            'avatar_url' => $userInfo['avatarUrl']
         ]);
 
         // 最终生成的token
@@ -90,7 +92,10 @@ class LoginService
 //             $status = $jwt->setSecretKey($this->secretKey)->decode($token);
             switch ($status) {
                 case  1:
-                    $userId = $jwtObject->getAud();
+                    $userInfo['user_id'] = $jwtObject->getAud();
+//                    $jwtObject->getAlg();
+//                    $jwtObject->getAud();
+                    $userInfo = array_merge($userInfo, $jwtObject->getData());
 //                    $jwtObject->getAlg();
 //                    $jwtObject->getAud();
 //                    $jwtObject->getData();
@@ -114,6 +119,6 @@ class LoginService
 
             throw new \Exception($e->getMessage(), CodeKey::INVALID_TOKEN);
         }
-        return $userId;
+        return $userInfo;
     }
 }

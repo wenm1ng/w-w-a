@@ -7,6 +7,7 @@ namespace EasySwoole\Mysqli;
 use EasySwoole\Mysqli\Exception\Exception;
 use Swoole\Coroutine\MySQL;
 use Common\Common;
+use EasySwoole\EasySwoole\Logger;
 
 class Client
 {
@@ -60,6 +61,8 @@ class Client
             $sql = $this->queryBuilder()->getLastQuery() ?: '';
             $ret = null;
             if($stmt){
+                echo $sql.PHP_EOL;
+                Logger::getInstance()->log($sql . " -)", Logger::LOG_LEVEL_INFO, 'sql_debug');
                 $ret = $stmt->execute($this->queryBuilder()->getLastBindParams(),$timeout);
             }else{
                 $ret = false;
@@ -73,7 +76,6 @@ class Client
             return $ret;
         }catch (\Throwable $exception){
             Common::log($exception->getMessage() . ' error sql' . $sql . " -)", 'error_sql_debug');
-
             throw $exception;
         }finally{
             $this->reset();
