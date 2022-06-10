@@ -321,9 +321,9 @@ class WaService
             'status' => 1,
             'comment_id' => 0
         ];
-        $fields = 'id,user_id,comment_id,content,create_at';
+        $fields = 'id,user_id,comment_id,content,create_at,reply_user_id';
         $commentList = WowWaCommentModel::query()->where($where)->select(Db::raw($fields))->orderBy('create_at')->get()->toArray();
-        $commentIds = array_filter(array_column($commentList, 'comment_id'));
+        $commentIds = array_column($commentList, 'id');
         $commentList = UserService::mergeUserNameAvatarUrl($commentList);
         $replyList = [];
         if(!empty($commentIds)){
@@ -333,11 +333,56 @@ class WaService
             $replyList = Common::arrayGroup($replyList, 'comment_id');
         }
 
-        foreach ($commentList as &$comment) {
-            $comment['child'] = $replyList[$comment['comment_id']] ?? [];
+        //重新二维数组排序
+        $newCommentList = [];
+        foreach ($commentList as $comment) {
+            $newCommentList[] = $comment;
+            if(isset($replyList[$comment['id']])){
+                foreach ($replyList[$comment['id']] as $childComment) {
+                    $newCommentList[] = $childComment;
+                }
+            }
         }
-        unset($comment);
 
-        return $commentList;
+        return $newCommentList;
+    }
+
+    /**
+     * @desc       　进行评论
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param array $params
+     *
+     * @return int
+     */
+    public function toComment(array $params){
+        $this->validator->checkComment();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+        $insertData = [
+            'wa_id' => $params['wa_id'],
+            'content' => $params['content'],
+            'comment_id' => $params['comment_id'] ?? 0,
+            'user_id' => Common::getUserId(),
+            'reply_user_id' => $params['reply_user_id']
+        ];
+        return WowWaCommentModel::query()->insertGetId($insertData);
+    }
+
+    /**
+     * @desc       　删除评论
+     * @example    　
+     * @author     　文明<wenming@ecgtool.com>
+     * @param int $commentId
+     *
+     * @return null
+     */
+    public function delComment(int $commentId){
+        if(empty($commentId)){
+            CommonException::msgException('评论id不能为空');
+        }
+        WowWaCommentModel::query()->where('id', $commentId)->where('user_id', Common::getUserId())->delete();
+        return null;
     }
 }

@@ -130,14 +130,18 @@ class UserService{
      */
     public static function mergeUserNameAvatarUrl(array $list){
         $userIds = array_unique(array_filter(array_column($list, 'user_id')));
+        $replyIds = array_unique(array_filter(array_column($list, 'reply_user_id')));
+        $userIds = array_merge($userIds, $replyIds);
         $link = [];
         if(!empty($userIds)){
             $link = WowUserModelNew::query()->whereIn('user_id', $userIds)->get(['nickName', 'user_id', 'avatarUrl'])->toArray();
-            $link = Common::arrayGroup($link, 'user_id');
+            $link = array_column($link, null, 'user_id');
         }
         foreach ($list as &$val) {
             $val['user_name'] = $link[$val['user_id']]['nickName'] ?? \App\Work\Config::ADMIN_NAME;
             $val['avatar_url'] = $link[$val['user_id']]['avatarUrl'] ?? '';
+            $val['reply_user_name'] = $link[$val['reply_user_id']]['nickName'] ?? '';
+            $val['reply_avatar_url'] = $link[$val['reply_user_id']]['avatarUrl'] ?? '';
         }
         return $list;
     }

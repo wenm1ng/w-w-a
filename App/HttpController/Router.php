@@ -103,6 +103,9 @@ class Router extends AbstractRouter
         $collector->get('/wa/get-wa-label',$basePath.'Wa/Wa/getLabels');
         //获取wa评论
         $collector->get('/wa/get-comment',$basePath.'Wa/Wa/getWaComment');
-
+        //进行评论
+        $collector->post('/wa/to-comment',$basePath.'Wa/WaL/toComment');
+        //删除评论
+        $collector->post('/wa/del-comment',$basePath.'Wa/WaL/delComment');
     }
 }
