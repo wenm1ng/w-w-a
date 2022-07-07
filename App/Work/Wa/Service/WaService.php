@@ -119,7 +119,7 @@ class WaService
         $list = (new UserService())->mergeUserName($list);
         $list = $this->mergeWaImage($list);
         $waIds = array_column($list, 'id');
-        $this->mergeWaCount($list, $waIds);
+        $list = $this->mergeWaCount($list, $waIds);
         return ['list' => $list, 'page' => (int)$params['page']];
     }
 
@@ -164,14 +164,14 @@ class WaService
             $likesLinkUser = WowUserLikesModel::baseQuery($whereLikes)->select(Db::raw('count(1) as total,link_id'))->groupBy(['link_id'])->pluck('total','link_id')->toArray();
             $commentLinkUser = WowWaCommentModel::baseQuery($whereComment)->select(Db::raw('count(1) as total,wa_id'))->groupBy(['wa_id'])->pluck('total','wa_id')->toArray();
         }
-
         if(!$isInfo){
-            foreach ($info as &$val) {
-                $val['flod'] = false;
-                $val['likes_count'] = $likesLink[$val['id']] ?? 0;
-                $val['comment_count'] = $commentLink[$val['id']] ?? 0;
-                $val['has_likes'] = !empty($likesLinkUser[$val['id']]) ? 1 : 0;
-                $val['has_comment'] = !empty($commentLinkUser[$val['id']]) ? 1 : 0;
+            dump(1);
+            foreach ($info as $key => $val) {
+                $info[$key]['flod'] = false;
+                $info[$key]['likes_count'] = $likesLink[$val['id']] ?? 0;
+                $info[$key]['comment_count'] = $commentLink[$val['id']] ?? 0;
+                $info[$key]['has_likes'] = !empty($likesLinkUser[$val['id']]) ? 1 : 0;
+                $info[$key]['has_comment'] = !empty($commentLinkUser[$val['id']]) ? 1 : 0;
             }
         }else{
             $info['likes_count'] = $likesLink[$info['id']] ?? 0;
@@ -179,7 +179,6 @@ class WaService
             $info['has_likes'] = !empty($likesLinkUser[$info['id']]) ? 1 : 0;
             $info['has_comment'] = !empty($commentLinkUser[$info['id']]) ? 1 : 0;
         }
-
         return $info;
     }
     /**
@@ -319,32 +318,33 @@ class WaService
         $where = [
             'wa_id' => $waId,
             'status' => 1,
-            'comment_id' => 0
+//            'comment_id' => 0
         ];
         $fields = 'id,user_id,comment_id,content,create_at,reply_user_id';
         $commentList = WowWaCommentModel::query()->where($where)->select(Db::raw($fields))->orderBy('create_at')->get()->toArray();
-        $commentIds = array_column($commentList, 'id');
+//        $commentIds = array_column($commentList, 'id');
         $commentList = UserService::mergeUserNameAvatarUrl($commentList);
-        $replyList = [];
-        if(!empty($commentIds)){
-            unset($where['comment_id']);
-            $replyList = WowWaCommentModel::query()->where($where)->whereIn('comment_id', $commentIds)->select(Db::raw($fields))->orderBy('create_at', 'asc')->get()->toArray();
-            $replyList = UserService::mergeUserNameAvatarUrl($replyList);
-            $replyList = Common::arrayGroup($replyList, 'comment_id');
-        }
-
-        //重新二维数组排序
-        $newCommentList = [];
-        foreach ($commentList as $comment) {
-            $newCommentList[] = $comment;
-            if(isset($replyList[$comment['id']])){
-                foreach ($replyList[$comment['id']] as $childComment) {
-                    $newCommentList[] = $childComment;
-                }
-            }
-        }
-
-        return $newCommentList;
+        return $commentList;
+//        $replyList = [];
+//        if(!empty($commentIds)){
+//            unset($where['comment_id']);
+//            $replyList = WowWaCommentModel::query()->where($where)->whereIn('comment_id', $commentIds)->select(Db::raw($fields))->orderBy('create_at', 'asc')->get()->toArray();
+//            $replyList = UserService::mergeUserNameAvatarUrl($replyList);
+//            $replyList = Common::arrayGroup($replyList, 'comment_id');
+//        }
+//
+//        //重新二维数组排序
+//        $newCommentList = [];
+//        foreach ($commentList as $comment) {
+//            $newCommentList[] = $comment;
+//            if(isset($replyList[$comment['id']])){
+//                foreach ($replyList[$comment['id']] as $childComment) {
+//                    $newCommentList[] = $childComment;
+//                }
+//            }
+//        }
+//
+//        return $newCommentList;
     }
 
     /**

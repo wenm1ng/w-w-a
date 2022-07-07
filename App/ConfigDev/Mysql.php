@@ -23,7 +23,7 @@ return [
             'checktime' => 10000, // 多久执行一次回收检测，单位毫秒
         ]
     ],
-    'service1'  => [
+    'service'  => [
         'host'          => 'bdm769854332.my3w.com',
         'port'          => 3306,
         'user'          => 'bdm769854332',
@@ -45,7 +45,7 @@ return [
         'getObjectTimeout'  => 3.0, // 设置 获取连接池的超时时间
         'loadAverageTime'   => 0.001, // 设置 负载阈值
     ],
-    'service'  => [
+    'service1'  => [
         'host'          => '192.168.39.101',
         'port'          => 3306,
         'user'          => 'root',
