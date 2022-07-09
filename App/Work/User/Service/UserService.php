@@ -178,9 +178,15 @@ class UserService{
             CommonException::msgException($this->validate->getError()->__toString());
         }
         $id = (int)$params['link_id'];
+        $userId = Common::getUserId();
+
+        $info = WowUserLikesModel::query()->where('link_id', $id)->where('type', $params['type'])->where('user_id', $userId)->first();
+        if(!empty($info)){
+            return null;
+        }
+
         (new WaService())->incrementWaFavorites($id, 1);
 
-        $userId = Common::getUserId();
         $addData = [
             'type' => $params['type'],
             'link_id' => $params['link_id'],

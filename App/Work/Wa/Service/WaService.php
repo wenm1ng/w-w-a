@@ -117,7 +117,7 @@ class WaService
         }
         $list = WowWaContentModel::getPageOrderList($where, $params['page'], 'id,title,user_id,update_at,description,read_num', $params['pageSize']);
         $list = (new UserService())->mergeUserName($list);
-        $list = $this->mergeWaImage($list);
+        $list = $this->mergeWaImage($list, 3);
         $waIds = array_column($list, 'id');
         $list = $this->mergeWaCount($list, $waIds);
         return ['list' => $list, 'page' => (int)$params['page']];
@@ -240,10 +240,11 @@ class WaService
      * @example    　
      * @author     　文明<wenming@ecgtool.com>
      * @param array $list
+     * @param array $num
      *
      * @return array
      */
-    public function mergeWaImage(array $list){
+    public function mergeWaImage(array $list, int $num = 0){
         $waIds = array_column($list, 'id');
         $imageLink = [];
         if(!empty($waIds)){
@@ -253,6 +254,9 @@ class WaService
 
         foreach ($list as &$val) {
             $val['images'] = $imageLink[$val['id']] ?? [];
+            if(!empty($num)){
+                $val['images'] = array_slice($val['images'],0, 3);
+            }
         }
         return $list;
     }
