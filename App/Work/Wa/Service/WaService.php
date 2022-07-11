@@ -273,7 +273,10 @@ class WaService
         $waIds = array_column($list, 'id');
         $historyLink = [];
         if(!empty($waIds)){
-            $historyLink = WowWaContentHistoryModel::query()->whereIn('wa_id', $waIds)->get(['version_number', 'wa_content', 'wa_id'])->toArray();
+            $historyLink = WowWaContentHistoryModel::query()->whereIn('wa_id', $waIds)->get(['version_number', 'wa_content', 'wa_id', 'create_at'])->toArray();
+            foreach ($historyLink as &$val) {
+                $val['create_at'] = date('Y-m-d H:i', strtotime($val['create_at']));
+            }
             $historyLink = Common::arrayGroup($historyLink, 'wa_id');
         }
         foreach ($list as &$val) {
@@ -313,18 +316,21 @@ class WaService
      * @return array
      */
     public function getWaComment(array $params){
-        $this->validator->checkWaId();
+        $this->validator->checkWaId($params);
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
-        $waId = $params['id'];
         //获取点赞、评论高亮
         $where = [
-            'wa_id' => $waId,
             'status' => 1,
 //            'comment_id' => 0
         ];
-        $fields = 'id,user_id,comment_id,content,create_at,reply_user_id';
+        if(!empty($params['is_all'])){
+            $where['user_id'] = Common::getUserId();
+        }else{
+            $where['wa_id'] = $params['id'];
+        }
+        $fields = 'id,user_id,comment_id,content,create_at,reply_user_id,wa_id';
         $commentList = WowWaCommentModel::query()->where($where)->select(Db::raw($fields))->orderBy('create_at')->get()->toArray();
 //        $commentIds = array_column($commentList, 'id');
         $commentList = UserService::mergeUserNameAvatarUrl($commentList);
@@ -388,5 +394,36 @@ class WaService
         }
         WowWaCommentModel::query()->where('id', $commentId)->where('user_id', Common::getUserId())->delete();
         return null;
+    }
+
+    /**
+     * @desc       获取用户收藏wa列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-11 14:36
+     * @param $params
+     *
+     * @return array
+     */
+    public function getWaFavoritesList($params){
+        $userId = Common::getUserId();
+        $waIds = WowUserLikesModel::query()->where('type', 1)->where('user_id', $userId)->pluck('link_id')->toArray();
+        if(empty($waIds)){
+            return ['list' => [], 'page' => (int)$params['page']];
+        }
+        $params = array_merge($params, ['id' => $waIds]);
+        return $this->getWaList($params);
+    }
+
+    /**
+     * @desc       获取用户所有wa评论
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-11 16:10
+     * @param array $params
+     *
+     * @return array
+     */
+    public function getCommentAll(array $params){
+        $params = array_merge($params, ['is_all' => 1]);
+        return $this->getWaComment($params);
     }
 }

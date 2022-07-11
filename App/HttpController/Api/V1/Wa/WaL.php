@@ -36,4 +36,30 @@ class WaL extends BaseController
             return (new WaService())->delComment($params);
         });
     }
+
+    /**
+     * @desc       获取用户收藏wa列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-11 14:31
+     * @return bool
+     */
+    public function getWaFavoritesList(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new WaService())->getWaFavoritesList($params);
+        });
+    }
+
+    /**
+     * @desc       获取用户所有wa评论
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-11 16:04
+     * @return bool
+     */
+    public function getCommentAll(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new WaService())->getCommentAll($params);
+        });
+    }
 }

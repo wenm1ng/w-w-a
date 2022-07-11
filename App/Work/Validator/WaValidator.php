@@ -34,8 +34,10 @@ class WaValidator extends systemValidate
         }
     }
 
-    public function checkWaId(){
-        $this->addColumn('id')->notEmpty('id不能为空');
+    public function checkWaId(array $params){
+        if(empty($params['is_all'])){
+            $this->addColumn('id')->notEmpty('id不能为空');
+        }
         $this->checkPage();
     }
 
