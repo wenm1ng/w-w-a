@@ -15,7 +15,7 @@ class WaValidator extends systemValidate
     }
 
     public function checkGetWaList(array $params){
-        if(empty($params['id'])){
+        if(!isset($params['id']) && !isset($params['search_value'])){
             $this->checkVerision();
             $this->addColumn('page')->notEmpty('页数不能为空')->func(function($params){
                 if(empty($params['tt_id']) || empty($params['oc'])){

@@ -20,6 +20,7 @@ use Wa\Models\WowWaContentModel;
 use Wa\Service\WaService;
 use App\Exceptions\CommonException;
 use App\Utility\Database\Db;
+use Wa\Models\WowWaCommentModel;
 
 class UserService{
 
@@ -307,5 +308,23 @@ class UserService{
         }
         $likesLink = WowUserLikesModel::query()->where('link_id', $id)->whereIn('type', [1,2])->pluck('link_id', 'type');
         return [$likeColumn => !empty($likesLink[2]) ? 1 : 0, $favoritesColumn => !empty($likesLink[1]) ? 1 : 0];
+    }
+
+    /**
+     * @desc       获取用户收藏、评论数
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-13 9:53
+     * @param array $params
+     *
+     * @return array|int[]
+     */
+    public function getNum(array $params){
+        $userId = Common::getUserId();
+        if(!$userId){
+            return ['favorites_num' => 0, 'comment_num' => 0];
+        }
+        $favoritesNum = WowUserLikesModel::query()->where('user_id', $userId)->where('type', 1)->count();
+        $comment_num = WowWaCommentModel::query()->where('user_id', $userId)->where('status', 1)->count();
+        return ['favorites_num' => $favoritesNum, 'comment_num' => $comment_num];
     }
 }

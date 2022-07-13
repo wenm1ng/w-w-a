@@ -35,4 +35,17 @@ class Login extends LoginController
 
         return $this->writeResultJson($rs);
     }
+
+    /**
+     * @desc       获取用户收藏、评论数
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-13 9:48
+     * @return bool
+     */
+    public function getNum(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->getNum($params);
+        });
+    }
 }

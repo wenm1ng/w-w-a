@@ -33,7 +33,8 @@ class WaL extends BaseController
     public function delComment(){
         return $this->apiResponse(function () {
             $params = $this->getRequestJsonData();
-            return (new WaService())->delComment($params);
+            $commentId = (int)($params['id'] ?? 0);
+            return (new WaService())->delComment($commentId);
         });
     }
 

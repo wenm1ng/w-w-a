@@ -110,6 +110,12 @@ class WaService
                     ['id', $params['id']]
                 ],
             ];
+        }elseif(!empty($params['search_value'])){
+            $where = [
+                'where' => [
+                    ['title', 'like', "%{$params['search_value']}%"]
+                ],
+            ];
         }
         $where['order'] = ['update_at' => 'desc'];
         if(!empty($params['order'])){
@@ -322,19 +328,25 @@ class WaService
         }
         //获取点赞、评论高亮
         $where = [
-            'status' => 1,
+            'where' => [
+                ['status', '=', 1]
+            ],
+            'order' => [
+                'create_at' => 'asc'
+            ]
 //            'comment_id' => 0
         ];
         if(!empty($params['is_all'])){
-            $where['user_id'] = Common::getUserId();
+            $where['where'][] = ['user_id', '=', Common::getUserId()];
         }else{
-            $where['wa_id'] = $params['id'];
+            $where['where'][] = ['wa_id', '=', $params['id']];
         }
         $fields = 'id,user_id,comment_id,content,create_at,reply_user_id,wa_id';
-        $commentList = WowWaCommentModel::query()->where($where)->select(Db::raw($fields))->orderBy('create_at')->get()->toArray();
+//        $commentList = WowWaCommentModel::query()->where($where)->select(Db::raw($fields))->orderBy('create_at')->get()->toArray();
+        $commentList = WowWaCommentModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
 //        $commentIds = array_column($commentList, 'id');
         $commentList = UserService::mergeUserNameAvatarUrl($commentList);
-        return $commentList;
+        return ['list' => $commentList, 'page' => (int)$params['page']];
 //        $replyList = [];
 //        if(!empty($commentIds)){
 //            unset($where['comment_id']);
@@ -424,6 +436,17 @@ class WaService
      */
     public function getCommentAll(array $params){
         $params = array_merge($params, ['is_all' => 1]);
-        return $this->getWaComment($params);
+        $list = $this->getWaComment($params);
+        //获取被回复的评论
+        $commentIds = array_unique(array_filter(array_column($list['list'], 'comment_id')));
+        $commentLink = [];
+        if(!empty($commentIds)){
+            $commentLink = WowWaCommentModel::query()->whereIn('id', $commentIds)->pluck('content', 'id')->toArray();
+        }
+        foreach ($list['list'] as &$val) {
+            $val['reply_content'] = !empty($commentLink[$val['comment_id']]) ? $commentLink[$val['comment_id']] : '';
+        }
+
+        return $list;
     }
 }
