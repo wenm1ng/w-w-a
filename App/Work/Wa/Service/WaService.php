@@ -160,14 +160,24 @@ class WaService
                 ['status', '=', 1]
             ]
         ];
+        $whereFavor = [
+            'whereIn' => [
+                ['link_id', $waId]
+            ],
+            'where' => [
+                ['type', '=', 1]
+            ]
+        ];
 
         //获取点赞、评论高亮
         $likesLink = WowUserLikesModel::baseQuery($whereLikes)->select(Db::raw('count(1) as total,link_id'))->groupBy(['link_id'])->pluck('total','link_id')->toArray();
+        $favorLink = WowUserLikesModel::baseQuery($whereFavor)->select(Db::raw('count(1) as total,link_id'))->groupBy(['link_id'])->pluck('total','link_id')->toArray();
         $commentLink = WowWaCommentModel::baseQuery($whereComment)->select(Db::raw('count(1) as total,wa_id'))->groupBy(['wa_id'])->pluck('total','wa_id')->toArray();
 
         if(!empty($userId)){
             $whereLikes['where'][] = $whereComment['where'][] = ['user_id', '=', $userId];
             $likesLinkUser = WowUserLikesModel::baseQuery($whereLikes)->select(Db::raw('count(1) as total,link_id'))->groupBy(['link_id'])->pluck('total','link_id')->toArray();
+            $favorLinkUser = WowUserLikesModel::baseQuery($whereFavor)->select(Db::raw('count(1) as total,link_id'))->groupBy(['link_id'])->pluck('total','link_id')->toArray();
             $commentLinkUser = WowWaCommentModel::baseQuery($whereComment)->select(Db::raw('count(1) as total,wa_id'))->groupBy(['wa_id'])->pluck('total','wa_id')->toArray();
         }
         if(!$isInfo){
@@ -175,14 +185,18 @@ class WaService
             foreach ($info as $key => $val) {
                 $info[$key]['flod'] = false;
                 $info[$key]['likes_count'] = $likesLink[$val['id']] ?? 0;
+                $info[$key]['favor_count'] = $favorLink[$val['id']] ?? 0;
                 $info[$key]['comment_count'] = $commentLink[$val['id']] ?? 0;
                 $info[$key]['has_likes'] = !empty($likesLinkUser[$val['id']]) ? 1 : 0;
+                $info[$key]['has_favor'] = !empty($favorLinkUser[$val['id']]) ? 1 : 0;
                 $info[$key]['has_comment'] = !empty($commentLinkUser[$val['id']]) ? 1 : 0;
             }
         }else{
             $info['likes_count'] = $likesLink[$info['id']] ?? 0;
+            $info['favor_count'] = $favorLink[$info['id']] ?? 0;
             $info['comment_count'] = $commentLink[$info['id']] ?? 0;
             $info['has_likes'] = !empty($likesLinkUser[$info['id']]) ? 1 : 0;
+            $info['has_favor'] = !empty($favorLinkUser[$info['id']]) ? 1 : 0;
             $info['has_comment'] = !empty($commentLinkUser[$info['id']]) ? 1 : 0;
         }
         return $info;
@@ -448,5 +462,10 @@ class WaService
         }
 
         return $list;
+    }
+
+    public function saveFiddlerWaData(array $params){
+
+        return null;
     }
 }

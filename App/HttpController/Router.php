@@ -113,5 +113,7 @@ class Router extends AbstractRouter
         $collector->get('/wa/get-wa-favorites-list',$basePath.'Wa/WaL/getWaFavoritesList');
         //获取用户所有wa评论
         $collector->get('/wa/get-comment-all',$basePath.'Wa/WaL/getCommentAll');
+        //保存爬虫数据
+        $collector->post('/wa/save-fiddler-data',$basePath.'Wa/Wa/saveFiddlerData');
     }
 }
