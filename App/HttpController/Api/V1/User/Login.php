@@ -48,4 +48,15 @@ class Login extends LoginController
             return (new UserService())->getNum($params);
         });
     }
+
+    /**
+     * @desc       获取用户未读消息数量
+     * @example
+     * @return bool
+     */
+    public function getMessage(){
+        return $this->apiResponse(function (){
+            return (new UserService())->getMessage();
+        });
+    }
 }

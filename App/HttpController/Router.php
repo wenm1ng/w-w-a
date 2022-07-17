@@ -87,6 +87,8 @@ class Router extends AbstractRouter
         $collector->post('/user/likes',$basePath.'User/User/toLikes');
         //获取用户点赞、收藏数
         $collector->get('/user/get-num',$basePath.'User/Login/getNum');
+        //获取用户未读消息数
+        $collector->post('/user/get-message',$basePath.'User/Login/getMessage');
     }
 
     public function damage(RouteCollector $collector, string $basePath = ''){

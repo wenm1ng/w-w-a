@@ -130,6 +130,30 @@ class WaService
     }
 
     /**
+     * @desc        将消息改为已读
+     * @example
+     * @param array $commentIds
+     */
+    public function updateNoReadNum(array $list){
+        if(!Common::getUserId()){
+            dump(1111);
+            return '';
+        }
+        $commentIds = [];
+        dump($list);
+        foreach($list as $val){
+            if(empty($val['is_read'])){
+                $commentIds[] = $val['id'];
+            }
+        }
+        if(empty($commentIds)){
+            dump(22222);
+            return '';
+        }
+        WowWaCommentModel::query()->whereIn('id', $commentIds)->update(['is_read' => 1]);
+        return count($commentIds);
+    }
+    /**
      * @desc       　合并wa相关数量信息（点赞、评论等）
      * @example    　
      * @author     　文明<wenming@ecgtool.com>
@@ -355,12 +379,13 @@ class WaService
         }else{
             $where['where'][] = ['wa_id', '=', $params['id']];
         }
-        $fields = 'id,user_id,comment_id,content,create_at,reply_user_id,wa_id';
+        $fields = 'id,user_id,comment_id,content,create_at,reply_user_id,wa_id,is_read';
 //        $commentList = WowWaCommentModel::query()->where($where)->select(Db::raw($fields))->orderBy('create_at')->get()->toArray();
         $commentList = WowWaCommentModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
+        $reduceReadNum = $this->updateNoReadNum($commentList);
 //        $commentIds = array_column($commentList, 'id');
         $commentList = UserService::mergeUserNameAvatarUrl($commentList);
-        return ['list' => $commentList, 'page' => (int)$params['page']];
+        return ['list' => $commentList, 'page' => (int)$params['page'], 'reduce_read_num' => $reduceReadNum];
 //        $replyList = [];
 //        if(!empty($commentIds)){
 //            unset($where['comment_id']);

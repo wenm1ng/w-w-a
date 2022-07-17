@@ -327,4 +327,17 @@ class UserService{
         $comment_num = WowWaCommentModel::query()->where('user_id', $userId)->where('status', 1)->count();
         return ['favorites_num' => $favoritesNum, 'comment_num' => $comment_num];
     }
+
+    /**
+     * @desc        获取用户未读消息数量
+     * @example
+     * @return string
+     */
+    public function getMessage(){
+        $count = WowWaCommentModel::query()->where('user_id', Common::getUserId())->where('is_read',0)->count();
+        if(empty($count)){
+            return '';
+        }
+        return (string)$count;
+    }
 }
