@@ -269,7 +269,7 @@ class WaService
         if(!empty($params['oc'])){
             $labels = WowTalentModelNew::getTalentByVersionOc($params['version'], $params['oc']);
         }elseif(!empty($params['tt_id'])){
-            $info = WowWaTabTitleModel::query()->where('tt_id', $params['tt_id'])->first();
+            $info = WowWaTabTitleModel::query()->where('id', $params['tt_id'])->first();
             $labels = [];
             if(!empty($info)){
                 $labels = explode('#', $info->toArray()['description']);
@@ -370,7 +370,7 @@ class WaService
                 ['status', '=', 1]
             ],
             'order' => [
-                'create_at' => 'asc'
+                'id' => 'desc'
             ]
 //            'comment_id' => 0
         ];
@@ -426,7 +426,8 @@ class WaService
             'content' => $params['content'],
             'comment_id' => $params['comment_id'] ?? 0,
             'user_id' => Common::getUserId(),
-            'reply_user_id' => $params['reply_user_id']
+            'reply_user_id' => $params['reply_user_id'],
+            'is_read' => 1
         ];
         return WowWaCommentModel::query()->insertGetId($insertData);
     }
@@ -490,7 +491,53 @@ class WaService
     }
 
     public function saveFiddlerWaData(array $params){
+        $params = $params['response_data']['data'];
 
+        $link = ['法师'=>1,'战士'=>1,'牧师'=>1,'圣骑士'=>1,'德鲁伊'=>1,'术士'=>1,'猎人'=>1,'潜行者'=>1,'萨满'=>1,'武僧'=>1,'死亡骑士'=>1,'恶魔猎手'=>1];
+        $versionLink = ['2' => 1];
+        $info = WowWaContentModel::query()->where('origin_id', $params['last_version']['id'])->first();
+        if(!empty($info)){
+            return null;
+        }
+        $insertData = [
+            'description' => $params['description'],
+            'origin_description' => $params['description'],
+            'wa_content' => $params['last_version']['string'],
+            'origin_id' => $params['id'],
+            'tips' => call_user_func(function()use($params, $link){
+                $tips = [];
+                foreach ($params['tags'] as $val) {
+                    if(isset($link[$val['name']])){
+                        continue;
+                    }
+                    $tips[] = $val['name'];
+                }
+                return implode('#', $tips);
+            }),
+            'title' => $params['title'],
+            'origin_title' => $params['title'],
+            'version' => $versionLink[$params['plugin_type']['id']],
+            'origin_url' => $params['raw_address'],
+        ];
+
+        $waId = WowWaContentModel::query()->insertGetId($insertData);
+
+        if(!empty($params['version_list'])){
+            $historyData = [
+                'version' => 
+            ];
+        }
+        $imageData = [];
+
+        foreach ($params['images'] as $image) {
+            $imageData[] = [
+                'wa_id' => $waId,
+                'origin_image_url' => $image,
+                'image_url' => $image
+            ];
+        }
+
+        WowWaImageModel::query()->insert($imageData);
         return null;
     }
 }

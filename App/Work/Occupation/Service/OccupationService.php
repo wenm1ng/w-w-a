@@ -51,7 +51,7 @@ class OccupationService
                 ['version', '=', $version]
             ]
         ];
-        $ocList = WowOccupationModelNew::getList($where, 'version,occupation,1 as type,name as title,"http://wenming.online/public/uploads/20220602/6d48286c8a947ffa3419f7ebd8a050a6.jpg" as image_url,0 as tt_id');
+        $ocList = WowOccupationModelNew::getList($where, 'version,occupation,1 as type,name as title,image_url,0 as tt_id');
         $talentList = WowTalentModelNew::getList($where, 'occupation,talent_name as description');
         $ocList = mergeList('occupation', 'occupation', $ocList, $talentList, 'description', true);
         return $ocList;

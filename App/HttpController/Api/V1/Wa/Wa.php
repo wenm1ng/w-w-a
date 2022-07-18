@@ -75,12 +75,12 @@ class Wa extends LoginController
     public function saveFiddlerData(){
         return $this->apiResponse(function (){
             $params = $this->getRequestJsonData();
-            if(isset($params['response_data']['data']['last_version'])){
-                //wa详情内容
-                return (new WaService())->saveFiddlerWaData($params);
-            }else{
-                //wa列表
+            //wa详情内容
+            $params = json_decode($params['data'], true);
+            if(!isset($params['response_data']['data']['last_version'])){
+                return null;
             }
+            return (new WaService())->saveFiddlerWaData($params);
         });
     }
 }
