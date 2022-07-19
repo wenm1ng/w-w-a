@@ -851,6 +851,33 @@ function curl_mrequest($url_arr = array(), $headers = array(), $add_args = array
     return $result;
 }
 
+/**
+ * @desc       　httpClient客户端下载图片
+ * @example    　
+ * @author     　文明<wenming@ecgtool.com>
+ * @param string $url
+ *
+ * @return string
+ */
+function download(string $url){
+    $client = new HttpClient($url);
+    $client->setTimeout(20);
+    $client->setHeaders([
+        'Host' => $url,
+        'User-Agent' => 'Chrome/49.0.2587.3',
+        'Accept' => '*',
+        'Accept-Encoding' => 'gzip'
+    ]);
+    $filend = pathinfo($url, PATHINFO_EXTENSION);
+    $path = EASYSWOOLE_ROOT.'/Temp';
+    if(!file_exists($path)){
+        mkdir($path,true, 0777);
+    }
+    $fileName = $path.'/'.random(11).'.'.$filend;
+    $client->download($fileName);
+    return $fileName;
+}
+
 function httpClientCurl($url, $data = [], $add_args = [], $headers = [])
 {
     $client = new HttpClient();
@@ -885,7 +912,6 @@ function httpClientCurl($url, $data = [], $add_args = [], $headers = [])
             $rs = $client->post();
         }
     }
-
     $rsBody = json_decode(strval($rs->getBody()), true);
 
     return $rsBody;

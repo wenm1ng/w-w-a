@@ -88,11 +88,18 @@ class EasyModel extends LaravelModel
                 $query = $query->where(...array_values($val));
             }
         }
-
         //in 查询
         if (!empty($where['whereIn'])) {
             foreach ($where['whereIn'] as $val) {
                 $query = $query->whereIn(...array_values($val));
+            }
+        }
+
+        if(!empty($where['whereRaw'])){
+            foreach ($where['whereRaw'] as $val) {
+                $query->where(function($q)use($val){
+                    $q->whereRaw($val);
+                });
             }
         }
 

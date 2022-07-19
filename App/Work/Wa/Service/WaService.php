@@ -22,6 +22,7 @@ use Occupation\Service\OccupationService;
 use User\Service\UserService;
 use App\Utility\Database\Db;
 use Talent\Models\WowTalentModelNew;
+use App\Work\Common\File;
 
 class WaService
 {
@@ -49,7 +50,8 @@ class WaService
         $tabList = WowWaTabModel::getEnableList($version);
         $where = [
             'where' => [
-                ['version', '=', $version]
+                ['version', '=', $version],
+                ['status', '=', 1]
             ]
         ];
         $ocList = (new OccupationService())->getOcListByVersion($version);
@@ -94,6 +96,9 @@ class WaService
                     ['tt_id', '=', $params['tt_id']]
                 ],
             ];
+            if(!empty($params['talent_name']) && $params['talent_name'] !== '全部'){
+                $where['whereRaw'][] = "FIND_IN_SET('{$params['talent_name']}',`tips`)";
+            }
         }elseif(!empty($params['oc'])){
             $where = [
                 'where' => [
@@ -101,9 +106,6 @@ class WaService
                     ['occupation', '=', $params['oc']],
                 ],
             ];
-            if(!empty($params['talent_name']) && $params['talent_name'] !== '全部'){
-                $where['where'][] = ['talent_name', '=', $params['talent_name']];
-            }
         }elseif(!empty($params['id'])){
             $where = [
                 'whereIn' => [
@@ -121,7 +123,7 @@ class WaService
         if(!empty($params['order'])){
             $where['order'] = [$params['order'] => 'desc'];
         }
-        $list = WowWaContentModel::getPageOrderList($where, $params['page'], 'id,title,user_id,update_at,description,read_num', $params['pageSize']);
+        $list = WowWaContentModel::getPageOrderList($where, $params['page'], 'id,title,user_id,update_at,description,read_num,tips', $params['pageSize']);
         $list = (new UserService())->mergeUserName($list);
         $list = $this->mergeWaImage($list, 3);
         $waIds = array_column($list, 'id');
@@ -205,7 +207,6 @@ class WaService
             $commentLinkUser = WowWaCommentModel::baseQuery($whereComment)->select(Db::raw('count(1) as total,wa_id'))->groupBy(['wa_id'])->pluck('total','wa_id')->toArray();
         }
         if(!$isInfo){
-            dump(1);
             foreach ($info as $key => $val) {
                 $info[$key]['flod'] = false;
                 $info[$key]['likes_count'] = $likesLink[$val['id']] ?? 0;
@@ -214,6 +215,7 @@ class WaService
                 $info[$key]['has_likes'] = !empty($likesLinkUser[$val['id']]) ? 1 : 0;
                 $info[$key]['has_favor'] = !empty($favorLinkUser[$val['id']]) ? 1 : 0;
                 $info[$key]['has_comment'] = !empty($commentLinkUser[$val['id']]) ? 1 : 0;
+                $info[$key]['tips'] = explode(',', $info[$key]['tips']);
             }
         }else{
             $info['likes_count'] = $likesLink[$info['id']] ?? 0;
@@ -222,6 +224,7 @@ class WaService
             $info['has_likes'] = !empty($likesLinkUser[$info['id']]) ? 1 : 0;
             $info['has_favor'] = !empty($favorLinkUser[$info['id']]) ? 1 : 0;
             $info['has_comment'] = !empty($commentLinkUser[$info['id']]) ? 1 : 0;
+            $info['tips'] = explode(',', $info['tips']);
         }
         return $info;
     }
@@ -236,7 +239,7 @@ class WaService
     public function getWaInfo(int $waId){
         //浏览量+1
         WowWaContentModel::query()->where('id', $waId)->increment('read_num', 1);
-        $list = WowWaContentModel::query()->where('id', $waId)->select(['id','title','description','update_description','wa_content','update_at','user_id','read_num','favorites_num','likes_num','talent_name as label'])->get()->toArray();
+        $list = WowWaContentModel::query()->where('id', $waId)->select(['id','title','description','update_description','wa_content','update_at','user_id','read_num','favorites_num','likes_num','talent_name as label','tips'])->get()->toArray();
         if(empty($list)){
             CommonException::msgException('该wa不存在');
         }
@@ -492,52 +495,72 @@ class WaService
 
     public function saveFiddlerWaData(array $params){
         $params = $params['response_data']['data'];
+        return;
+        $link = ['法师'=>'fs','战士'=>'zs','牧师'=>'ms','圣骑士'=>'qs','德鲁伊'=>'xd','术士'=>'ss','猎人'=>'lr','潜行者'=>'dz','萨满祭祀'=>'sm','武僧'=>'ws','死亡骑士'=>'dk','恶魔猎手'=>'dh'];
+        $versionLink = ['2' => 1, '5' => 3, '1' => 2];
+//        $info = WowWaContentModel::query()->where('origin_id', $params['last_version']['id'])->first();
+//        if(!empty($info)){
+//            return null;
+//        }
 
-        $link = ['法师'=>1,'战士'=>1,'牧师'=>1,'圣骑士'=>1,'德鲁伊'=>1,'术士'=>1,'猎人'=>1,'潜行者'=>1,'萨满'=>1,'武僧'=>1,'死亡骑士'=>1,'恶魔猎手'=>1];
-        $versionLink = ['2' => 1];
-        $info = WowWaContentModel::query()->where('origin_id', $params['last_version']['id'])->first();
-        if(!empty($info)){
-            return null;
+        $tips = [];
+        $oc = '';
+        foreach ($params['tags'] as $val) {
+            if(isset($link[$val['name']])){
+                $oc = $link[$val['name']];
+                continue;
+            }
+            $tips[] = $val['name'];
         }
+        $tips = implode(',', $tips);
+
         $insertData = [
+            'occupation' => $oc,
             'description' => $params['description'],
             'origin_description' => $params['description'],
             'wa_content' => $params['last_version']['string'],
-            'origin_id' => $params['id'],
-            'tips' => call_user_func(function()use($params, $link){
-                $tips = [];
-                foreach ($params['tags'] as $val) {
-                    if(isset($link[$val['name']])){
-                        continue;
-                    }
-                    $tips[] = $val['name'];
-                }
-                return implode('#', $tips);
-            }),
+            'origin_id' => $params['last_version']['id'],
+            'tips' => $tips,
             'title' => $params['title'],
             'origin_title' => $params['title'],
-            'version' => $versionLink[$params['plugin_type']['id']],
+            'version' => !empty($versionLink[$params['plugin_type']['id']]) ? $versionLink[$params['plugin_type']['id']] : 2,
             'origin_url' => $params['raw_address'],
+            'type' => 3,
+            'tt_id' => 9,
+            'data_from' => 2,
         ];
 
         $waId = WowWaContentModel::query()->insertGetId($insertData);
 
         if(!empty($params['version_list'])){
             $historyData = [
-                'version' => 
+                'version' => $insertData['version'],
+                'version_number' => $params['version_list'][0]['version'],
+                'wa_content' => $insertData['wa_content'],
+                'wa_id' => $waId,
+                'description' => $params['version_list'][0]['description'],
             ];
+            WowWaContentHistoryModel::query()->insert($historyData);
         }
         $imageData = [];
 
+        $file = new File();
         foreach ($params['images'] as $image) {
+            $rs = $file->uploadImageToBlog($image);
+            dump($rs);
+            if(empty($rs['status'])){
+                continue;
+            }
             $imageData[] = [
                 'wa_id' => $waId,
                 'origin_image_url' => $image,
-                'image_url' => $image
+                'image_url' => 'http://www.wenming.online/public/uploads/'.$rs['savepath']
             ];
         }
-
-        WowWaImageModel::query()->insert($imageData);
+        if(!empty($imageData)){
+            WowWaImageModel::query()->insert($imageData);
+        }
+        dump('采集成功');
         return null;
     }
 }

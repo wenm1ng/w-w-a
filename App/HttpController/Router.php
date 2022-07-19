@@ -28,6 +28,8 @@ class Router extends AbstractRouter
             $this->damage($collector, $apiBasePathOpenV1);
             //wa模块
             $this->wa($collector, $apiBasePathOpenV1);
+            //测试
+            $this->test($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -117,5 +119,10 @@ class Router extends AbstractRouter
         $collector->get('/wa/get-comment-all',$basePath.'Wa/WaL/getCommentAll');
         //保存爬虫数据
         $collector->post('/wa/save-fiddler-data',$basePath.'Wa/Wa/saveFiddlerData');
+    }
+
+    public function test(RouteCollector $collector, string $basePath = '')
+    {
+        $collector->get('/test',$basePath.'File/File/uploadImageToBlog');
     }
 }
