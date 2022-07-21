@@ -315,6 +315,7 @@ function saveInterImage($url)
     $file = file_get_contents($url);
 
     $filend = pathinfo($url, PATHINFO_EXTENSION);
+    dump($filend);
     $path = EASYSWOOLE_ROOT . '/Temp';
     if (!file_exists($path)) {
         mkdir($path, true, 0777);

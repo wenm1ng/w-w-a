@@ -7,11 +7,11 @@
 
 return [
     'service' => [
-        'host' => 'bdm769854332.my3w.com',
+        'host' => '127.0.0.1',
         'port' => 3306,
-        'user' => 'bdm769854332',
-        'password' => 'Azhanshengziji9',
-        'database' => 'bdm769854332_db',
+        'user' => 'root',
+        'password' => '123456',
+        'database' => 'wow',
         'timeout' => 5,
         'charset' => 'utf8mb4',
         'table_prefix' => '',
@@ -29,11 +29,11 @@ return [
         'loadAverageTime' => 0.001, // 设置 负载阈值
     ],
     'product'  => [
-        'host'          => '10.10.7.6',
-        'port'          => 3306,
-        'user'          => 'root',
-        'password'      => 'wycIblla5u(;',
-        'database'      => 'yixiaobao_product',
+        'host' => '127.0.0.1',
+        'port' => 3306,
+        'user' => 'root',
+        'password' => '123456',
+        'database' => 'wow',
         'timeout'       => 5,
         'charset'       => 'utf8mb4',
         'table_prefix' => '',

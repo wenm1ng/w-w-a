@@ -120,6 +120,7 @@ class WaService
             ];
         }
         $where['order'] = ['update_at' => 'desc'];
+        $where['where'][] = ['status', '=', 1];
         if(!empty($params['order'])){
             $where['order'] = [$params['order'] => 'desc'];
         }
@@ -239,7 +240,7 @@ class WaService
     public function getWaInfo(int $waId){
         //浏览量+1
         WowWaContentModel::query()->where('id', $waId)->increment('read_num', 1);
-        $list = WowWaContentModel::query()->where('id', $waId)->select(['id','title','description','update_description','wa_content','update_at','user_id','read_num','favorites_num','likes_num','talent_name as label','tips'])->get()->toArray();
+        $list = WowWaContentModel::query()->where('id', $waId)->where('status', 1)->select(['id','title','description','update_description','wa_content','update_at','user_id','read_num','favorites_num','likes_num','talent_name as label','tips'])->get()->toArray();
         if(empty($list)){
             CommonException::msgException('该wa不存在');
         }
@@ -295,7 +296,7 @@ class WaService
         $waIds = array_column($list, 'id');
         $imageLink = [];
         if(!empty($waIds)){
-            $imageLink = WowWaImageModel::query()->whereIn('wa_id', $waIds)->select(Db::raw('origin_image_url as image_url, wa_id'))->get()->toArray();
+            $imageLink = WowWaImageModel::query()->whereIn('wa_id', $waIds)->select(Db::raw('image_url, wa_id'))->get()->toArray();
             $imageLink = Common::arrayGroup($imageLink, 'wa_id');
         }
 
@@ -491,6 +492,21 @@ class WaService
         }
 
         return $list;
+    }
+
+    public function uploadFile(){
+        $list = WowWaImageModel::query()->whereBetween('wa_id',[26,111])->get()->toArray();
+        $file = new File();
+        foreach ($list as $val) {
+            $rs = $file->uploadImageToBlog($val['image_url']);
+            dump($rs);
+            if(empty($rs['status'])){
+                continue;
+            }
+            WowWaImageModel::query()->where('id', $val['id'])->update(['image_url' => 'http://www.wenming.online/public/uploads/'.$rs['savepath']]);
+            \Co::sleep(0.5);
+        }
+        return null;
     }
 
     public function saveFiddlerWaData(array $params){

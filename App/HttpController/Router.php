@@ -124,5 +124,6 @@ class Router extends AbstractRouter
     public function test(RouteCollector $collector, string $basePath = '')
     {
         $collector->get('/test',$basePath.'File/File/uploadImageToBlog');
+        $collector->get('/test-new',$basePath.'Test/Test/test');
     }
 }
