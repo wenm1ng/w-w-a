@@ -106,6 +106,9 @@ class WaService
                     ['occupation', '=', $params['oc']],
                 ],
             ];
+            if(!empty($params['talent_name']) && $params['talent_name'] !== '全部'){
+                $where['whereRaw'][] = "FIND_IN_SET('{$params['talent_name']}',`tips`)";
+            }
         }elseif(!empty($params['id'])){
             $where = [
                 'whereIn' => [
@@ -119,12 +122,12 @@ class WaService
                 ],
             ];
         }
-        $where['order'] = ['update_at' => 'desc'];
+        $where['order'] = ['create_at' => 'desc'];
         $where['where'][] = ['status', '=', 1];
         if(!empty($params['order'])){
             $where['order'] = [$params['order'] => 'desc'];
         }
-        $list = WowWaContentModel::getPageOrderList($where, $params['page'], 'id,title,user_id,update_at,description,read_num,tips', $params['pageSize']);
+        $list = WowWaContentModel::getPageOrderList($where, $params['page'], 'id,title,user_id,create_at,description,read_num,tips', $params['pageSize']);
         $list = (new UserService())->mergeUserName($list);
         $list = $this->mergeWaImage($list, 3);
         $waIds = array_column($list, 'id');
@@ -240,7 +243,7 @@ class WaService
     public function getWaInfo(int $waId){
         //浏览量+1
         WowWaContentModel::query()->where('id', $waId)->increment('read_num', 1);
-        $list = WowWaContentModel::query()->where('id', $waId)->where('status', 1)->select(['id','title','description','update_description','wa_content','update_at','user_id','read_num','favorites_num','likes_num','talent_name as label','tips'])->get()->toArray();
+        $list = WowWaContentModel::query()->where('id', $waId)->where('status', 1)->select(['id','title','description','update_description','wa_content','create_at','user_id','read_num','favorites_num','likes_num','talent_name as label','tips'])->get()->toArray();
         if(empty($list)){
             CommonException::msgException('该wa不存在');
         }
