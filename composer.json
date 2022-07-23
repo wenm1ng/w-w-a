@@ -16,7 +16,8 @@
         "guzzlehttp/guzzle": "^6.5",
         "easyswoole/orm": "^1.4",
         "hyperf/database": "^2.2",
-        "hyperf/paginator": "^2.2"
+        "hyperf/paginator": "^2.2",
+        "ext-json" : "*"
     },
     "autoload": {
         "psr-4": {

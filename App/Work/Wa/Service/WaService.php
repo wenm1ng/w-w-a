@@ -122,7 +122,11 @@ class WaService
                 ],
             ];
         }
-        $where['order'] = ['create_at' => 'desc'];
+        if(empty($params['order'])){
+            $where['order'] = ['create_at' => 'desc', 'id' => 'desc'];
+        }else{
+            $where['order'] = [$params['order'] => 'desc', 'id' => 'desc'];
+        }
         $where['where'][] = ['status', '=', 1];
         if(!empty($params['order'])){
             $where['order'] = [$params['order'] => 'desc'];

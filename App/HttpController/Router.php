@@ -30,6 +30,8 @@ class Router extends AbstractRouter
             $this->wa($collector, $apiBasePathOpenV1);
             //测试
             $this->test($collector, $apiBasePathOpenV1);
+            //聊天室
+            $this->chatRoom($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -126,4 +128,12 @@ class Router extends AbstractRouter
         $collector->get('/test',$basePath.'File/File/uploadImageToBlog');
         $collector->get('/test-new',$basePath.'Test/Test/test');
     }
+
+    public function chatRoom(RouteCollector $collector, string $basePath = ''){
+        //获取聊天室历史记录
+        $collector->get('/chat-room/get-history',$basePath.'Chat/Chat/getChatHistory');
+        //获取房间当前成员
+        $collector->get('/chat-room/get-member',$basePath.'Chat/Chat/getChatMember');
+    }
+
 }

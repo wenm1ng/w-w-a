@@ -39,6 +39,20 @@ class EasySwooleEvent implements Event
         require_once "App/Common/function.php";
 
         self::hotReload();
+
+        $register->set($register::onOpen, function ($ws, $request) {
+//            var_dump($request->fd, $request->server);
+            $ws->push($request->fd, "hello, welcome\n");
+        });
+
+        $register->set($register::onMessage, function (\Swoole\WebSocket\Server $server, \Swoole\WebSocket\Frame $frame) {
+            echo "Message: {$frame->data}\n";
+            $server->push($frame->fd, "server: {$frame->data}");
+        });
+
+        $register->set($register::onClose, function ($ws, $fd) {
+            echo "client-{$fd} is closed\n";
+        });
 //        $register->add($register::onWorkerStart,function (){
 //            // 链接预热
 //            // ORM 1.4.31 版本之前请使用 getClientPool()
