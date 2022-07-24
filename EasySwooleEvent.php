@@ -13,6 +13,8 @@ use EasySwoole\ORM\Db\Connection;
 use EasySwoole\ORM\Db\Config;
 use EasySwoole\EasySwoole\Config as SettingConfig;
 use App\Utility\Common;
+use App\Work\Chat\Service\ChatService;
+use Common\Common as CommonCommon;
 
 class EasySwooleEvent implements Event
 {
@@ -39,66 +41,10 @@ class EasySwooleEvent implements Event
         require_once "App/Common/function.php";
 
         self::hotReload();
-
-        $register->set($register::onOpen, function ($ws, $request) {
-//            var_dump($request->fd, $request->server);
-            $ws->push($request->fd, "hello, welcome\n");
-        });
-
-        $register->set($register::onMessage, function (\Swoole\WebSocket\Server $server, \Swoole\WebSocket\Frame $frame) {
-            echo "Message: {$frame->data}\n";
-            $server->push($frame->fd, "server: {$frame->data}");
-        });
-
-        $register->set($register::onClose, function ($ws, $fd) {
-            echo "client-{$fd} is closed\n";
-        });
-//        $register->add($register::onWorkerStart,function (){
-//            // 链接预热
-//            // ORM 1.4.31 版本之前请使用 getClientPool()
-//            // DbManager::getInstance()->getConnection()->getClientPool()->keepMin();
-//
-//            DbManager::getInstance()->getConnection()->__getClientPool()->keepMin();
-//        });
-//        $config = new Config();
-//        $config->setDatabase(SettingConfig::getInstance()->getConf('mysql.service.database'));
-//        $config->setUser(SettingConfig::getInstance()->getConf('mysql.service.host'));
-//        $config->setPassword(SettingConfig::getInstance()->getConf('mysql.service.password'));
-//        $config->setHost(SettingConfig::getInstance()->getConf('mysql.service.host'));
-//        $config->setTimeout(SettingConfig::getInstance()->getConf('mysql.service.timeout')); // 超时时间
-//
-//        //连接池配置
-//        $config->setGetObjectTimeout(SettingConfig::getInstance()->getConf('mysql.service.pool.timeout')); //设置获取连接池对象超时时间
-//        $config->setIntervalCheckTime(SettingConfig::getInstance()->getConf('mysql.service.pool.checktime')); //设置检测连接存活执行回收和创建的周期
-//        $config->setMaxIdleTime(SettingConfig::getInstance()->getConf('mysql.service.pool.idletime')); //连接池对象最大闲置时间(秒)
-//        try{
-//            $config->setMinObjectNum(SettingConfig::getInstance()->getConf('mysql.service.pool.maxnum')); //设置最小连接池存在连接对象数量
-//            $config->setMaxObjectNum(SettingConfig::getInstance()->getConf('mysql.service.pool.minnum')); //设置最大连接池存在连接对象数量
-//        }catch (\Exception $e){
-//        }
-//
-//        $config->setAutoPing(SettingConfig::getInstance()->getConf('mysql.service.pool.autoping')); //设置自动ping客户端链接的间隔
-
-//        DbManager::getInstance()->addConnection(new Connection($config));
-
-//        // 设置指定连接名称 后期可通过连接名称操作不同的数据库
-//        DbManager::getInstance()->addConnection(new Connection($config),'write');
-
-//        $processConfig = new \EasySwoole\Component\Process\Config([
-//            'processName' => 'TestProcess', // 设置 进程名称为 TickProcess
-//        ]);
-//
-//        // 【推荐】使用 \EasySwoole\Component\Process\Manager 类注册自定义进程
-//        $testProcess1 = new \App\Process\TestProcess($processConfig);
-//        $testProcess2 = new \App\Process\TestProcess($processConfig);
-//
-//        ### 正确的注册进程的示例：重新使用 new 实例化另外 1 个新的自定义进程对象，然后进行注册
-//        // 注册进程
-//        \EasySwoole\Component\Process\Manager::getInstance()->addProcess($testProcess1);
-//        \EasySwoole\Component\Process\Manager::getInstance()->addProcess($testProcess2);
+        //开启聊天websocket
+        $ChatService = new ChatService();
+        $ChatService->run($register);
     }
-
-
 
     public static function onRequest(Request $request, Response $response): bool
     {

@@ -9,7 +9,7 @@ Class websocket{
     public function __construct()
     {
         // 注册 Redis 连接池
-        $this->redis = new \Redis();
+//        $this->redis = new \Redis();
     }
 
     public function start(){
@@ -33,7 +33,6 @@ Class websocket{
         $websocketServer->start();
     }
 
-    public
 }
 
 (new websocket())->start();
