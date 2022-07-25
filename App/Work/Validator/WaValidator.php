@@ -49,6 +49,6 @@ class WaValidator extends systemValidate
     public function checkComment(){
         $this->addColumn('content')->notEmpty('评论内容不能为空');
         $this->addColumn('wa_id')->notEmpty('所属wa不能为空');
-        $this->addColumn('reply_user_id')->notEmpty('回复人不能为空');
+        $this->addColumn('reply_user_id')->required('回复人不能为空');
     }
 }

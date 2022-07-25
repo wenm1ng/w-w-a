@@ -17,6 +17,7 @@ class ChatService
 {
     protected $validator;
     protected $userInfo;
+    protected $messageMaxLen = 100;
     public function __construct()
     {
         $this->validator = new ChatValidator();
@@ -237,6 +238,13 @@ class ChatService
             'date_time' => date('Y-m-d H:i:s')
         ], $this->userInfo);
         redis()->lpush('chat_record', json_encode($jsonData));
+        $len = redis()->llen('chat_record');
+        if($len > $this->messageMaxLen){
+            $num = $len - $this->messageMaxLen;
+            for ($i = 0; $i < $num; $i++){
+                redis()->rpop('chat_record');
+            }
+        }
         $jsonData['action'] = 'speak';
         //通知
         $this->noticeMessage($server, $fd, $jsonData);
