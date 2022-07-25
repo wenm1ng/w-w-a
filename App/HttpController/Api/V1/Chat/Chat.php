@@ -23,4 +23,17 @@ class Chat extends BaseController
             return (new ChatService())->getChatHistory($params);
         });
     }
+
+    /**
+     * @desc       记录日志
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-25 11:31
+     * @return bool
+     */
+    public function recordLog(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new ChatService())->recordLog($params);
+        });
+    }
 }

@@ -125,7 +125,6 @@ class ServerManager
             }
         }
         $this->isStart = true;
-        dump($this->getSwooleServer());
         $this->getSwooleServer()->start();
     }
 

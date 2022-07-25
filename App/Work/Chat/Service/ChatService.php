@@ -10,6 +10,8 @@ use App\Work\Validator\ChatValidator;
 use App\Exceptions\CommonException;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use User\Service\LoginService;
+use App\Work\Chat\Models\WowLogModel;
+use Common\Common;
 
 class ChatService
 {
@@ -18,6 +20,27 @@ class ChatService
     public function __construct()
     {
         $this->validator = new ChatValidator();
+    }
+
+    /**
+     * @desc       记录聊天日志
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-25 11:39
+     * @param array $params
+     *
+     * @return null
+     */
+    public function recordLog(array $params){
+        $this->validator->checkRecord();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+        $insertData = [
+            'user_id' => Common::getUserId(),
+            'content' => $params['content']
+        ];
+        WowLogModel::query()->insert($insertData);
+        return null;
     }
 
     /**
@@ -33,29 +56,45 @@ class ChatService
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
-//        $arr = json_encode(['name'=>'文明2','age'=>1]);
-//        redis()->lpush('room:1', $arr);
-        $roomId = $params['room_id'];
+//        $roomId = $params['room_id'];
         $start = ($params['page']-1) * $params['pageSize'];
-        $end = $params['page'] * $params['pageSize'];
-        $list = redis()->lRange('room:'.$roomId, $start, $end);
+        $end = $params['page'] * ($params['pageSize'] - 1);
+        $list = redis()->lRange('chat_record', $start, $end);
+        $todayTime = strtotime(date('Y-m-d').' 23:59:59');
         if(!empty($list)){
             $list = array_reverse($list);
+            $newList = [];
+            $preTime = 0;
             foreach ($list as &$val) {
                 $val = json_decode($val, true);
+                $timestamp = strtotime($val['date_time']);
+                if($timestamp - $preTime >= 120){
+                    if($todayTime - $timestamp <= 3600*24){
+                        //当天消息，不需要日期，只要时分秒
+                        $time = date('H:i:s', $timestamp);
+                    }else{
+                        //全局日期消息
+                        $time = $val['date_time'];
+                    }
+                    $newList[] = [
+                        'type' => 'time',
+                        'content' => $time
+                    ];
+                }
+                $preTime = $timestamp;
+                $newList[] = [
+                    'type' => 'message',
+                    'content' => $val['content'],
+                    'user_id' => $val['user_id'],
+                    'user_name' => $val['user_name'],
+                    'avatar_url' => $val['avatar_url']
+                ];
             }
+            $list = $newList;
         }else{
             $list = [];
         }
         return $list;
-    }
-
-    public function getRoomMember(){
-        return redis()->sMembers('chat_room');
-    }
-
-    public function addMember($fd){
-        redis()->sadd('chat_room', $fd);
     }
 
     public function run(EventRegister $register){
@@ -83,47 +122,46 @@ class ChatService
 //        });
 
 
-//        $register->set($register::onOpen, function ($ws, $request) {
-////            var_dump($request->fd, $request->server);
-//            dump($request->fd, "hello, welcome\n");
-////            $ws->push($request->fd, "message");
-////            $list = $ChatService->getRoomMember();
-////            if(!empty($list)){
-////                foreach($list as $id){
-////                    $ws->push();
-////                }
-////            }
-////            $ChatService->addMember($request->fd);
-//        });
-//
-//        $register->set($register::onMessage, function (\Swoole\WebSocket\Server $server, \Swoole\WebSocket\Frame $frame) {
-//            try {
-//                $data = json_decode($frame->data, true);
-//                if(empty($data['token'])){
-//                    return;
+        $register->set($register::onOpen, function ($ws, $request) {
+//            var_dump($request->fd, $request->server);
+            dump($request->fd, "hello, welcome\n");
+//            $ws->push($request->fd, "message");
+//            $list = $ChatService->getRoomMember();
+//            if(!empty($list)){
+//                foreach($list as $id){
+//                    $ws->push();
 //                }
-//                try {
-//                    $this->userInfo = (new LoginService())->checkToken($data['token']);
-//                }catch (\Exception $e){
-//                    return;
-//                }
-//                if(empty($data['action'])){
-//                    $server->push($frame->fd, json_encode(['status'=>400, 'msg' =>'参数错误']));
-//                    return;
-//                }
-//                call_user_func([$this, $data['action']], $server, $frame->fd, $data);
-//            }catch (\Exception $e){
-//                $server->push($frame->fd, json_encode(['status'=>400, 'msg' =>$e->getMessage()]));
 //            }
-//
-////            $server->push($frame->fd, "server: {$frame->data}");
-//        });
-//
-//        $register->set($register::onClose, function ($ws, $fd) {
-//            echo "client-{$fd} is closed\n";
-//            //离开房间
-//            $this->leaveRoom($fd);
-//        });
+//            $ChatService->addMember($request->fd);
+        });
+
+        $register->set($register::onMessage, function (\Swoole\WebSocket\Server $server, \Swoole\WebSocket\Frame $frame) {
+            try {
+                $data = json_decode($frame->data, true);
+                if(empty($data['token'])){
+                    return;
+                }
+                try {
+                    $this->userInfo = (new LoginService())->checkToken($data['token']);
+                }catch (\Exception $e){
+                    return;
+                }
+                if(empty($data['action'])){
+                    $server->push($frame->fd, json_encode(['status'=>400, 'msg' =>'参数错误']));
+                    return;
+                }
+                call_user_func([$this, $data['action']], $server, $frame->fd, $data);
+            }catch (\Exception $e){
+                $server->push($frame->fd, json_encode(['status'=>400, 'msg' =>$e->getMessage()]));
+            }
+
+//            $server->push($frame->fd, "server: {$frame->data}");
+        });
+
+        $register->set($register::onClose, function ($ws, $fd) {
+            echo "client-{$fd} is closed\n";
+            $this->redisLeaveRoom($fd);
+        });
     }
 
     /**
@@ -137,9 +175,9 @@ class ChatService
         $info = array_merge([
             'action' => 'entryRoom',
         ], $this->userInfo);
+        redis()->sadd('chat_room', $fd);
         //发消息给客户端
         $this->noticeMessage($server, $fd, $info);
-        redis()->sadd('chat_room', $fd);
     }
 
     /**
@@ -150,27 +188,42 @@ class ChatService
      * @param array                    $data
      * @param int                      $isMyself 是否需要给自己提示 1是 0否
      */
-    public function noticeMessage(\Swoole\WebSocket\Server $server, int $fd, array $data, int $isMyself = 0){
+    public function noticeMessage(\Swoole\WebSocket\Server $server, int $fd, array $data){
         $list = redis()->sMembers('chat_room');
         if(!empty($list)){
             $info = json_encode($data);
             foreach($list as $id){
-                if(!$isMyself && $id == $fd){
-                    continue;
-                }
                 $server->push($id, $info);
             }
         }
     }
+
     /**
-     * @desc     退出websocket离开房间
-     * @example
-     * @param int $fd
+     * @desc       退出websocket离开房间
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-25 11:09
+     * @param \Swoole\WebSocket\Server $server
+     * @param int                      $fd
+     * @param array                    $data
      */
-    public function leaveRoom(int $fd){
-        redis()->srem('chat_room', $fd);
+    public function leaveRoom(\Swoole\WebSocket\Server $server, int $fd, array $data){
+        $info = array_merge([
+            'action' => 'leaveRoom',
+        ], $this->userInfo);
+        //发消息给客户端
+        $this->noticeMessage($server, $fd, $info);
+        $this->redisLeaveRoom($fd);
     }
 
+    /**
+     * @desc       移除redis集合
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-25 11:20
+     * @param int $fd
+     */
+    public function redisLeaveRoom(int $fd){
+        redis()->srem('chat_room', $fd);
+    }
     /**
      * @desc   发言监听
      * @example
@@ -186,6 +239,6 @@ class ChatService
         redis()->lpush('chat_record', json_encode($jsonData));
         $jsonData['action'] = 'speak';
         //通知
-        $this->noticeMessage($server, $fd, $jsonData, 1);
+        $this->noticeMessage($server, $fd, $jsonData);
     }
 }

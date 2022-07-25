@@ -134,6 +134,8 @@ class Router extends AbstractRouter
         $collector->get('/chat-room/get-history',$basePath.'Chat/Chat/getChatHistory');
         //获取房间当前成员
         $collector->get('/chat-room/get-member',$basePath.'Chat/Chat/getChatMember');
+        //记录错误日志
+        $collector->post('/chat-room/record-log',$basePath.'Chat/Chat/recordLog');
     }
 
 }

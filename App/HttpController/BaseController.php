@@ -42,7 +42,6 @@ class BaseController extends Controller
             $this->request()->withAddedHeader('user_id', $userId);
             $body = json_decode($this->request()->getBody()->__toString(), true);
             $body['user_id'] = $userId;
-            dump($userId);
             Common::setUserToken($authorization[0]);
             //将解析出来的user_id重新写进body
             $this->request()->withBody(\GuzzleHttp\Psr7\stream_for(json_encode($body)));

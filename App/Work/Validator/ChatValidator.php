@@ -20,4 +20,8 @@ class ChatValidator extends systemValidate
         $this->addColumn('page')->notEmpty('页数不能为空');
         $this->addColumn('pageSize')->notEmpty('每页数量不能为空');
     }
+
+    public function checkRecord(){
+        $this->addColumn('content')->notEmpty('日志内容不能为空');
+    }
 }

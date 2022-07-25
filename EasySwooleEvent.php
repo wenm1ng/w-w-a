@@ -42,6 +42,19 @@ class EasySwooleEvent implements Event
 
         self::hotReload();
         //开启聊天websocket
+//        $register->set($register::onOpen, function ($ws, $request) {
+////            var_dump($request->fd, $request->server);
+//            $ws->push($request->fd, "hello, welcome\n");
+//        });
+//
+//        $register->set($register::onMessage, function (\Swoole\WebSocket\Server $server, \Swoole\WebSocket\Frame $frame) {
+//            echo "Message: {$frame->data}\n";
+//            $server->push($frame->fd, "server: {$frame->data}");
+//        });
+//
+//        $register->set($register::onClose, function ($ws, $fd) {
+//            echo "client-{$fd} is closed\n";
+//        });
         $ChatService = new ChatService();
         $ChatService->run($register);
     }
