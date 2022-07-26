@@ -18,6 +18,14 @@ class ChatService
     protected $validator;
     protected $userInfo;
     protected $messageMaxLen = 100;
+    /**
+     * @var string 群成员
+     */
+    protected $chatRoomKey = 'chat_room';
+    /**
+     * @var string 聊天记录
+     */
+    protected $chatRecordKey = 'chat_record';
     public function __construct()
     {
         $this->validator = new ChatValidator();
@@ -60,7 +68,7 @@ class ChatService
 //        $roomId = $params['room_id'];
         $start = ($params['page']-1) * $params['pageSize'];
         $end = $params['page'] * ($params['pageSize'] - 1);
-        $list = redis()->lRange('chat_record', $start, $end);
+        $list = redis()->lRange($this->chatRecordKey, $start, $end);
         $todayTime = strtotime(date('Y-m-d').' 23:59:59');
         if(!empty($list)){
             $list = array_reverse($list);
@@ -176,9 +184,30 @@ class ChatService
         $info = array_merge([
             'action' => 'entryRoom',
         ], $this->userInfo);
-        redis()->sadd('chat_room', $fd);
+
+        redis()->hSetNx($this->chatRoomKey, (string)$fd, json_encode($this->userInfo));
+
         //发消息给客户端
         $this->noticeMessage($server, $fd, $info);
+    }
+
+    /**
+     * @desc       获取房间内成员
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-26 17:56
+     * @param \Swoole\WebSocket\Server $server
+     * @param int                      $fd
+     * @param array                    $data
+     */
+    public function getRoomMember(\Swoole\WebSocket\Server $server, int $fd, array $data = []){
+
+        $list = redis()->hGetAll($this->chatRoomKey);
+        dump($list);
+        $list = !empty($list) ? ['list' => $list] : ['list' => []];
+        $info = array_merge([
+            'action' => 'getRoomMember',
+        ], $list);
+        $server->push($fd, json_encode($info));
     }
 
     /**
@@ -190,11 +219,11 @@ class ChatService
      * @param int                      $isMyself 是否需要给自己提示 1是 0否
      */
     public function noticeMessage(\Swoole\WebSocket\Server $server, int $fd, array $data){
-        $list = redis()->sMembers('chat_room');
+        $list = redis()->hGetAll($this->chatRoomKey);
         if(!empty($list)){
             $info = json_encode($data);
-            foreach($list as $id){
-                $server->push($id, $info);
+            foreach($list as $id => $val){
+                $server->push((int)$id, $info);
             }
         }
     }
@@ -223,7 +252,7 @@ class ChatService
      * @param int $fd
      */
     public function redisLeaveRoom(int $fd){
-        redis()->srem('chat_room', $fd);
+        redis()->hDel($this->chatRoomKey, (string)$fd);
     }
     /**
      * @desc   发言监听
@@ -237,12 +266,12 @@ class ChatService
             'content' => $data['content'],
             'date_time' => date('Y-m-d H:i:s')
         ], $this->userInfo);
-        redis()->lpush('chat_record', json_encode($jsonData));
-        $len = redis()->llen('chat_record');
+        redis()->lpush($this->chatRecordKey, json_encode($jsonData));
+        $len = redis()->llen($this->chatRecordKey);
         if($len > $this->messageMaxLen){
             $num = $len - $this->messageMaxLen;
             for ($i = 0; $i < $num; $i++){
-                redis()->rpop('chat_record');
+                redis()->rpop($this->chatRecordKey);
             }
         }
         $jsonData['action'] = 'speak';

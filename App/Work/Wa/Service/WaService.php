@@ -516,6 +516,14 @@ class WaService
         return null;
     }
 
+    /**
+     * @desc       爬虫wa数据
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-26 16:21
+     * @param array $params
+     *
+     * @return void|null
+     */
     public function saveFiddlerWaData(array $params){
         $params = $params['response_data']['data'];
         return;
@@ -586,4 +594,5 @@ class WaService
         dump('采集成功');
         return null;
     }
+
 }

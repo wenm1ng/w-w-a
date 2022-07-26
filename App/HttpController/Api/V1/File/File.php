@@ -20,4 +20,11 @@ class File extends LoginController
             return (new FileService())->uploadImageToBlog($url);
         });
     }
+
+    public function uploadImage(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new FileService())->uploadImage($params);
+        });
+    }
 }

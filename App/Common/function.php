@@ -310,17 +310,17 @@ function getIp()
     return $ret;
 }
 
-function saveInterImage($url)
+function saveInterImage($url, $dir)
 {
     $file = file_get_contents($url);
 
     $filend = pathinfo($url, PATHINFO_EXTENSION);
     dump($filend);
-    $path = EASYSWOOLE_ROOT . '/Temp';
+    $path = '/data/www/image' . $dir;
     if (!file_exists($path)) {
         mkdir($path, true, 0777);
     }
-    $fileName = $path . '/' . random(11) . '.' . $filend;
+    $fileName = $path . '/' . random(20) . '.' . $filend;
     file_put_contents($fileName, $file);
     return $fileName;
 }
@@ -860,7 +860,7 @@ function curl_mrequest($url_arr = array(), $headers = array(), $add_args = array
  *
  * @return string
  */
-function download(string $url){
+function download(string $url, string $saveDir){
     $client = new HttpClient($url);
     $client->setTimeout(20);
     $client->setHeaders([
@@ -870,11 +870,10 @@ function download(string $url){
         'Accept-Encoding' => 'gzip'
     ]);
     $filend = pathinfo($url, PATHINFO_EXTENSION);
-    $path = EASYSWOOLE_ROOT.'/Temp';
-    if(!file_exists($path)){
-        mkdir($path,true, 0777);
+    if(!file_exists($saveDir)){
+        mkdir($saveDir,true, 0777);
     }
-    $fileName = $path.'/'.random(11).'.'.$filend;
+    $fileName = $saveDir.'/'.random(11).'.'.$filend;
     $client->download($fileName);
     return $fileName;
 }

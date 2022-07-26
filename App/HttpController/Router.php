@@ -127,6 +127,7 @@ class Router extends AbstractRouter
     {
         $collector->get('/test',$basePath.'File/File/uploadImageToBlog');
         $collector->get('/test-new',$basePath.'Test/Test/test');
+        $collector->post('/upload',$basePath.'File/File/uploadImage');
     }
 
     public function chatRoom(RouteCollector $collector, string $basePath = ''){
