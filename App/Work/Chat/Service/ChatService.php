@@ -26,6 +26,14 @@ class ChatService
      * @var string 聊天记录
      */
     protected $chatRecordKey = 'chat_record';
+    /**
+     * @var string 是否需要提醒
+     */
+    protected $entryRoomRemind = 'chat_room_remind';
+    /**
+     * @var int 进入房间提醒间隔时间 5分钟
+     */
+    protected $remindTime = 300;
     public function __construct()
     {
         $this->validator = new ChatValidator();
@@ -186,7 +194,13 @@ class ChatService
         ], $this->userInfo);
 
         redis()->hSetNx($this->chatRoomKey, (string)$fd, json_encode($this->userInfo));
-
+        $rs = redis()->get($this->entryRoomRemind.$this->userInfo['user_id']);
+        if(!$rs){
+            redis()->SETEX($this->entryRoomRemind.$this->userInfo['user_id'], $this->remindTime, 1);
+            $info['noticeType'] = 'message';
+        }else{
+            $info['noticeType'] = 'getRoomMembers';
+        }
         //发消息给客户端
         $this->noticeMessage($server, $fd, $info);
     }
