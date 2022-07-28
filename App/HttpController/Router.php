@@ -32,6 +32,8 @@ class Router extends AbstractRouter
             $this->test($collector, $apiBasePathOpenV1);
             //聊天室
             $this->chatRoom($collector, $apiBasePathOpenV1);
+            //帮助中心
+            $this->helpCenter($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -137,6 +139,11 @@ class Router extends AbstractRouter
         $collector->get('/chat-room/get-member',$basePath.'Chat/Chat/getChatMember');
         //记录错误日志
         $collector->post('/chat-room/record-log',$basePath.'Chat/Chat/recordLog');
+    }
+
+    public function helpCenter(RouteCollector $collector, string $basePath = ''){
+        //获取帮助列表
+        $collector->get('/help-center/list',$basePath.'HelpCenter/HelpCenter/getHelpList');
     }
 
 }

@@ -146,6 +146,27 @@ class UserService{
         }
         return $list;
     }
+
+    /**
+     * @desc       合并用户信息
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-28 14:57
+     * @param array $list
+     *
+     * @return array
+     */
+    public function mergeUserInfo(array $list){
+        $userIds = array_unique(array_filter(array_column($list, 'user_id')));
+        $link = [];
+        if(!empty($userIds)){
+            $link = WowUserModelNew::query()->whereIn('user_id', $userIds)->select(Db::raw('user_id,nickName as user_name,avatarUrl as avatar_url'))->get()->toArray();
+            $link = array_column($link, null, 'user_id');
+        }
+        foreach ($list as &$val) {
+            $val['user_info'] = $link[$val['user_id']] ?? [];
+        }
+        return $list;
+    }
     /**
      * @desc       　获取收藏的内容列表
      * @example    　

@@ -32,6 +32,50 @@ function handleErrorMsg($e){
     return $errMsg;
 }
 
+/**
+ * @desc       获取时间格式（多久前）
+ * @author     文明<736038880@qq.com>
+ * @date       2022-07-28 17:10
+ * @param string $date
+ *
+ * @return false|string
+ */
+function getTimeFormat(string $date){
+    $time = strtotime($date);
+    $minute = 60;
+    $hour = $minute * 60;
+    $day = $hour * 24;
+    $month = $day * 30;
+    $year = $day * 365;
+    $nowTime = time();
+    $diffTime = $nowTime - $time;
+    if ($diffTime < 0) {
+      return "刚刚";
+    }
+    $monthEnd = $diffTime / $month;
+    $weekEnd = $diffTime / (7 * $day);
+    $dayEnd = $diffTime / $day;
+    $hourEnd = $diffTime / $hour;
+    $minEnd = $diffTime / $minute;
+    $yearEnd = $diffTime / $year;
+    if ($yearEnd >= 1) {
+      $result = date('Y-m-d H:i:s', $time);
+    } else if ($monthEnd >= 1) {
+      $result = round($monthEnd)."个月前";
+    } else if ($weekEnd >= 1) {
+      $result = round($weekEnd)."周前";
+    } else if ($dayEnd >= 1) {
+      $result = round($dayEnd)."天前";
+    } else if ($hourEnd >= 1) {
+      $result = round($hourEnd)."小时前";
+    } else if ($minEnd >= 1) {
+      $result = round($minEnd)."分钟前";
+    } else {
+      $result = "刚刚";
+    }
+    return $result;
+}
+
 function postPageT($text, $targe_lang = 'en', $from_lang = 'auto')
 {
     $res = '';
