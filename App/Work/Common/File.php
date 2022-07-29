@@ -7,6 +7,7 @@
 namespace App\Work\Common;
 
 use EasySwoole\HttpClient\HttpClient;
+use App\Work\Config;
 
 class File{
     protected $dir = '/data/www/image';
@@ -53,8 +54,8 @@ class File{
      */
     public function uploadImage(array $params){
         $path = '/wa';
-        $trim = '/data/www/image';
-        $replace = 'http://119.29.1.85:83';
+        $trim = Config::IMAGE_DIR;
+        $replace = Config::IMAGE_HOST;
         $return = [];
         foreach ($params['url'] as $url) {
            $imageUrl = saveInterImage($url, $path);
@@ -64,5 +65,22 @@ class File{
            \Co::sleep(0.2);
         }
         return $return;
+    }
+
+    /**
+     * @desc       删除图片
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-29 14:59
+     * @param string $url
+     */
+    public function delImage(string $url){
+        if(empty($url)){
+            return;
+        }
+        $filePath = str_replace(Config::IMAGE_HOST, '', $url);
+        $filePath = Config::IMAGE_DIR. $filePath;
+        if(file_exists($filePath)){
+            unlink($filePath);
+        }
     }
 }

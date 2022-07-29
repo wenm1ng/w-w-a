@@ -15,6 +15,8 @@ use App\Work\HelpCenter\Models\WowHelpCenterModel;
 use Common\Common;
 use Wa\Models\WowUserLikesModel;
 use App\Utility\Database\Db;
+use App\Work\Config;
+use App\Work\Common\File;
 
 class HelpCenterService
 {
@@ -77,8 +79,13 @@ class HelpCenterService
      * @param array $list
      */
     public function dealData(array &$list){
+        $versionList = (new \Version\Service\VersionService())->getVersionList();
+        $versionList = array_column($versionList, 'name', 'version');
         foreach ($list as $key => $val) {
             $list[$key]['modify_at'] = getTimeFormat($val['modify_at']);
+            $list[$key]['flod'] = false;
+            $list[$key]['version_name'] = $versionList[$val['version_id']] ?? '正式服';
+            $list[$key]['help_type_name'] = Config::$helpTypeLink[$val['help_type']] ?? '插件研究';
         }
     }
     /**
@@ -131,5 +138,136 @@ class HelpCenterService
             $list['has_answer'] = !empty($answerLink[$list['id']]) ? 1 : 0;
         }
         return $list;
+    }
+
+    /**
+     * @desc       添加求助
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-29 14:52
+     * @param array $params
+     *
+     * @return int
+     */
+    public function addHelp(array $params){
+        $this->validator->checkAddHelp();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        $insertData = [
+            'title' => $params['title'],
+            'description' => $params['description'],
+            'help_type' => $params['help_type'],
+            'version' => $params['version'],
+            'image_url' => !empty($params['image_url']) ? $params['image_url'] : '',
+            'user_id' => Common::getUserId(),
+            'status' => 1,
+            'is_pay' => $params['is_pay']
+        ];
+        $helpId = WowHelpCenterModel::query()->insertGetId($insertData);
+        return $helpId;
+    }
+
+    /**
+     * @desc       删除求助
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-29 14:52
+     * @param array $params
+     *
+     * @return null
+     */
+    public function deleteHelp(array $params){
+        $this->validator->checkId();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+        $info = WowHelpAnswerModel::query()->where('help_id', $params['id'])->select(['id'])->first();
+        if(!empty($info)){
+            CommonException::msgException('已有帮助人进行回答，无法删除');
+        }
+        $info = WowHelpCenterModel::query()->where('id', $params['id'])->select(['image_url'])->first();
+        if(empty($info)){
+            CommonException::msgException('数据不存在');
+        }
+        $info = $info->toArray();
+        WowHelpCenterModel::query()->where('id', $params['id'])->delete();
+        (new File())->delImage($info['image_url']);
+
+        return null;
+    }
+
+    /**
+     * @desc       添加求助回答
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-29 15:21
+     * @param array $params
+     *
+     * @return int
+     */
+    public function addAnswer(array $params){
+        $this->validator->checkAddAnswer();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        $insertData = [
+            'help_id' => $params['help_id'],
+            'description' => $params['description'],
+            'image_url' => !empty($params['image_url']) ? $params['image_url'] : '',
+            'user_id' => Common::getUserId()
+        ];
+
+        $id = WowHelpAnswerModel::query()->insertGetId($insertData);
+
+        return $id;
+    }
+
+    /**
+     * @desc       修改求助回答
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-29 15:29
+     * @param array $params
+     *
+     * @return null
+     */
+    public function updateAnswer(array $params){
+        $this->validator->checkUpdateAnswer();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        $updateData = [
+            'description' => $params['description'],
+            'image_url' => !empty($params['image_url']) ? $params['image_url'] : '',
+            'modify_at' => date('Y-m-d H:i:s')
+        ];
+
+        WowHelpAnswerModel::query()->where('id', $params['id'])->update($updateData);
+
+        return null;
+    }
+
+    /**
+     * @desc       提交回答（状态改为1）
+     * @author     文明<736038880@qq.com>
+     * @date       2022-07-29 15:34
+     * @param array $params
+     *
+     * @return null
+     */
+    public function setAnswerStatus(array $params){
+        $this->validator->checkId();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        $updateData = [
+            'status' => 1,
+            'modify_at' => date('Y-m-d H:i:s')
+        ];
+
+        WowHelpAnswerModel::query()->where('id', $params['id'])->update($updateData);
+
+        return null;
     }
 }
