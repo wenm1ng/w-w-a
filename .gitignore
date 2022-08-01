@@ -8,6 +8,7 @@ composer.lock
 /Log/
 /Temp/
 /Config.php
-/App/ConfigDev/Mysql.php
+/App/ConfigDev/
+/App/Config/
 /dev.php
 easyswoole.install
