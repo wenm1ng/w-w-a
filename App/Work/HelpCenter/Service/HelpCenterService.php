@@ -40,22 +40,21 @@ class HelpCenterService
             CommonException::msgException($this->validator->getError()->__toString());
         }
         $where = [
-            ['status', '=', 1]
+            'where' => [
+                ['status', '=', 1]
+            ]
         ];
         if(!empty($params['version'])){
-            $where['where'][] = [
-                ['version', '=', $params['version']]
-            ];
+            $where['where'][] = ['version', '=', $params['version']];
         }
         if(!empty($params['help_type'])){
-            $where['where'][] = [
-                ['help_type', '=', $params['help_type']]
-            ];
+            $where['where'][] = ['help_type', '=', $params['help_type']];
+        }
+        if(!empty($params['adopt_type'])){
+            $where['where'][] = ['is_adopt', '=', $params['adopt_type']];
         }
         if(!empty($params['is_pay'])){
-            $where['where'][] = [
-                ['is_pay', '=', $params['is_pay']]
-            ];
+            $where['where'][] = ['is_pay', '=', $params['is_pay']];
         }
         if(empty($params['order'])){
             $where['order'] = ['modify_at' => 'desc', 'id' => 'desc'];
@@ -65,6 +64,7 @@ class HelpCenterService
 
         $fields = 'id,version,occupation,help_type,title,user_id,image_url,description,modify_at,favorites_num,help_num,read_num, 0 as has_favor, 0 as has_answer';
         $list = WowHelpCenterModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
+
         $list = (new UserService())->mergeUserInfo($list);
         $waIds = array_column($list, 'id');
         $list = $this->mergeCount($list, $waIds);
@@ -190,7 +190,7 @@ class HelpCenterService
             CommonException::msgException('数据不存在');
         }
         $info = $info->toArray();
-        WowHelpCenterModel::query()->where('id', $params['id'])->delete();
+        WowHelpCenterModel::query()->where('id', $params['id'])->update(['status' => 0]);
         (new File())->delImage($info['image_url']);
 
         return null;

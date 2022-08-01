@@ -143,7 +143,7 @@ class Router extends AbstractRouter
 
     public function helpCenter(RouteCollector $collector, string $basePath = ''){
         //获取帮助列表
-        $collector->get('/help-center/list',$basePath.'HelpCenter/HelpCenter/getHelpList');
+        $collector->post('/help-center/list',$basePath.'HelpCenter/HelpCenter/getHelpList');
     }
 
 }

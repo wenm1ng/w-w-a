@@ -21,6 +21,7 @@ use Wa\Service\WaService;
 use App\Exceptions\CommonException;
 use App\Utility\Database\Db;
 use Wa\Models\WowWaCommentModel;
+use EasySwoole\EasySwoole\Config;
 
 class UserService{
 
@@ -35,8 +36,8 @@ class UserService{
     }
 
     private function getSessionKey($code){
-        $appId = \Common\Config::APPID;
-        $secret = \Common\Config::SECRET;
+        $appId = Config::getInstance()->getConf('app.APP_KEY');
+        $secret = Config::getInstance()->getConf('app.APP_SECRET');
         $url = "https://api.weixin.qq.com/sns/jscode2session?appid={$appId}&secret={$secret}&js_code={$code}&grant_type=authorization_code";
         $return = httpClientCurl($url);
         return $return;
