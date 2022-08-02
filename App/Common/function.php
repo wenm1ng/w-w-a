@@ -15,6 +15,7 @@ use App\Lib\AliFanyi\Validate\TranslateValidate;
 use Common\Code\CodeKey;
 use App\Utility\Company;
 use EasySwoole\HttpClient\HttpClient;
+use App\Work\Config as workConfig;
 //use App\Pool\RedisPool;
 /* 谷歌翻译CURL请求（不用代理）
  * @param $text String required  翻译的字符串
@@ -354,6 +355,15 @@ function getIp()
     return $ret;
 }
 
+/**
+ * @desc       保存网络图片
+ * @author     文明<736038880@qq.com>
+ * @date       2022-08-02 15:24
+ * @param $url
+ * @param $dir
+ *
+ * @return string
+ */
 function saveInterImage($url, $dir)
 {
     $file = file_get_contents($url);
@@ -367,6 +377,42 @@ function saveInterImage($url, $dir)
     $fileName = $path . '/' . random(20) . '.' . $filend;
     file_put_contents($fileName, $file);
     return $fileName;
+}
+
+/**
+ * @desc       保存文件流图片
+ * @author     文明<736038880@qq.com>
+ * @date       2022-08-02 15:24
+ * @param $file
+ * @param $dir
+ * @param $filend
+ *
+ * @return string
+ */
+function saveFileDataImage($file, $dir, $filend)
+{
+    $path = '/data/www/image' . $dir;
+    if (!file_exists($path)) {
+        mkdir($path, true, 0777);
+    }
+    $fileName = $path . '/' . random(20) . '.' . $filend;
+    file_put_contents($fileName, $file);
+    return $fileName;
+}
+
+/**
+ * @desc       替换图片路径
+ * @author     文明<736038880@qq.com>
+ * @date       2022-08-02 15:29
+ * @param string $imageUrl
+ *
+ * @return string|string[]
+ */
+function getInterImageName(string $imageUrl){
+    $trim = workConfig::IMAGE_DIR;
+    $replace = workConfig::IMAGE_HOST;
+    $imageUrl = str_replace($trim, $replace, $imageUrl);
+    return $imageUrl;
 }
 
 function echoTime(&$time)

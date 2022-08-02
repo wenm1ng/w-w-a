@@ -141,6 +141,27 @@ class HelpCenterService
     }
 
     /**
+     * @desc       帮助详情
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-02 18:11
+     * @param int $id
+     *
+     * @return mixed
+     */
+    public function getHelpInfo(int $id){
+        $info = WowHelpCenterModel::query()->where('id', $id)->first();
+        if(empty($info) || empty($id)){
+            CommonException::msgException('该帮助不存在');
+        }
+        $list = [$info->toArray()];
+        $list = (new UserService())->mergeUserInfo($list);
+        $list = $this->mergeCount($list, [$id]);
+        $this->dealData($list);
+
+        return $list[0];
+    }
+
+    /**
      * @desc       添加求助
      * @author     文明<736038880@qq.com>
      * @date       2022-07-29 14:52
@@ -148,18 +169,29 @@ class HelpCenterService
      *
      * @return int
      */
-    public function addHelp(array $params){
+    public function addHelp(array $params, \EasySwoole\Http\Request $request){
         $this->validator->checkAddHelp();
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
 
+        $file = $request->getUploadedFile('file');
+        $imageUrl = '';
+        if (!empty($file) && $file->getSize()) {
+            $fileName = $file->getClientFileName();
+            $filend = pathinfo($fileName, PATHINFO_EXTENSION);
+            $data = file_get_contents($file->getTempName());
+            $fileName = saveFileDataImage($data, '/help', $filend);
+            $imageUrl = getInterImageName($fileName);
+        }
+        dump($imageUrl);
         $insertData = [
             'title' => $params['title'],
             'description' => $params['description'],
             'help_type' => $params['help_type'],
             'version' => $params['version'],
-            'image_url' => !empty($params['image_url']) ? $params['image_url'] : '',
+            'is_adopt' => 2,
+            'image_url' => $imageUrl,
             'user_id' => Common::getUserId(),
             'status' => 1,
             'is_pay' => $params['is_pay']

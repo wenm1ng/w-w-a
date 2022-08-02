@@ -26,4 +26,18 @@ class HelpCenter extends LoginController
             return (new HelpCenterService())->getHelpList($params);
         });
     }
+
+    /**
+     * @desc       获取帮助详情
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-02 18:13
+     * @return bool
+     */
+    public function getHelpInfo(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            $id = $params['id'] ?? 0;
+            return (new HelpCenterService())->getHelpInfo($id);
+        });
+    }
 }
