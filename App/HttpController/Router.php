@@ -148,6 +148,9 @@ class Router extends AbstractRouter
         $collector->post('/help-center/add',$basePath.'HelpCenter/HelpCenterL/addHelp');
         //帮助详情
         $collector->get('/help-center/info',$basePath.'HelpCenter/HelpCenter/getHelpInfo');
+        //回答列表
+        $collector->get('/help-center/answer-list',$basePath.'HelpCenter/HelpCenter/getAnswerList');
+
     }
 
 }

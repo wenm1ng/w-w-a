@@ -40,4 +40,17 @@ class HelpCenter extends LoginController
             return (new HelpCenterService())->getHelpInfo($id);
         });
     }
+
+    /**
+     * @desc       获取回答列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-03 18:12
+     * @return bool
+     */
+    public function getAnswerList(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->getAnswerList($params);
+        });
+    }
 }

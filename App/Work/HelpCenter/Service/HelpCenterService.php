@@ -72,6 +72,27 @@ class HelpCenterService
         return ['list' => $list, 'page' => (int)$params['page']];
     }
 
+    public function getAnswerList(array $params){
+        $this->validator->checkId();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+        $where = [
+            'where' => [
+                ['help_id', '=', $params['id']]
+            ]
+        ];
+        $fields = 'id,help_id,user_id,image_url,description,modify_at';
+        $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
+
+        $list = (new UserService())->mergeUserInfo($list);
+        $waIds = array_column($list, 'id');
+        $list = $this->mergeCount($list, $waIds);
+        $this->dealData($list);
+        return ['list' => $list, 'page' => (int)$params['page']];
+    }
+
+
     /**
      * @desc       处理返回数据
      * @author     文明<736038880@qq.com>
