@@ -17,6 +17,7 @@ use Wa\Models\WowUserLikesModel;
 use App\Utility\Database\Db;
 use App\Work\Config;
 use App\Work\Common\File;
+use Wa\Models\WowWaCommentModel;
 
 class HelpCenterService
 {
@@ -72,6 +73,14 @@ class HelpCenterService
         return ['list' => $list, 'page' => (int)$params['page']];
     }
 
+    /**
+     * @desc       获取回答列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-04 10:21
+     * @param array $params
+     *
+     * @return array
+     */
     public function getAnswerList(array $params){
         $this->validator->checkId();
         if (!$this->validator->validate($params)) {
@@ -80,15 +89,18 @@ class HelpCenterService
         $where = [
             'where' => [
                 ['help_id', '=', $params['id']]
-            ]
+            ],
+            'order' => ['favorites_num' => 'desc', 'comment_num' => 'desc', 'id' => 'desc'],
         ];
         $fields = 'id,help_id,user_id,image_url,description,modify_at';
         $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
 
         $list = (new UserService())->mergeUserInfo($list);
         $waIds = array_column($list, 'id');
-        $list = $this->mergeCount($list, $waIds);
-        $this->dealData($list);
+        $list = $this->mergeCount($list, $waIds, 4);
+        foreach ($list as &$val) {
+            $val['modify_at'] = getTimeFormat($val['modify_at']);
+        }
         return ['list' => $list, 'page' => (int)$params['page']];
     }
 
@@ -119,7 +131,7 @@ class HelpCenterService
      *
      * @return array
      */
-    public function mergeCount(array $list, array $ids, int $isInfo = 0){
+    public function mergeCount(array $list, array $ids, int $type = 3){
         if(empty($ids)){
             return $list;
         }
@@ -133,7 +145,7 @@ class HelpCenterService
             ],
             'where' => [
                 ['user_id', '=', $userId],
-                ['type', '=', 3]
+                ['type', '=', $type]
             ]
         ];
         $whereAnswer = [
@@ -147,17 +159,18 @@ class HelpCenterService
 
         //获取点赞、评论高亮
         $likeLink = WowUserLikesModel::baseQuery($whereLikes)->pluck('id', 'link_id')->toArray();
-        $answerLink = WowHelpAnswerModel::baseQuery($whereAnswer)->pluck('id', 'help_id')->toArray();
-
-        if(!$isInfo){
-            foreach ($list as $key => $val) {
-                $list[$key]['has_favor'] = !empty($likeLink[$val['id']]) ? 1 : 0;
-                $list[$key]['has_answer'] = !empty($answerLink[$val['id']]) ? 1 : 0;
-            }
+        if($type === 3){
+            $answerLink = WowHelpAnswerModel::baseQuery($whereAnswer)->pluck('id', 'help_id')->toArray();
         }else{
-            $list['has_favor'] = !empty($likeLink[$list['id']]) ? 1 : 0;
-            $list['has_answer'] = !empty($answerLink[$list['id']]) ? 1 : 0;
+            $commentLink = WowWaCommentModel::query()->whereIn('wa_id', $ids)->where('user_id', $userId)->where('type', 2)->pluck('id', 'wa_id')->toArray();
         }
+
+        foreach ($list as $key => $val) {
+            $list[$key]['has_favor'] = !empty($likeLink[$val['id']]) ? 1 : 0;
+            $list[$key]['has_answer'] = !empty($answerLink[$val['id']]) ? 1 : 0;
+            $list[$key]['has_comment'] = !empty($commentLink[$val['id']]) ? 1 : 0;
+        }
+
         return $list;
     }
 
