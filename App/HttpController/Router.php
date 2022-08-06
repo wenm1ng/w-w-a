@@ -150,7 +150,16 @@ class Router extends AbstractRouter
         $collector->get('/help-center/info',$basePath.'HelpCenter/HelpCenter/getHelpInfo');
         //回答列表
         $collector->get('/help-center/answer-list',$basePath.'HelpCenter/HelpCenter/getAnswerList');
-
+        //采纳答案
+        $collector->post('/help-center/adopt-answer',$basePath.'HelpCenter/HelpCenter/adoptAnswer');
+        //提交回答
+        $collector->post('/help-center/set-answer-status',$basePath.'HelpCenter/HelpCenter/setAnswerStatus');
+        //修改求助回答
+        $collector->post('/help-center/update-answer',$basePath.'HelpCenter/HelpCenter/updateAnswer');
+        //添加求助回答
+        $collector->post('/help-center/add-answer',$basePath.'HelpCenter/HelpCenter/addAnswer');
+        //删除求助
+        $collector->post('/help-center/del-help',$basePath.'HelpCenter/HelpCenter/deleteHelp');
     }
 
 }

@@ -336,4 +336,34 @@ class HelpCenterService
 
         return null;
     }
+
+    /**
+     * @desc       采纳答案
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-06 16:23
+     * @param array $params
+     *
+     * @return null
+     */
+    public function adoptAnswer(array $params){
+        $this->validator->checkId();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        $updateData = [
+            'is_adopt_answer' => 1,
+            'modify_at' => date('Y-m-d H:i:s')
+        ];
+
+        WowHelpAnswerModel::query()->where('id', $params['id'])->update($updateData);
+
+        $updateData = [
+            'is_adopt' => 1,
+            'modify_at' => date('Y-m-d H:i:s')
+        ];
+        WowHelpCenterModel::query()->where('id', $params['help_id'])->update($updateData);
+
+        return null;
+    }
 }

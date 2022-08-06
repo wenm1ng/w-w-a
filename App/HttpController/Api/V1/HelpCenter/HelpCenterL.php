@@ -25,4 +25,69 @@ class HelpCenterL extends BaseController
             return (new HelpCenterService())->addHelp($params,  $this->request());
         });
     }
+
+    /**
+     * @desc       采纳答案
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-06 16:24
+     * @return bool
+     */
+    public function adoptAnswer(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->adoptAnswer($params);
+        });
+    }
+
+    /**
+     * @desc       提交回答
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-06 16:29
+     * @return bool
+     */
+    public function setAnswerStatus(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->setAnswerStatus($params);
+        });
+    }
+
+    /**
+     * @desc       修改求助回答
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-06 16:31
+     * @return bool
+     */
+    public function updateAnswer(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->updateAnswer($params);
+        });
+    }
+
+    /**
+     * @desc       添加求助回答
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-06 16:32
+     * @return bool
+     */
+    public function addAnswer(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->addAnswer($params);
+        });
+    }
+
+    /**
+     * @desc       删除求助
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-06 16:33
+     * @return bool
+     */
+    public function deleteHelp(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->deleteHelp($params);
+        });
+    }
 }
