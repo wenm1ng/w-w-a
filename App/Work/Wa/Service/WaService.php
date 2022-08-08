@@ -437,7 +437,7 @@ class WaService
             'content' => $params['content'],
             'comment_id' => $params['comment_id'] ?? 0,
             'user_id' => Common::getUserId(),
-            'reply_user_id' => $params['reply_user_id'],
+            'reply_user_id' => !empty($params['reply_user_id']) ? $params['reply_user_id'] : 0,
             'is_read' => 1
         ];
         return WowWaCommentModel::query()->insertGetId($insertData);
