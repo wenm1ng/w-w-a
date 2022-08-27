@@ -92,7 +92,7 @@ class HelpCenterService
             ],
             'order' => ['favorites_num' => 'desc', 'comment_num' => 'desc', 'id' => 'desc'],
         ];
-        $fields = 'id,help_id,user_id,image_url,description,modify_at';
+        $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num';
         $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
 
         $list = (new UserService())->mergeUserInfo($list);
@@ -117,7 +117,7 @@ class HelpCenterService
         foreach ($list as $key => $val) {
             $list[$key]['modify_at'] = getTimeFormat($val['modify_at']);
             $list[$key]['flod'] = false;
-            $list[$key]['version_name'] = $versionList[$val['version_id']] ?? '正式服';
+            $list[$key]['version_name'] = $versionList[$val['version']] ?? '正式服';
             $list[$key]['help_type_name'] = Config::$helpTypeLink[$val['help_type']] ?? '插件研究';
         }
     }
@@ -183,6 +183,7 @@ class HelpCenterService
      * @return mixed
      */
     public function getHelpInfo(int $id){
+        $this->incrementHelpRead($id);
         $info = WowHelpCenterModel::query()->where('id', $id)->first();
         if(empty($info) || empty($id)){
             CommonException::msgException('该帮助不存在');
@@ -193,6 +194,25 @@ class HelpCenterService
         $this->dealData($list);
 
         return $list[0];
+    }
+
+    /**
+     * @desc     帮助详情阅读量累加
+     * @example
+     * @param int $id
+     */
+    public function incrementHelpRead(int $id, int $num = 1){
+        WowHelpCenterModel::query()->where('id', $id)->increment('read_num', $num);
+    }
+
+    public function incrementHelpFavor(int $id, int $num = 1)
+    {
+        WowHelpCenterModel::query()->where('id', $id)->increment('favorites_num', $num);
+    }
+
+    public function incrementAnswerFavor(int $id, int $num = 1)
+    {
+        WowHelpAnswerModel::query()->where('id', $id)->increment('favorites_num', $num);
     }
 
     /**
