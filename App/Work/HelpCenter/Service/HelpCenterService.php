@@ -90,7 +90,7 @@ class HelpCenterService
             'where' => [
                 ['help_id', '=', $params['id']]
             ],
-            'order' => ['favorites_num' => 'desc', 'comment_num' => 'desc', 'id' => 'desc'],
+            'order' => ['id' => 'asc'],
         ];
         $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num';
         $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
@@ -133,10 +133,12 @@ class HelpCenterService
      */
     public function mergeCount(array $list, array $ids, int $type = 3){
         if(empty($ids)){
+            dump(1);
             return $list;
         }
         $userId = Common::getUserId();
         if(empty($userId)){
+            dump(2);
             return $list;
         }
         $whereLikes = [
@@ -159,16 +161,19 @@ class HelpCenterService
 
         //获取点赞、评论高亮
         $likeLink = WowUserLikesModel::baseQuery($whereLikes)->pluck('id', 'link_id')->toArray();
+        dump($likeLink);
         if($type === 3){
             $answerLink = WowHelpAnswerModel::baseQuery($whereAnswer)->pluck('id', 'help_id')->toArray();
         }else{
             $commentLink = WowWaCommentModel::query()->whereIn('wa_id', $ids)->where('user_id', $userId)->where('type', 2)->pluck('id', 'wa_id')->toArray();
+            $commentCountLink = WowWaCommentModel::query()->whereIn('wa_id', $ids)->where('type', 2)->select(DB::raw('count(1) as total,wa_id'))->groupBy(['wa_id'])->pluck('total', 'wa_id')->toArray();
         }
 
         foreach ($list as $key => $val) {
             $list[$key]['has_favor'] = !empty($likeLink[$val['id']]) ? 1 : 0;
             $list[$key]['has_answer'] = !empty($answerLink[$val['id']]) ? 1 : 0;
             $list[$key]['has_comment'] = !empty($commentLink[$val['id']]) ? 1 : 0;
+            $list[$key]['comment_num'] = !empty($commentCountLink[$val['id']]) ? $commentCountLink[$val['id']] : 0;
         }
 
         return $list;
@@ -283,6 +288,7 @@ class HelpCenterService
         $insertData = [
             'help_id' => $params['help_id'],
             'description' => $params['description'],
+            'wa_content' => $params['wa_content'] ?? '',
             'image_url' => $imageUrl,
             'user_id' => Common::getUserId()
         ];
@@ -382,6 +388,7 @@ class HelpCenterService
      * @param array $params
      *
      * @return null
+     *
      */
     public function adoptAnswer(array $params){
         $this->validator->checkId();
@@ -403,5 +410,24 @@ class HelpCenterService
         WowHelpCenterModel::query()->where('id', $params['help_id'])->update($updateData);
 
         return null;
+    }
+
+    /**
+     * @desc    获取回答详情
+     * @example
+     * @param int $id
+     *
+     * @return mixed
+     */
+    public function getAnswerInfo(int $id){
+        $info = WowHelpAnswerModel::query()->where('id', $id)->first();
+        if(empty($info) || empty($id)){
+            CommonException::msgException('该回答不存在');
+        }
+        $list = [$info->toArray()];
+        $list = (new UserService())->mergeUserInfo($list);
+        $list = $this->mergeCount($list, [$id], 4);
+
+        return $list[0];
     }
 }
