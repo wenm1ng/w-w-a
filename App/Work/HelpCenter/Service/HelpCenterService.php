@@ -224,6 +224,7 @@ class HelpCenterService
      * @return int
      */
     public function addHelp(array $params, \EasySwoole\Http\Request $request){
+        dump(1);
         $this->validator->checkAddHelp();
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
@@ -255,6 +256,48 @@ class HelpCenterService
     }
 
     /**
+     * @desc  添加回答
+     * @example
+     * @param array                    $params
+     * @param \EasySwoole\Http\Request $request
+     *
+     * @return int
+     */
+    public function addAnswer(array $params, \EasySwoole\Http\Request $request){
+        $this->validator->checkAddAnswer();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        $file = $request->getUploadedFile('file');
+        $imageUrl = '';
+        if (!empty($file) && $file->getSize()) {
+            $fileName = $file->getClientFileName();
+            $filend = pathinfo($fileName, PATHINFO_EXTENSION);
+            $data = file_get_contents($file->getTempName());
+            $fileName = saveFileDataImage($data, '/help', $filend);
+            $imageUrl = getInterImageName($fileName);
+        }
+        dump($imageUrl);
+
+        $insertData = [
+            'help_id' => $params['help_id'],
+            'description' => $params['description'],
+            'image_url' => $imageUrl,
+            'user_id' => Common::getUserId()
+        ];
+
+        $id = WowHelpAnswerModel::query()->insertGetId($insertData);
+        $this->incrementHelpAnswerNum($params['help_id'], 1);
+        return $id;
+    }
+
+    public function incrementHelpAnswerNum(int $id, int $num = 1){
+        WowHelpCenterModel::query()->where('id', $id)->increment('help_num', $num);
+    }
+
+
+    /**
      * @desc       删除求助
      * @author     文明<736038880@qq.com>
      * @date       2022-07-29 14:52
@@ -282,31 +325,6 @@ class HelpCenterService
         return null;
     }
 
-    /**
-     * @desc       添加求助回答
-     * @author     文明<736038880@qq.com>
-     * @date       2022-07-29 15:21
-     * @param array $params
-     *
-     * @return int
-     */
-    public function addAnswer(array $params){
-        $this->validator->checkAddAnswer();
-        if (!$this->validator->validate($params)) {
-            CommonException::msgException($this->validator->getError()->__toString());
-        }
-
-        $insertData = [
-            'help_id' => $params['help_id'],
-            'description' => $params['description'],
-            'image_url' => !empty($params['image_url']) ? $params['image_url'] : '',
-            'user_id' => Common::getUserId()
-        ];
-
-        $id = WowHelpAnswerModel::query()->insertGetId($insertData);
-
-        return $id;
-    }
 
     /**
      * @desc       修改求助回答
