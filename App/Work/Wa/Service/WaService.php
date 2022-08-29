@@ -247,7 +247,7 @@ class WaService
     public function getWaInfo(int $waId){
         //浏览量+1
         WowWaContentModel::query()->where('id', $waId)->increment('read_num', 1);
-        $list = WowWaContentModel::query()->where('id', $waId)->where('status', 1)->select(['id','title','description','update_description','wa_content','create_at','user_id','read_num','favorites_num','likes_num','talent_name as label','tips'])->get()->toArray();
+        $list = WowWaContentModel::query()->where('id', $waId)->where('status', 1)->select(['id','title','description','update_description','wa_content','create_at','user_id','read_num','favorites_num','likes_num','talent_name as label','tips','origin_url'])->get()->toArray();
         if(empty($list)){
             CommonException::msgException('该wa不存在');
         }
