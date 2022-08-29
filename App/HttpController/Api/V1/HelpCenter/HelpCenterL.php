@@ -74,7 +74,7 @@ class HelpCenterL extends BaseController
     public function addAnswer(){
         return $this->apiResponse(function () {
             $params = $this->getRequestJsonData();
-            return (new HelpCenterService())->addAnswer($params);
+            return (new HelpCenterService())->addAnswer($params, $this->request());
         });
     }
 

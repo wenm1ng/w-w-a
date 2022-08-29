@@ -22,6 +22,7 @@ use App\Exceptions\CommonException;
 use App\Utility\Database\Db;
 use Wa\Models\WowWaCommentModel;
 use EasySwoole\EasySwoole\Config;
+use App\Work\HelpCenter\Service\HelpCenterService;
 
 class UserService{
 
@@ -258,7 +259,13 @@ class UserService{
             CommonException::msgException($this->validate->getError()->__toString());
         }
         $id = (int)$params['link_id'];
-        (new WaService())->incrementWaLikes($id, 1);
+        if($params['type'] == 3){
+            (new HelpCenterService())->incrementHelpFavor($id, 1);
+        }elseif($params['type'] == 4){
+            (new HelpCenterService())->incrementAnswerFavor($id, 1);
+        }else{
+            (new WaService())->incrementWaLikes($id, 1);
+        }
         $userId = Common::getUserId();
         $addData = [
             'type' => $params['type'],
@@ -281,7 +288,13 @@ class UserService{
             CommonException::msgException($this->validate->getError()->__toString());
         }
         $id = (int)$params['link_id'];
-        (new WaService())->incrementWaFavorites($id, -1);
+        if($params['type'] == 3){
+            (new HelpCenterService())->incrementHelpFavor($id, -1);
+        }elseif($params['type'] == 4){
+            (new HelpCenterService())->incrementAnswerFavor($id, -1);
+        }else{
+            (new WaService())->incrementWaFavorites($id, -1);
+        }
         $where = [
             ['link_id','=', $params['link_id']],
             ['type','=', $params['type']],

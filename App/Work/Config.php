@@ -7,8 +7,8 @@ namespace App\Work;
  */
 Class Config{
     const ADMIN_NAME = '我就是小明';
-    const IMAGE_DIR = '/data/www/image';
-    const IMAGE_HOST = 'http://119.29.1.85:83';
+    const IMAGE_DIR = '/data/www';
+    const IMAGE_HOST = 'https://mingtongct.com';
     //获取天赋树技能列表的redis key
     public static function getTalentSkillTreeRedisKey($version, $oc){
         return "talent_tree_list:{$version}:{$oc}";

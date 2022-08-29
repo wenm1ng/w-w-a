@@ -90,9 +90,9 @@ class HelpCenterService
             'where' => [
                 ['help_id', '=', $params['id']]
             ],
-            'order' => ['favorites_num' => 'desc', 'comment_num' => 'desc', 'id' => 'desc'],
+            'order' => ['id' => 'asc'],
         ];
-        $fields = 'id,help_id,user_id,image_url,description,modify_at';
+        $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num';
         $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
 
         $list = (new UserService())->mergeUserInfo($list);
@@ -117,7 +117,7 @@ class HelpCenterService
         foreach ($list as $key => $val) {
             $list[$key]['modify_at'] = getTimeFormat($val['modify_at']);
             $list[$key]['flod'] = false;
-            $list[$key]['version_name'] = $versionList[$val['version_id']] ?? '正式服';
+            $list[$key]['version_name'] = $versionList[$val['version']] ?? '正式服';
             $list[$key]['help_type_name'] = Config::$helpTypeLink[$val['help_type']] ?? '插件研究';
         }
     }
@@ -133,10 +133,12 @@ class HelpCenterService
      */
     public function mergeCount(array $list, array $ids, int $type = 3){
         if(empty($ids)){
+            dump(1);
             return $list;
         }
         $userId = Common::getUserId();
         if(empty($userId)){
+            dump(2);
             return $list;
         }
         $whereLikes = [
@@ -159,16 +161,19 @@ class HelpCenterService
 
         //获取点赞、评论高亮
         $likeLink = WowUserLikesModel::baseQuery($whereLikes)->pluck('id', 'link_id')->toArray();
+        dump($likeLink);
         if($type === 3){
             $answerLink = WowHelpAnswerModel::baseQuery($whereAnswer)->pluck('id', 'help_id')->toArray();
         }else{
             $commentLink = WowWaCommentModel::query()->whereIn('wa_id', $ids)->where('user_id', $userId)->where('type', 2)->pluck('id', 'wa_id')->toArray();
+            $commentCountLink = WowWaCommentModel::query()->whereIn('wa_id', $ids)->where('type', 2)->select(DB::raw('count(1) as total,wa_id'))->groupBy(['wa_id'])->pluck('total', 'wa_id')->toArray();
         }
 
         foreach ($list as $key => $val) {
             $list[$key]['has_favor'] = !empty($likeLink[$val['id']]) ? 1 : 0;
             $list[$key]['has_answer'] = !empty($answerLink[$val['id']]) ? 1 : 0;
             $list[$key]['has_comment'] = !empty($commentLink[$val['id']]) ? 1 : 0;
+            $list[$key]['comment_num'] = !empty($commentCountLink[$val['id']]) ? $commentCountLink[$val['id']] : 0;
         }
 
         return $list;
@@ -183,6 +188,7 @@ class HelpCenterService
      * @return mixed
      */
     public function getHelpInfo(int $id){
+        $this->incrementHelpRead($id);
         $info = WowHelpCenterModel::query()->where('id', $id)->first();
         if(empty($info) || empty($id)){
             CommonException::msgException('该帮助不存在');
@@ -196,6 +202,25 @@ class HelpCenterService
     }
 
     /**
+     * @desc     帮助详情阅读量累加
+     * @example
+     * @param int $id
+     */
+    public function incrementHelpRead(int $id, int $num = 1){
+        WowHelpCenterModel::query()->where('id', $id)->increment('read_num', $num);
+    }
+
+    public function incrementHelpFavor(int $id, int $num = 1)
+    {
+        WowHelpCenterModel::query()->where('id', $id)->increment('favorites_num', $num);
+    }
+
+    public function incrementAnswerFavor(int $id, int $num = 1)
+    {
+        WowHelpAnswerModel::query()->where('id', $id)->increment('favorites_num', $num);
+    }
+
+    /**
      * @desc       添加求助
      * @author     文明<736038880@qq.com>
      * @date       2022-07-29 14:52
@@ -204,6 +229,7 @@ class HelpCenterService
      * @return int
      */
     public function addHelp(array $params, \EasySwoole\Http\Request $request){
+        dump(1);
         $this->validator->checkAddHelp();
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
@@ -235,6 +261,49 @@ class HelpCenterService
     }
 
     /**
+     * @desc  添加回答
+     * @example
+     * @param array                    $params
+     * @param \EasySwoole\Http\Request $request
+     *
+     * @return int
+     */
+    public function addAnswer(array $params, \EasySwoole\Http\Request $request){
+        $this->validator->checkAddAnswer();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        $file = $request->getUploadedFile('file');
+        $imageUrl = '';
+        if (!empty($file) && $file->getSize()) {
+            $fileName = $file->getClientFileName();
+            $filend = pathinfo($fileName, PATHINFO_EXTENSION);
+            $data = file_get_contents($file->getTempName());
+            $fileName = saveFileDataImage($data, '/help', $filend);
+            $imageUrl = getInterImageName($fileName);
+        }
+        dump($imageUrl);
+
+        $insertData = [
+            'help_id' => $params['help_id'],
+            'description' => $params['description'],
+            'wa_content' => $params['wa_content'] ?? '',
+            'image_url' => $imageUrl,
+            'user_id' => Common::getUserId()
+        ];
+
+        $id = WowHelpAnswerModel::query()->insertGetId($insertData);
+        $this->incrementHelpAnswerNum($params['help_id'], 1);
+        return $id;
+    }
+
+    public function incrementHelpAnswerNum(int $id, int $num = 1){
+        WowHelpCenterModel::query()->where('id', $id)->increment('help_num', $num);
+    }
+
+
+    /**
      * @desc       删除求助
      * @author     文明<736038880@qq.com>
      * @date       2022-07-29 14:52
@@ -262,31 +331,6 @@ class HelpCenterService
         return null;
     }
 
-    /**
-     * @desc       添加求助回答
-     * @author     文明<736038880@qq.com>
-     * @date       2022-07-29 15:21
-     * @param array $params
-     *
-     * @return int
-     */
-    public function addAnswer(array $params){
-        $this->validator->checkAddAnswer();
-        if (!$this->validator->validate($params)) {
-            CommonException::msgException($this->validator->getError()->__toString());
-        }
-
-        $insertData = [
-            'help_id' => $params['help_id'],
-            'description' => $params['description'],
-            'image_url' => !empty($params['image_url']) ? $params['image_url'] : '',
-            'user_id' => Common::getUserId()
-        ];
-
-        $id = WowHelpAnswerModel::query()->insertGetId($insertData);
-
-        return $id;
-    }
 
     /**
      * @desc       修改求助回答
@@ -344,6 +388,7 @@ class HelpCenterService
      * @param array $params
      *
      * @return null
+     *
      */
     public function adoptAnswer(array $params){
         $this->validator->checkId();
@@ -365,5 +410,24 @@ class HelpCenterService
         WowHelpCenterModel::query()->where('id', $params['help_id'])->update($updateData);
 
         return null;
+    }
+
+    /**
+     * @desc    获取回答详情
+     * @example
+     * @param int $id
+     *
+     * @return mixed
+     */
+    public function getAnswerInfo(int $id){
+        $info = WowHelpAnswerModel::query()->where('id', $id)->first();
+        if(empty($info) || empty($id)){
+            CommonException::msgException('该回答不存在');
+        }
+        $list = [$info->toArray()];
+        $list = (new UserService())->mergeUserInfo($list);
+        $list = $this->mergeCount($list, [$id], 4);
+
+        return $list[0];
     }
 }

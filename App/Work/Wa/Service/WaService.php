@@ -390,6 +390,12 @@ class WaService
         }else{
             $where['where'][] = ['wa_id', '=', $params['id']];
         }
+        $type = 1;
+        if(!empty($params['type'])){
+            $type = $params['type'];
+        }
+        $where['where'][] = ['type', '=', $type];
+
         $fields = 'id,user_id,comment_id,content,create_at,reply_user_id,wa_id,is_read';
 //        $commentList = WowWaCommentModel::query()->where($where)->select(Db::raw($fields))->orderBy('create_at')->get()->toArray();
         $commentList = WowWaCommentModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
@@ -440,6 +446,9 @@ class WaService
             'reply_user_id' => !empty($params['reply_user_id']) ? $params['reply_user_id'] : 0,
             'is_read' => 1
         ];
+        if(!empty($params['type'])){
+            $insertData['type'] = $params['type'];
+        }
         return WowWaCommentModel::query()->insertGetId($insertData);
     }
 

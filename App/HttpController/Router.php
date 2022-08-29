@@ -151,15 +151,17 @@ class Router extends AbstractRouter
         //回答列表
         $collector->get('/help-center/answer-list',$basePath.'HelpCenter/HelpCenter/getAnswerList');
         //采纳答案
-        $collector->post('/help-center/adopt-answer',$basePath.'HelpCenter/HelpCenter/adoptAnswer');
+        $collector->post('/help-center/adopt-answer',$basePath.'HelpCenter/HelpCenterL/adoptAnswer');
         //提交回答
-        $collector->post('/help-center/set-answer-status',$basePath.'HelpCenter/HelpCenter/setAnswerStatus');
+        $collector->post('/help-center/set-answer-status',$basePath.'HelpCenter/HelpCenterL/setAnswerStatus');
         //修改求助回答
-        $collector->post('/help-center/update-answer',$basePath.'HelpCenter/HelpCenter/updateAnswer');
+        $collector->post('/help-center/update-answer',$basePath.'HelpCenter/HelpCenterL/updateAnswer');
         //添加求助回答
-        $collector->post('/help-center/add-answer',$basePath.'HelpCenter/HelpCenter/addAnswer');
+        $collector->post('/help-center/add-answer',$basePath.'HelpCenter/HelpCenterL/addAnswer');
+        //回答详情
+        $collector->get('/help-center/get-answer-info',$basePath.'HelpCenter/HelpCenter/getAnswerInfo');
         //删除求助
-        $collector->post('/help-center/del-help',$basePath.'HelpCenter/HelpCenter/deleteHelp');
+        $collector->post('/help-center/del-help',$basePath.'HelpCenter/HelpCenterL/deleteHelp');
     }
 
 }

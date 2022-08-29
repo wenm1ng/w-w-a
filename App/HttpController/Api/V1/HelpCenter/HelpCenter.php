@@ -53,4 +53,18 @@ class HelpCenter extends LoginController
             return (new HelpCenterService())->getAnswerList($params);
         });
     }
+
+    /**
+     * @desc    获取回答详情
+     * @example
+     * @return bool
+     */
+    public function getAnswerInfo(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            $id = $params['id'] ?? 0;
+            return (new HelpCenterService())->getAnswerInfo($id);
+        });
+    }
+
 }
