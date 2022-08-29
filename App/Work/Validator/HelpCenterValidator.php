@@ -33,6 +33,11 @@ class HelpCenterValidator extends systemValidate
         $this->addColumn('id')->notEmpty('id不能为空');
     }
 
+    public function checkAdopt(){
+        $this->addColumn('id')->notEmpty('id不能为空');
+        $this->addColumn('help')->notEmpty('帮助id不能为空');
+    }
+
     public function checkAddAnswer(){
         $this->addColumn('help_id')->notEmpty('求助id不能为空');
         $this->addColumn('description')->notEmpty('描述不能为空');
