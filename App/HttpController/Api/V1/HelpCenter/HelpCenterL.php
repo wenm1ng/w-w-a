@@ -90,4 +90,16 @@ class HelpCenterL extends BaseController
             return (new HelpCenterService())->deleteHelp($params);
         });
     }
+
+    /**
+     * @desc    删除回答
+     * @example
+     * @return bool
+     */
+    public function delAnswer(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->delAnswer($params);
+        });
+    }
 }
