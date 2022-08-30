@@ -92,7 +92,7 @@ class HelpCenterService
             ],
             'order' => ['id' => 'asc'],
         ];
-        $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num';
+        $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num,is_adopt_answer';
         $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
 
         $list = (new UserService())->mergeUserInfo($list);
@@ -391,7 +391,7 @@ class HelpCenterService
      *
      */
     public function adoptAnswer(array $params){
-        $this->validator->checkId();
+        $this->validator->checkAdopt();
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
