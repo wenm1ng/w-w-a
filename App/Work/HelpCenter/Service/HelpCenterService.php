@@ -32,10 +32,11 @@ class HelpCenterService
      * @author     文明<736038880@qq.com>
      * @date       2022-07-28 14:39
      * @param array $params
+     * @param array $isMyself 是否自己的数据
      *
      * @return array
      */
-    public function getHelpList(array $params){
+    public function getHelpList(array $params, int $isMyself = 0){
         $this->validator->checkPage();
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
@@ -63,6 +64,10 @@ class HelpCenterService
             $where['order'] = [$params['order'] => 'desc', 'id' => 'desc'];
         }
 
+        if($isMyself){
+            $where['where'][] = ['user_id', '=', Common::getUserId()];
+        }
+
         $fields = 'id,version,occupation,help_type,title,user_id,image_url,description,modify_at,favorites_num,help_num,read_num, 0 as has_favor, 0 as has_answer,is_adopt';
         $list = WowHelpCenterModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
 
@@ -81,20 +86,33 @@ class HelpCenterService
      *
      * @return array
      */
-    public function getAnswerList(array $params){
-        $this->validator->checkId();
-        if (!$this->validator->validate($params)) {
-            CommonException::msgException($this->validator->getError()->__toString());
+    public function getAnswerList(array $params, int $isMyself = 0){
+        if(!$isMyself){
+            $this->validator->checkId();
+            if (!$this->validator->validate($params)) {
+                CommonException::msgException($this->validator->getError()->__toString());
+            }
+        }else{
+            $this->validator->checkPage();
+            if (!$this->validator->validate($params)) {
+                CommonException::msgException($this->validator->getError()->__toString());
+            }
         }
+
         $where = [
             'where' => [
                 ['help_id', '=', $params['id']]
             ],
             'order' => ['id' => 'asc'],
         ];
+
         $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num,is_adopt_answer';
-//        $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
-        $list = WowHelpAnswerModel::baseQuery($where)->select(DB::raw($fields))->get()->toArray();
+        if($isMyself){
+            $where['where'][] = ['user_id', '=', Common::getUserId()];
+            $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
+        }else{
+            $list = WowHelpAnswerModel::baseQuery($where)->select(DB::raw($fields))->get()->toArray();
+        }
         $list = (new UserService())->mergeUserInfo($list);
         $waIds = array_column($list, 'id');
         $list = $this->mergeCount($list, $waIds, 4);

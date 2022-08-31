@@ -102,4 +102,30 @@ class HelpCenterL extends BaseController
             return (new HelpCenterService())->delAnswer($params);
         });
     }
+
+    /**
+     * @desc       获取用户自己的回答列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-31 15:02
+     * @return bool
+     */
+    public function getUserAnswerList(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->getAnswerList($params, 1);
+        });
+    }
+
+    /**
+     * @desc       获取用户自己的帮助列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-08-31 15:02
+     * @return bool
+     */
+    public function getUserHelpList(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new HelpCenterService())->getHelpList($params, 1);
+        });
+    }
 }
