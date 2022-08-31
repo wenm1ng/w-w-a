@@ -100,9 +100,6 @@ class HelpCenterService
         }
 
         $where = [
-            'where' => [
-                ['help_id', '=', $params['id']]
-            ],
             'order' => ['id' => 'asc'],
         ];
 
@@ -111,6 +108,7 @@ class HelpCenterService
             $where['where'][] = ['user_id', '=', Common::getUserId()];
             $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
         }else{
+            $where['where'][] = ['help_id', '=', $params['id']];
             $list = WowHelpAnswerModel::baseQuery($where)->select(DB::raw($fields))->get()->toArray();
         }
         $list = (new UserService())->mergeUserInfo($list);
@@ -462,7 +460,7 @@ class HelpCenterService
      * @return array
      */
     public function delAnswer(array $params){
-        $info = WowHelpAnswerModel::query()->where('id', $id)->first(['user_id','is_adopt_answer']);
+        $info = WowHelpAnswerModel::query()->where('id', $params['id'])->first(['user_id','is_adopt_answer']);
         if(empty($info)){
             CommonException::msgException('回答不存在');
         }
@@ -472,7 +470,7 @@ class HelpCenterService
         if(!empty($info['is_adopt_answer'])){
             CommonException::msgException('该回答已被采纳,无法删除');
         }
-        WowHelpAnswerModel::query()->where('id', $id)->delete();
+        WowHelpAnswerModel::query()->where('id', $params['id'])->delete();
 
         $this->incrementHelpAnswerNum($params['help_id'], -1);
 

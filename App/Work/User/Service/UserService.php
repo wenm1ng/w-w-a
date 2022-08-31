@@ -16,6 +16,8 @@ use User\Validator\UserValidate;
 use User\Service\LoginService;
 use User\Models\WowUserModelNew;
 use User\Models\WowUserLikesModel;
+use App\Work\HelpCenter\Models\WowHelpAnswerModel;
+use App\Work\HelpCenter\Models\WowHelpCenterModel;
 use Wa\Models\WowWaContentModel;
 use Wa\Service\WaService;
 use App\Exceptions\CommonException;
@@ -359,8 +361,11 @@ class UserService{
             return ['favorites_num' => 0, 'comment_num' => 0];
         }
         $favoritesNum = WowUserLikesModel::query()->where('user_id', $userId)->where('type', 1)->count();
-        $comment_num = WowWaCommentModel::query()->where('user_id', $userId)->where('status', 1)->count();
-        return ['favorites_num' => $favoritesNum, 'comment_num' => $comment_num];
+        $commentNum = WowWaCommentModel::query()->where('user_id', $userId)->where('status', 1)->count();
+        $helpNum = WowHelpCenterModel::query()->where('user_id', $userId)->where('status', 1)->count();
+        $answerNum = WowHelpAnswerModel::query()->where('user_id', $userId)->where('status', 1)->count();
+
+        return ['favorites_num' => $favoritesNum, 'comment_num' => $commentNum, 'help_num' => $helpNum, 'answer_num' => $answerNum];
     }
 
     /**

@@ -390,13 +390,18 @@ class WaService
         }else{
             $where['where'][] = ['wa_id', '=', $params['id']];
         }
-        $type = 1;
-        if(!empty($params['type'])){
-            $type = $params['type'];
+        if(!empty($params['is_all'])){
+            $where['whereIn'][] = ['type', [1,2]];
+        }else{
+            $type = 1;
+            if(!empty($params['type'])){
+                $type = $params['type'];
+            }
+            $where['where'][] = ['type', '=', $type];
         }
-        $where['where'][] = ['type', '=', $type];
 
-        $fields = 'id,user_id,comment_id,content,create_at,reply_user_id,wa_id,is_read';
+
+        $fields = 'id,user_id,comment_id,content,create_at,reply_user_id,wa_id,is_read,type';
 //        $commentList = WowWaCommentModel::query()->where($where)->select(Db::raw($fields))->orderBy('create_at')->get()->toArray();
         $commentList = WowWaCommentModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
         $reduceReadNum = $this->updateNoReadNum($commentList);
