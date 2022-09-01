@@ -10,6 +10,7 @@ use App\Work\Validator\HelpCenterValidator;
 use App\Exceptions\CommonException;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use User\Service\UserService;
+use User\Service\CommonService;
 use App\Work\HelpCenter\Models\WowHelpAnswerModel;
 use App\Work\HelpCenter\Models\WowHelpCenterModel;
 use Common\Common;
@@ -304,18 +305,33 @@ class HelpCenterService
             $fileName = saveFileDataImage($data, '/help', $filend);
             $imageUrl = getInterImageName($fileName);
         }
-        dump($imageUrl);
+        $userInfo = Common::getUserInfo();
+        $userId = $userInfo['user_id'];
 
         $insertData = [
             'help_id' => $params['help_id'],
             'description' => $params['description'],
             'wa_content' => $params['wa_content'] ?? '',
             'image_url' => $imageUrl,
-            'user_id' => Common::getUserId()
+            'user_id' => $userId
         ];
 
         $id = WowHelpAnswerModel::query()->insertGetId($insertData);
         $this->incrementHelpAnswerNum($params['help_id'], 1);
+
+        $info = WowHelpCenterModel::query()->where('id', $params['help_id'])->first();
+        if(!empty($info)){
+            $info = $info->toArray();
+            //推送通知给用户
+            $pushData = [
+                'help_id' => $params['help_id'],
+                'type' => 1,
+                'user_id' => $info['user_id'],
+                'model_data' => [$info['title'], $userInfo['user_name'], $params['description'], date('Y-m-d H:i:s')]
+            ];
+            (new CommonService())->pushWxMessage($pushData);
+        }
+
         return $id;
     }
 

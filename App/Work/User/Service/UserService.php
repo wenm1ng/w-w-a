@@ -25,6 +25,7 @@ use App\Utility\Database\Db;
 use Wa\Models\WowWaCommentModel;
 use EasySwoole\EasySwoole\Config;
 use App\Work\HelpCenter\Service\HelpCenterService;
+use App\Work\Config as WorkConfig;
 
 class UserService{
 
@@ -43,6 +44,7 @@ class UserService{
         $secret = Config::getInstance()->getConf('app.APP_SECRET');
         $url = "https://api.weixin.qq.com/sns/jscode2session?appid={$appId}&secret={$secret}&js_code={$code}&grant_type=authorization_code";
         $return = httpClientCurl($url);
+        dump($return);
         return $return;
     }
 

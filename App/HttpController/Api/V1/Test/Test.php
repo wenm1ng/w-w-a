@@ -9,6 +9,7 @@ use App\HttpController\LoginController;
 use Common\Common;
 use Common\CodeKey;
 use Wa\Service\WaService;
+use User\Service\UserService;
 
 class Test extends LoginController
 {
@@ -21,7 +22,7 @@ class Test extends LoginController
     {
         return $this->apiResponse(function () {
             $params = $this->getRequestJsonData();
-            return (new WaService())->uploadFile($params);
+            return (new UserService())->getAccessToken();
         });
     }
 }

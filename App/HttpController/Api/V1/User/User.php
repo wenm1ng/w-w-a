@@ -10,6 +10,7 @@ use Common\Common;
 use Common\CodeKey;
 use App\HttpController\BaseController;
 use User\Service\UserService;
+use User\Service\CommonService;
 
 class User extends BaseController
 {
@@ -110,4 +111,31 @@ class User extends BaseController
             return (new UserService())->toLikes($params);
         });
     }
+
+    /**
+     * @desc       :
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-01 11:52
+     * @return bool
+     */
+    public function addPushNum(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new CommonService())->addPushNum($params);
+        });
+    }
+
+    /**
+     * @desc       获取用户推送数
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-01 13:45
+     * @return bool
+     */
+    public function getPushNum(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new CommonService())->getPushNum($params);
+        });
+    }
+
 }

@@ -25,4 +25,20 @@ class UserValidate extends Validate
     public function checkoutLikes(){
         $this->checkFavorites();
     }
+
+    public function checkAddPushNum(){
+        $this->addColumn('type')->notEmpty('类型不能为空');
+        $this->addColumn('model_id')->notEmpty('模板id不能为空');
+    }
+
+    public function checkGetPushNum(){
+        $this->addColumn('type')->notEmpty('类型不能为空');
+    }
+
+    public function checkPushWxMessage(){
+        $this->addColumn('type')->notEmpty('类型不能为空');
+        $this->addColumn('user_id')->notEmpty('用户id不能为空');
+        $this->addColumn('help_id')->notEmpty('帮助id不能为空');
+        $this->addColumn('model_data')->notEmpty('推送格式数据不能为空');
+    }
 }

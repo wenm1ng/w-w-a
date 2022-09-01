@@ -9,6 +9,7 @@ Class Config{
     const ADMIN_NAME = '我就是小明';
     const IMAGE_DIR = '/data/www';
     const IMAGE_HOST = 'https://mingtongct.com';
+    const ACCESS_TOKEN_KEY = 'access_token';
     //获取天赋树技能列表的redis key
     public static function getTalentSkillTreeRedisKey($version, $oc){
         return "talent_tree_list:{$version}:{$oc}";
@@ -33,4 +34,36 @@ Class Config{
         8 => '地精商会',
         9 => '新版本讨论'
     ];
+
+    public static $pushModels = [
+        //回答
+        1 => 'VQUnsikNUM9pKaue4ufp4Ql8mvmKRsJCezbVtRLsEPA',
+        //评论
+        2 => 'UTVidyyWxD0xlnQv8xkrnu_Ar7s5OusnnyK9So_Vr1M',
+        //回复
+        3 => '1LaDLFdDr2zaBIXAYmJlQ4Imb3b89Owy6I8nHr-mRW4',
+    ];
+
+    public static $pushModelDataFormat = [
+        //回答
+        1 => [
+            'thing4' => ['value' => ''],
+            'name1' => ['value' => ''],
+            'thing2' => ['value' => ''],
+            'time3' => ['value' => ''],
+        ],
+    ];
+
+    public static function getModelFormat($type, array $data){
+        $modelData = self::$pushModelDataFormat[$type];
+        $num = 0;
+        foreach ($modelData as &$val) {
+            if(!isset($data[$num])){
+                break;
+            }
+            $val['value'] = $data[$num];
+            $num++;
+        }
+        return $modelData;
+    }
 }

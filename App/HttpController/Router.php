@@ -95,6 +95,12 @@ class Router extends AbstractRouter
         $collector->get('/user/get-num',$basePath.'User/Login/getNum');
         //获取用户未读消息数
         $collector->post('/user/get-message',$basePath.'User/Login/getMessage');
+        //添加用户可推送数
+        $collector->post('/user/add-push-num',$basePath.'User/User/addPushNum');
+        //用户用户推送数
+        $collector->get('/user/get-push-num',$basePath.'User/User/getPushNum');
+        //获取推送模板id
+        $collector->get('/user/get-model-id',$basePath.'User/Login/getModelId');
     }
 
     public function damage(RouteCollector $collector, string $basePath = ''){

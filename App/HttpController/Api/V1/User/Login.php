@@ -10,6 +10,8 @@ use Common\Common;
 use Common\CodeKey;
 use App\HttpController\LoginController;
 use User\Service\UserService;
+use User\Service\CommonService;
+
 class Login extends LoginController
 {
 
@@ -59,4 +61,18 @@ class Login extends LoginController
             return (new UserService())->getMessage();
         });
     }
+
+    /**
+     * @desc       回去推送模板id
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-01 14:38
+     * @return bool
+     */
+    public function getModelId(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new CommonService())->getModelId($params);
+        });
+    }
+
 }
