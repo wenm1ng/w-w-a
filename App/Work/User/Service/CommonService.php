@@ -117,6 +117,11 @@ class CommonService
         if(empty(Config::$pushModels[$params['type']])){
             CommonException::msgException('推送类型不存在');
         }
+        $pushNum = WowUserPushModel::query()->where('user_id', Common::getUserId())->where('model_id', Config::$pushModels[$params['type']])->value('push_num');
+        if($pushNum <= 0){
+            CommonException::msgException('推送数量不足');
+        }
+
         $openId = WowUserModelNew::query()->where('user_id', $params['user_id'])->value('openId');
         if(empty($openId)){
             CommonException::msgException('open_id为空');
@@ -132,12 +137,23 @@ class CommonService
             'data' => $modelData,
             'miniprogram_state' => 'developer',
         ];
-        Common::log(json_encode($data), 'pushMessage');
+        Common::log('requestData:'.json_encode($data, JSON_UNESCAPED_UNICODE), 'pushMessage');
         $return = httpClientCurl($url, json_encode($data));
+        Common::log('responseData:'.json_encode($return, JSON_UNESCAPED_UNICODE), 'pushMessage');
 
         if($return['errcode'] === 0){
             //减掉用户推送数量
-            WowUserPushModel::query()->where('user_id', Common::getUserId())->where('model_id', Config::$pushModels[$params['type']])->increment('push_num', -1);
+            try {
+                WowUserPushModel::query()->where('user_id', Common::getUserId())->where('model_id', Config::$pushModels[$params['type']])->increment('push_num', -1);
+            }catch(\Exception $e){
+                if(strpos($e->getMessage(), 'Numeric value out of range') === false){
+                    CommonException::msgException('sql错误');
+                }
+            }
+        }
+        if($return['errcode'] === 43101){
+            //拒绝推送，将数量修改为0
+            WowUserPushModel::query()->where('user_id', Common::getUserId())->where('model_id', Config::$pushModels[$params['type']])->update(['push_num' => 0]);
         }
     }
 

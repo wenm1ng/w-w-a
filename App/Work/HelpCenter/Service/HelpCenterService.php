@@ -55,6 +55,8 @@ class HelpCenterService
         }
         if(!empty($params['adopt_type'])){
             $where['where'][] = ['is_adopt', '=', $params['adopt_type']];
+        }else{
+            $where['where'][] = ['is_adopt', '=', 0];
         }
         if(!empty($params['is_pay'])){
             $where['where'][] = ['is_pay', '=', $params['is_pay']];
@@ -329,7 +331,11 @@ class HelpCenterService
                 'user_id' => $info['user_id'],
                 'model_data' => [mbSubStr($info['title'], 15), $userInfo['user_name'], mbSubStr($params['description'], 15), date('Y-m-d H:i:s')]
             ];
-            (new CommonService())->pushWxMessage($pushData);
+            try{
+                (new CommonService())->pushWxMessage($pushData);
+            }catch(\Exception $e){
+                Common::log('errMsg:'.$userId.'--'.$e->getMessage(), 'pushMessage');
+            }
         }
 
         return $id;

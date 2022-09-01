@@ -981,7 +981,7 @@ function mbSubStr(string $str, int $len){
     if(mb_strlen($str) <= $len){
         return $str;
     }
-    return mb_substr($str, $len).'...';
+    return mb_substr($str, 0, $len).'...';
 }
 
 function httpClientCurl($url, $data = [], $add_args = [], $headers = [])
