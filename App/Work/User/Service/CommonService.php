@@ -132,8 +132,9 @@ class CommonService
             'data' => $modelData,
             'miniprogram_state' => 'developer',
         ];
+        Common::log(json_encode($data), 'pushMessage');
         $return = httpClientCurl($url, json_encode($data));
-        dump($return);
+
         if($return['errcode'] === 0){
             //减掉用户推送数量
             WowUserPushModel::query()->where('user_id', Common::getUserId())->where('model_id', Config::$pushModels[$params['type']])->increment('push_num', -1);

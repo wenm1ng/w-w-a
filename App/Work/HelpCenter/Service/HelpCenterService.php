@@ -327,7 +327,7 @@ class HelpCenterService
                 'help_id' => $params['help_id'],
                 'type' => 1,
                 'user_id' => $info['user_id'],
-                'model_data' => [$info['title'], $userInfo['user_name'], $params['description'], date('Y-m-d H:i:s')]
+                'model_data' => [mbSubStr($info['title'], 15), $userInfo['user_name'], mbSubStr($params['description'], 15), date('Y-m-d H:i:s')]
             ];
             (new CommonService())->pushWxMessage($pushData);
         }

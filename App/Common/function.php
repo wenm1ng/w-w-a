@@ -968,6 +968,22 @@ function download(string $url, string $saveDir){
     return $fileName;
 }
 
+/**
+ * @desc       截取字符串
+ * @author     文明<736038880@qq.com>
+ * @date       2022-09-01 18:31
+ * @param string $str
+ * @param int    $len
+ *
+ * @return string
+ */
+function mbSubStr(string $str, int $len){
+    if(mb_strlen($str) <= $len){
+        return $str;
+    }
+    return mb_substr($str, $len).'...';
+}
+
 function httpClientCurl($url, $data = [], $add_args = [], $headers = [])
 {
     $client = new HttpClient();
