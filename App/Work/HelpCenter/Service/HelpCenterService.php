@@ -254,7 +254,7 @@ class HelpCenterService
      */
     public function addHelp(array $params, \EasySwoole\Http\Request $request){
         dump(1);
-        $this->validator->checkAddHelp();
+        $this->validator->checkAddHelp($params);
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
@@ -293,7 +293,7 @@ class HelpCenterService
      * @return int
      */
     public function addAnswer(array $params, \EasySwoole\Http\Request $request){
-        $this->validator->checkAddAnswer();
+        $this->validator->checkAddAnswer($params);
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
@@ -384,7 +384,7 @@ class HelpCenterService
      * @return null
      */
     public function updateAnswer(array $params){
-        $this->validator->checkUpdateAnswer();
+        $this->validator->checkUpdateAnswer($params);
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }

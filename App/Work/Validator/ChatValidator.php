@@ -5,9 +5,8 @@
  * @date       2022-07-23 16:32
  */
 namespace App\Work\Validator;
-use Common\Common;
-use EasySwoole\Validate\Validate as systemValidate;
 
+use EasySwoole\Validate\Validate as systemValidate;
 class ChatValidator extends systemValidate
 {
     public function checkRoom()

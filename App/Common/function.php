@@ -16,6 +16,8 @@ use Common\Code\CodeKey;
 use App\Utility\Company;
 use EasySwoole\HttpClient\HttpClient;
 use App\Work\Config as workConfig;
+use App\Work\Lib\SensitiveWords\TrieTree;
+
 //use App\Pool\RedisPool;
 /* 谷歌翻译CURL请求（不用代理）
  * @param $text String required  翻译的字符串
@@ -1021,6 +1023,41 @@ function httpClientCurl($url, $data = [], $add_args = [], $headers = [])
     $rsBody = json_decode(strval($rs->getBody()), true);
 
     return $rsBody;
+}
+
+/**
+ * @desc       过滤关键词
+ * @author     文明<736038880@qq.com>
+ * @date       2022-09-02 16:04
+ * @param string $txt
+ */
+function filterSensitiveWords(string $txt){
+    $disturbList = workConfig::$sensitiveDisturb;
+
+    $wordObj = new TrieTree($disturbList);
+
+//    $words = $wordObj->search($txt);
+
+    $txt = $wordObj->filter($txt);
+    return $txt;
+}
+
+/**
+ * @desc       搜索关键词
+ * @author     文明<736038880@qq.com>
+ * @date       2022-09-02 17:40
+ * @param string $txt
+ *
+ * @return array
+ */
+function searchSensitiveWords(string $txt){
+    $disturbList = workConfig::$sensitiveDisturb;
+
+    $wordObj = new TrieTree($disturbList);
+
+    $words = $wordObj->search($txt);
+
+    return $words;
 }
 
 function curl_mrequests($url_arr = [], $headers = [], $add_args = [])

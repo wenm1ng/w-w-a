@@ -439,7 +439,7 @@ class WaService
      * @return int
      */
     public function toComment(array $params){
-        $this->validator->checkComment();
+        $this->validator->checkComment($params);
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
