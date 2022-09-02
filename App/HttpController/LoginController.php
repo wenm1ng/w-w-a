@@ -94,10 +94,10 @@ Class LoginController extends Controller{
             }
             $result[CodeKey::DATA] = call_user_func($func);
         }catch (\Exception $e){
-            $result[CodeKey::STATE] = CodeKey::FAIL;
+            $result[CodeKey::STATE] = !empty($e->getCode()) ? $e->getCode() : CodeKey::FAIL;
             $result[CodeKey::MSG] = $e->getMessage();
         }catch (\Throwable $e){
-            $result[CodeKey::STATE] = CodeKey::FAIL;
+            $result[CodeKey::STATE] = !empty($e->getCode()) ? $e->getCode() : CodeKey::FAIL;
             $result[CodeKey::MSG] = '系统异常~';
             \App\Utility\Logger\Logger::error($e->getMessage().'_'.$e->getFile().'_'.$e->getLine(), 'apiResponse');
         }

@@ -6,6 +6,7 @@
  */
 namespace App\Exceptions;
 
+use Common\CodeKey;
 
 class CommonException extends \Exception
 {
@@ -19,7 +20,7 @@ class CommonException extends \Exception
      * @param int $code
      * @throws CommonException
      */
-    public static function msgException(string $message, int $code = 10002)
+    public static function msgException(string $message, int $code = CodeKey::FAIL)
     {
         throw new self($code, $message);
     }

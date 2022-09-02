@@ -6,8 +6,7 @@
  */
 namespace App\Work\Validator;
 
-use EasySwoole\Validate\Validate as systemValidate;
-class WaValidator extends systemValidate
+class WaValidator extends BaseValidator
 {
     public function checkVerision(){
         $this->addColumn('version')->notEmpty('版本号不能为空');
@@ -46,14 +45,8 @@ class WaValidator extends systemValidate
     }
 
     public function checkComment(array $params){
-        $this->addColumn('content')->notEmpty('评论内容不能为空')->func(function()use($params){
-            return '你妈的';
-            if(!empty(searchSensitiveWords($params['content']))){
-                dump(333);
-                return '你填写的信息里面包含敏感词汇，请修改';
-            }
-            return true;
-        });
+        $this->addColumn('content')->notEmpty('评论内容不能为空');
         $this->addColumn('wa_id')->notEmpty('所属wa不能为空');
+        $this->checkText($params['content']);
     }
 }

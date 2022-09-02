@@ -22,10 +22,7 @@ class BaseValidator extends systemValidate
      */
     public function checkText(string $description){
         if(!empty(searchSensitiveWords($description))){
-            dump(333);
-//                CommonException::msgException('你填写的信息里面包含敏感词汇，请修改', CodeKey::WORDS_SENSITIVE);
-            return '你填写的信息里面包含敏感词汇，请修改';
+            CommonException::msgException('你填写的信息里面包含敏感词汇，请修改', CodeKey::WORDS_SENSITIVE);
         }
-        return true;
     }
 }

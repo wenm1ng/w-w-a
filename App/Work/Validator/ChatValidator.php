@@ -6,8 +6,7 @@
  */
 namespace App\Work\Validator;
 
-use EasySwoole\Validate\Validate as systemValidate;
-class ChatValidator extends systemValidate
+class ChatValidator extends BaseValidator
 {
     public function checkRoom()
     {
