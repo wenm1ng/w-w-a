@@ -1184,7 +1184,7 @@ function makeUploadPath($path, $mode = 0777)
  *
  * @return string
  */
-function getRandomStr($len, $special = true)
+function getRandomStr($len, $special = true, $speaialChars = [])
 {
     $chars = array(
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
@@ -1196,11 +1196,12 @@ function getRandomStr($len, $special = true)
     );
 
     if ($special) {
-        $chars = array_merge($chars, array(
+        $speaialChars = !empty($speaialChars) ? $speaialChars : [
             "!", "@", "#", "$", "?", "|", "{", "/", ":", ";",
             "%", "^", "&", "*", "(", ")", "-", "_", "[", "]",
             "}", "<", ">", "~", "+", "=", ",", "."
-        ));
+        ];
+        $chars = array_merge($chars, $speaialChars);
     }
 
     $charsLen = count($chars) - 1;

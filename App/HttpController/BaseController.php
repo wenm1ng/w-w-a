@@ -32,7 +32,7 @@ class BaseController extends Controller
                 if(empty($userIds[0])){
                     $userIds = $this->request()->getHeader('testuserid');
                 }
-                $userId = $userIds[0] ?? 1013;
+                $userId = $userIds[0] ?? 2;
                 Common::setUserId($userId);
             }else{
                 $userId = $loginService->checkToken($authorization[0]);
@@ -102,6 +102,7 @@ class BaseController extends Controller
         }catch (\Exception $e){
             $result[CodeKey::STATE] = !empty($e->getCode()) ? $e->getCode() : CodeKey::FAIL;
             $result[CodeKey::MSG] = $e->getMessage();
+            \App\Utility\Logger\Logger::error($e->getMessage().'_'.$e->getFile().'_'.$e->getLine(), 'apiResponse');
         }catch (\Throwable $e){
             $result[CodeKey::STATE] = !empty($e->getCode()) ? $e->getCode() : CodeKey::FAIL;
             $result[CodeKey::MSG] = '系统异常~';

@@ -15,8 +15,8 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
         '538ca81a9a966a6716601ecf48f4eaef' => __DIR__ . '/..' . '/opis/closure/functions.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -38,6 +38,7 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'W' => 
         array (
             'Webmozart\\Assert\\' => 17,
+            'WeChatPay\\' => 10,
             'Wa\\' => 3,
         ),
         'V' => 
@@ -96,6 +97,7 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         ),
         'G' => 
         array (
+            'GuzzleHttp\\UriTemplate\\' => 23,
             'GuzzleHttp\\Psr7\\' => 16,
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
@@ -180,6 +182,10 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'Webmozart\\Assert\\' => 
         array (
             0 => __DIR__ . '/..' . '/webmozart/assert/src',
+        ),
+        'WeChatPay\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wechatpay/wechatpay/src',
         ),
         'Wa\\' => 
         array (
@@ -304,6 +310,10 @@ class ComposerStaticInit0c91106380afab2eeef6f1f03e970f57
         'Hyperf\\Context\\' => 
         array (
             0 => __DIR__ . '/..' . '/hyperf/context/src',
+        ),
+        'GuzzleHttp\\UriTemplate\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/guzzlehttp/uri-template/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (

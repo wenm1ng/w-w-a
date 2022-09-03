@@ -34,6 +34,10 @@ class Router extends AbstractRouter
             $this->chatRoom($collector, $apiBasePathOpenV1);
             //帮助中心
             $this->helpCenter($collector, $apiBasePathOpenV1);
+            //订单
+            $this->order($collector, $apiBasePathOpenV1);
+            //微信支付
+            $this->wxPay($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -176,4 +180,15 @@ class Router extends AbstractRouter
         $collector->get('/help-center/user-list',$basePath.'HelpCenter/HelpCenterL/getUserHelpList');
     }
 
+    public function order(RouteCollector $collector, string $basePath = '')
+    {
+        //创建订单
+        $collector->post('/order/add-order',$basePath.'Order/Order/addOrder');
+    }
+
+    public function wxPay(RouteCollector $collector, string $basePath = '')
+    {
+        //创建订单
+        $collector->post('/wx-pay/order-notify',$basePath.'HelpCenter/HelpCenterL/delAnswer');
+    }
 }

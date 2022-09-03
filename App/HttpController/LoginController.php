@@ -29,7 +29,7 @@ Class LoginController extends Controller{
                 if(empty($userIds[0])){
                     $userIds = $this->request()->getHeader('testuserid');
                 }
-                $userId = $userIds[0] ?? 1013;
+                $userId = $userIds[0] ?? 2;
                 Common::setUserId($userId);
             }else{
                 $userId = $loginService->checkToken($authorization[0]);

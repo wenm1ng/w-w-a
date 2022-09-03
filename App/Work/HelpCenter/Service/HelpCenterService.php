@@ -104,6 +104,9 @@ class HelpCenterService
 
         $where = [
             'order' => ['id' => 'asc'],
+            'where' => [
+                ['status', '=', 1]
+            ],
         ];
 
         $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num,is_adopt_answer';

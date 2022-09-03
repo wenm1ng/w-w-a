@@ -35,6 +35,8 @@ class CodeKey
     const SECRET_NOT_MATCH    = 1011; // secret不匹配
     const FILE_UPLOAD_FAIL    = 1012; // 文件上传失败
 
+    const WXPAY_ERROR     = 60001; //含有敏感词
+
 
     const SUCCESSMSG = 'Success';
 

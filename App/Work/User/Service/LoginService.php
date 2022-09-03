@@ -60,7 +60,8 @@ class LoginService
         // 自定义数据
         $jwtObject->setData([
             'user_name' => $userInfo['nickName'],
-            'avatar_url' => $userInfo['avatarUrl']
+            'avatar_url' => $userInfo['avatarUrl'],
+            'openId' => $userInfo['openId']
         ]);
 
         // 最终生成的token
