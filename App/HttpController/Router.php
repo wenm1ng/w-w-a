@@ -188,7 +188,7 @@ class Router extends AbstractRouter
 
     public function wxPay(RouteCollector $collector, string $basePath = '')
     {
-        //创建订单
-        $collector->post('/wx-pay/order-notify',$basePath.'HelpCenter/HelpCenterL/delAnswer');
+        //支付回调
+        $collector->post('/wx-pay/callback',$basePath.'Order/Order/wxPayCallback');
     }
 }

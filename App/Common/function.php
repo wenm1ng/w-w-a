@@ -1184,7 +1184,7 @@ function makeUploadPath($path, $mode = 0777)
  *
  * @return string
  */
-function getRandomStr($len, $special = true, $speaialChars = [])
+function getRandomStr($len, $special = false, $speaialChars = [])
 {
     $chars = array(
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",

@@ -14,6 +14,7 @@ use Common\CodeKey;
 
 class OrderService{
     protected $validator;
+    protected $logName = 'wxPayCallback';
 
     public function __construct()
     {
@@ -35,11 +36,11 @@ class OrderService{
 
         $userInfo = Common::getUserInfo();
         $userId = $userInfo['user_id'];
-
+        $params['money'] = 0.01;
         $money = $params['money'] * 100;
-        $outTradeNo = getRandomStr(32);
+        $outTradeNo = date('YmdHis').getRandomStr(18);
         $result = (new WxPayService())->wxAddOrder($money, $userInfo['openId'], $outTradeNo);
-        if($result['code'] !== 200){
+        if($result['code'] !== 200 || empty($result['data']['prepay_id'])){
             CommonException::msgException($result['message'], CodeKey::WXPAY_ERROR);
         }
 
@@ -47,12 +48,28 @@ class OrderService{
             'type' => 1,
             'order_status' => 1,
             'order_money' => $params['money'],
+            'wx_money' => $money,
             'order_id' => $outTradeNo,
             'user_id' => $userId,
             'prepay_id' => $result['data']['prepay_id']
         ];
         WowOrderModel::query()->insert($insertData);
 
-        return $result['data'];
+        $prepayId = $result['data']['prepay_id'];
+        $returnData = WxPayService::getSign($prepayId);
+
+        return $returnData;
+    }
+
+    /**
+     * @desc        微信支付回调
+     * @example
+     * @param array $params
+     *
+     * @return array
+     */
+    public function wxPayCallback(array $params){
+        Common::log('wxPayCallback params:'. json_encode($params), $this->logName);
+        return [];
     }
 }

@@ -12,7 +12,7 @@ use WeChatPay\Builder;
 use WeChatPay\Crypto\Rsa;
 use WeChatPay\Util\PemUtil;
 use EasySwoole\EasySwoole\Config;
-use App\Work\WxPay\Models\WowOrderModel;
+use WeChatPay\Formatter;
 
 class WxPayService{
     //商户号
@@ -29,6 +29,8 @@ class WxPayService{
     //appid
     protected static $appId;
     protected static $logName = 'wxPay';
+    //支付回调链接
+    protected static $callbackUrl;
     protected static $returnData = [
         'code' => 0,
         'message' => '',
@@ -42,6 +44,7 @@ class WxPayService{
         self::$merchantCertificateSerial = Config::getInstance()->getConf('app.MERCHANT_CERTIFICATE_SERIAL');
         self::$platformCertificateFilePath = Config::getInstance()->getConf('app.PLATFORM_CERTIFICATE_FILE_PATH');
         self::$appId = Config::getInstance()->getConf('app.APP_KEY');
+        self::$callbackUrl = Config::getInstance()->getConf('app.MERCHANT_PAY_CALLBACK_URL');
         self::init();
     }
 
@@ -78,44 +81,67 @@ class WxPayService{
     public function wxAddOrder(int $money, string $openId, string $orderNo){
 
         try {
+            $data = [
+                'json' => [
+                    'mchid'        => self::$merchantId,
+                    'out_trade_no' => $orderNo,
+                    'appid'        => self::$appId,
+                    'description'  => 'WOW WA仓库-帮币',
+                    'notify_url'   => self::$callbackUrl,
+                    'amount'       => [
+                        'total'    => $money, //单位分
+                        'currency' => 'CNY'
+                    ],
+                    'payer' =>[
+                        'openid' => $openId
+                    ],
+                ],
+//                    'debug' => true
+            ];
+            Common::log('requestData:'.json_encode($data, JSON_UNESCAPED_UNICODE), self::$logName);
+
             $resp = self::$instance
                 ->chain('v3/pay/transactions/jsapi')
-                ->post([
-                    'json' => [
-                        'mchid'        => self::$merchantId,
-                        'out_trade_no' => $orderNo,
-                        'appid'        => self::$appId,
-                        'description'  => 'WOW WA仓库-帮币',
-                        'notify_url'   => 'https://mingtongct.com/api/v1/wx-pay/order-notify',
-                        'amount'       => [
-                            'total'    => $money, //单位分
-                            'currency' => 'CNY'
-                        ],
-                        'payer' =>[
-                            'openid' => $openId
-                        ],
-                    ],
-                    'debug' => true
-                ]);
+                ->post($data);
 
-//            echo $resp->getStatusCode(), PHP_EOL;
-//            echo $resp->getBody(), PHP_EOL;
             self::$returnData['code'] = $resp->getStatusCode();
             self::$returnData['data'] = json_decode($resp->getBody(), true);
 
         } catch (\Exception $e) {
             // 进行错误处理
-//            echo $e->getMessage(), PHP_EOL;
             if ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()) {
                 $r = $e->getResponse();
                 Common::log('code:'.$r->getStatusCode(). ';body:'.$r->getReasonPhrase(), self::$logName);
-//                echo $r->getBody(), PHP_EOL, PHP_EOL, PHP_EOL;
             }
-//            echo $e->getTraceAsString(), PHP_EOL;
             Common::log('errorMsg:'.$e->getMessage(), self::$logName);
             self::$returnData['code'] = $r->getStatusCode();
             self::$returnData['message'] = $e->getMessage();
         }
         return self::$returnData;
+    }
+
+    /**
+     * @desc        获取支付签名相关信息
+     * @example
+     * @param string $prepayId
+     *
+     * @return array
+     */
+    public static function getSign(string $prepayId){
+        $merchantPrivateKeyFilePath = 'file://'.self::$merchantPrivateKeyFilePath;
+        $merchantPrivateKeyInstance = Rsa::from($merchantPrivateKeyFilePath);
+
+        $params = [
+            'appId'     => self::$appId,
+            'timeStamp' => (string)Formatter::timestamp(),
+            'nonceStr'  => Formatter::nonce(),
+            'package'   => 'prepay_id='.$prepayId,
+        ];
+        $params += ['paySign' => Rsa::sign(
+            Formatter::joinedByLineFeed(...array_values($params)),
+            $merchantPrivateKeyInstance
+        ), 'signType' => 'RSA'];
+
+        return $params;
     }
 }
