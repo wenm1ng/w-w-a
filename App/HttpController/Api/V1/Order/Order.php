@@ -24,12 +24,4 @@ class Order extends BaseController
         });
     }
 
-    public function wxPayCallback()
-    {
-        return $this->apiResponse(function () {
-            $params = $this->getRequestJsonData();
-            return (new OrderService())->wxPayCallback($params);
-        });
-    }
-
 }

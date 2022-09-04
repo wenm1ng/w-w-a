@@ -15,6 +15,7 @@ use EasySwoole\EasySwoole\Config;
 use WeChatPay\Formatter;
 
 class WxPayService{
+    const AUTH_TAG_LENGTH_BYTE = 16;
     //商户号
     protected static $merchantId;
     //商户API私钥文件路径
@@ -31,6 +32,8 @@ class WxPayService{
     protected static $logName = 'wxPay';
     //支付回调链接
     protected static $callbackUrl;
+    //app v3秘钥
+    protected static $v3Secret;
     protected static $returnData = [
         'code' => 0,
         'message' => '',
@@ -45,14 +48,11 @@ class WxPayService{
         self::$platformCertificateFilePath = Config::getInstance()->getConf('app.PLATFORM_CERTIFICATE_FILE_PATH');
         self::$appId = Config::getInstance()->getConf('app.APP_KEY');
         self::$callbackUrl = Config::getInstance()->getConf('app.MERCHANT_PAY_CALLBACK_URL');
+        self::$v3Secret = Config::getInstance()->getConf('app.APP_V3_SECRET');
         self::init();
     }
 
     public static function init(){
-        dump(self::$merchantId);
-        dump(self::$merchantPrivateKeyFilePath);
-        dump(self::$merchantCertificateSerial);
-        dump(self::$platformCertificateFilePath);
         $merchantPrivateKeyInstance = Rsa::from('file://'.self::$merchantPrivateKeyFilePath, Rsa::KEY_TYPE_PRIVATE);
 
         $platformPublicKeyInstance = Rsa::from('file://'.self::$platformCertificateFilePath, Rsa::KEY_TYPE_PUBLIC);
@@ -143,5 +143,46 @@ class WxPayService{
         ), 'signType' => 'RSA'];
 
         return $params;
+    }
+
+    /**
+     * 解密报文
+     *
+     * @param string    $associatedData     AES GCM additional authentication data
+     * @param string    $nonceStr           AES GCM nonce
+     * @param string    $ciphertext         AES GCM cipher text
+     *
+     * @return string|bool      Decrypted string on success or FALSE on failure
+     */
+    public function decryptToString($associatedData, $nonceStr, $ciphertext)
+    {
+        $ciphertext = base64_decode($ciphertext);
+        if (strlen($ciphertext) <= self::AUTH_TAG_LENGTH_BYTE) {
+            return false;
+        }
+        // ext-sodium (default installed on >= PHP 7.2)
+        if (function_exists('\sodium_crypto_aead_aes256gcm_is_available') &&
+            \sodium_crypto_aead_aes256gcm_is_available()) {
+            dump(1);
+            return \sodium_crypto_aead_aes256gcm_decrypt($ciphertext, $associatedData, $nonceStr, self::$v3Secret);
+        }
+
+        // ext-libsodium (need install libsodium-php 1.x via pecl)
+        if (function_exists('\Sodium\crypto_aead_aes256gcm_is_available') &&
+            \Sodium\crypto_aead_aes256gcm_is_available()) {
+            dump(2);
+            return \Sodium\crypto_aead_aes256gcm_decrypt($ciphertext, $associatedData, $nonceStr, self::$v3Secret);
+        }
+
+        // openssl (PHP >= 7.1 support AEAD)
+        if (PHP_VERSION_ID >= 70100 && in_array('aes-256-gcm', \openssl_get_cipher_methods())) {
+            $ctext = substr($ciphertext, 0, -self::AUTH_TAG_LENGTH_BYTE);
+            $authTag = substr($ciphertext, -self::AUTH_TAG_LENGTH_BYTE);
+            dump(3);
+            return \openssl_decrypt($ctext, 'aes-256-gcm', self::$v3Secret, \OPENSSL_RAW_DATA, $nonceStr,
+                $authTag, $associatedData);
+        }
+
+        throw new \RuntimeException('AEAD_AES_256_GCM需要PHP 7.1以上或者安装libsodium-php');
     }
 }

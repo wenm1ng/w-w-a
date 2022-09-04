@@ -70,6 +70,29 @@ class OrderService{
      */
     public function wxPayCallback(array $params){
         Common::log('wxPayCallback params:'. json_encode($params), $this->logName);
+        $returnJson = (new WxPayService())->decryptToString($params['resource']['associated_data'], $params['resource']['nonce'], $params['resource']['ciphertext']);
+        Common::log('wxPayCallback response:'.$returnJson, $this->logName);
+        $return = json_decode($returnJson, true);
+        if(!is_array($return) || empty($return['out_trade_no'])){
+            CommonException::msgException('签名错误');
+        }
+        $this->callbackUpdateOrder($return['out_trade_no'], $return['transaction_id'], $returnJson);
         return [];
+    }
+
+    /**
+     * @desc        支付回调修改订单信息
+     * @example
+     * @param string $tradeNo
+     * @param string $transactionId
+     * @param string $callbackJson
+     */
+    public function callbackUpdateOrder(string $tradeNo, string $transactionId, string $callbackJson){
+        $updateData = [
+            'wx_order_id' => $transactionId,
+            'callback_json' => $callbackJson,
+            'order_status' => 2 //2支付成功
+        ];
+        WowOrderModel::query()->where('order_id', $tradeNo)->update($updateData);
     }
 }
