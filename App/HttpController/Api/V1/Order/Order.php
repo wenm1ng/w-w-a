@@ -24,4 +24,18 @@ class Order extends BaseController
         });
     }
 
+    /**
+     * @desc       获取日志数据
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-05 15:39
+     * @return bool
+     */
+    public function getLogList()
+    {
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new OrderService())->getLogList($params);
+        });
+    }
+
 }

@@ -41,4 +41,8 @@ class UserValidate extends Validate
         $this->addColumn('help_id')->notEmpty('帮助id不能为空');
         $this->addColumn('model_data')->notEmpty('推送格式数据不能为空');
     }
+
+    public function checkGetMoney(){
+        $this->addColumn('type')->notEmpty('类型不能为空');
+    }
 }

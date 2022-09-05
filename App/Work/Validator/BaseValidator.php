@@ -25,4 +25,9 @@ class BaseValidator extends systemValidate
             CommonException::msgException('你填写的信息里面包含敏感词汇，请修改', CodeKey::WORDS_SENSITIVE);
         }
     }
+
+    public function checkPage(){
+        $this->addColumn('page')->notEmpty('页数不能为空');
+        $this->addColumn('pageSize')->notEmpty('每页数量不能为空');
+    }
 }

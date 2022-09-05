@@ -105,6 +105,8 @@ class Router extends AbstractRouter
         $collector->get('/user/get-push-num',$basePath.'User/User/getPushNum');
         //获取推送模板id
         $collector->get('/user/get-model-id',$basePath.'User/Login/getModelId');
+        //获取钱包余额
+        $collector->get('/user/wallet/get-money',$basePath.'User/Wallet/getMoney');
     }
 
     public function damage(RouteCollector $collector, string $basePath = ''){
@@ -184,6 +186,9 @@ class Router extends AbstractRouter
     {
         //创建订单
         $collector->post('/order/add-order',$basePath.'Order/Order/addOrder');
+        //订单日志
+        $collector->get('/order/log-list',$basePath.'Order/Order/getLogList');
+
     }
 
     public function wxPay(RouteCollector $collector, string $basePath = '')

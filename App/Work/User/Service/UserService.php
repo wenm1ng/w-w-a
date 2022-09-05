@@ -26,6 +26,7 @@ use Wa\Models\WowWaCommentModel;
 use EasySwoole\EasySwoole\Config;
 use App\Work\HelpCenter\Service\HelpCenterService;
 use App\Work\Config as WorkConfig;
+use App\Work\WxPay\Models\WowUserWalletModel;
 
 class UserService{
 
@@ -92,6 +93,8 @@ class UserService{
         if(empty($userInfo)){
             //新增用户
             $userInfo['user_id'] = WowUserModelNew::query()->insertGetId($dbData);
+            //添加钱包数据
+            WowUserWalletModel::incrementMoney(1, $userInfo['user_id']);
         }else{
             //修改用户
             $dbData['update_at'] = date('Y-m-d H:i:s');

@@ -11,6 +11,10 @@ use App\Work\WxPay\Models\WowOrderModel;
 use App\Work\Validator\OrderValidator;
 use App\Exceptions\CommonException;
 use Common\CodeKey;
+use App\Utility\Database\Db;
+use App\Work\WxPay\Models\WowOrderLogModel;
+use User\Models\WowUserModelNew;
+use App\Work\WxPay\Models\WowUserWalletModel;
 
 class OrderService{
     protected $validator;
@@ -62,6 +66,36 @@ class OrderService{
     }
 
     /**
+     * @desc       获取订单列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-05 15:38
+     * @param array $params
+     *
+     * @return array
+     */
+    public function getLogList(array $params){
+        $this->validator->checkPage();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+        $where = ['order' => ['success_at' => 'desc', 'id' => 'desc']];
+
+        if(!empty($params['pay_type'])){
+            $where['where'][] = ['pay_type', '=', $params['pay_type']];
+        }
+
+        if(!empty($params['month'])){
+            $where['where'][] = ['date_month', '=', $params['month']];
+        }
+        $fields = 'id,order_id,pay_type,amount,help_id,date_month,success_at';
+        $list = WowOrderLogModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
+
+        $list = Common::arrayGroup($list, 'date_month');
+
+        return ['list' => $list];
+    }
+
+    /**
      * @desc        微信支付回调
      * @example
      * @param array $params
@@ -76,7 +110,7 @@ class OrderService{
         if(!is_array($return) || empty($return['out_trade_no'])){
             CommonException::msgException('签名错误');
         }
-        $this->callbackUpdateOrder($return['out_trade_no'], $return['transaction_id'], $returnJson);
+        $this->callbackUpdateOrder($return['out_trade_no'], $return['transaction_id'], $returnJson, $return['payer']['openid'], $return['amount']['total'], $return['amount']['payer_total']);
         return [];
     }
 
@@ -87,12 +121,36 @@ class OrderService{
      * @param string $transactionId
      * @param string $callbackJson
      */
-    public function callbackUpdateOrder(string $tradeNo, string $transactionId, string $callbackJson){
-        $updateData = [
-            'wx_order_id' => $transactionId,
-            'callback_json' => $callbackJson,
-            'order_status' => 2 //2支付成功
-        ];
-        WowOrderModel::query()->where('order_id', $tradeNo)->update($updateData);
+    public function callbackUpdateOrder(string $tradeNo, string $transactionId, string $callbackJson, string $openId, float $money, float $payerMoney){
+        try{
+            Db::beginTransaction();
+            //修改订单状态
+            $updateData = [
+                'wx_order_id' => $transactionId,
+                'callback_json' => $callbackJson,
+                'order_status' => 2 //2支付成功
+            ];
+            WowOrderModel::query()->where('order_id', $tradeNo)->update($updateData);
+
+            $userId = WowUserModelNew::query()->where('openId', $openId)->value('user_id');
+            //记录订单日志
+            $logData = [
+                'order_type' => 1, //1帮币
+                'order_id' => $tradeNo,
+                'wx_order_id' => $transactionId,
+                'pay_type' => 1, //1充值
+                'user_id' => !empty($userId) ? $userId : 0,
+                'amount' => $payerMoney
+            ];
+            WowOrderLogModel::query()->insert($logData);
+            //添加账户余额
+            WowUserWalletModel::incrementMoney(1, $userId, $payerMoney);
+            Db::commit();
+        }catch (\Exception $e){
+            Db::rollBack();
+            Common::log('orderUpdate fail:'.$e->getMessage(), $this->logName);
+            CommonException::msgException('订单回写失败');
+        }
+
     }
 }

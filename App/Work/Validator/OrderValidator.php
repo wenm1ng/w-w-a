@@ -13,4 +13,9 @@ class OrderValidator extends BaseValidator
         $this->addColumn('money')->notEmpty('金额不能为空')->float('金额必须为数字')->between(0.01, 100, '金额必须在[0.01, 100]之间');
         $this->addColumn('type')->notEmpty('类型不能为空');
     }
+
+    public function checkPage(){
+        $this->addColumn('page')->notEmpty('页数不能为空');
+        $this->addColumn('pageSize')->notEmpty('每页数量不能为空');
+    }
 }
