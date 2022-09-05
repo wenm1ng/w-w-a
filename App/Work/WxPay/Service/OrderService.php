@@ -92,7 +92,7 @@ class OrderService{
 
         $list = Common::arrayGroup($list, 'date_month');
 
-        return ['list' => $list];
+        return ['list' => empty($list) ? false : $list];
     }
 
     /**
