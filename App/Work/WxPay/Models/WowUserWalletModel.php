@@ -7,6 +7,7 @@
 namespace App\Work\WxPay\Models;
 
 use App\Common\EasyModel;
+use App\Utility\Database\Db;
 
 class WowUserWalletModel extends EasyModel
 {
@@ -41,7 +42,7 @@ class WowUserWalletModel extends EasyModel
             ];
             self::query()->insert($insertData);
         }else{
-            self::query()->where('id', $id)->increment('money', $money);
+            self::query()->where('id', $id)->update(['money' => Db::raw('money + '. $money)]);
         }
     }
 

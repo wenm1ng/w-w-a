@@ -98,7 +98,7 @@ class WxPayService{
                 ],
 //                    'debug' => true
             ];
-            Common::log('requestData:'.json_encode($data, JSON_UNESCAPED_UNICODE), self::$logName);
+            Common::log('wxAddOrder_requestData:'.json_encode($data, JSON_UNESCAPED_UNICODE), self::$logName);
 
             $resp = self::$instance
                 ->chain('v3/pay/transactions/jsapi')
@@ -106,14 +106,15 @@ class WxPayService{
 
             self::$returnData['code'] = $resp->getStatusCode();
             self::$returnData['data'] = json_decode($resp->getBody(), true);
+            Common::log('wxAddOrder_responseData:'.$resp->getBody(), self::$logName);
 
         } catch (\Exception $e) {
             // 进行错误处理
             if ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()) {
                 $r = $e->getResponse();
-                Common::log('code:'.$r->getStatusCode(). ';body:'.$r->getReasonPhrase(), self::$logName);
+                Common::log('wxAddOrder_code:'.$r->getStatusCode(). ';body:'.$r->getReasonPhrase(), self::$logName);
             }
-            Common::log('errorMsg:'.$e->getMessage(), self::$logName);
+            Common::log('wxAddOrder_errorMsg:'.$e->getMessage(), self::$logName);
             self::$returnData['code'] = $r->getStatusCode();
             self::$returnData['message'] = $e->getMessage();
         }

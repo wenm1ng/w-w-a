@@ -18,6 +18,7 @@ class CodeKey
     const INVALID_TOKEN       = 501; //无效的token
     const EXPIRED_TOKEN       = 50002; //token已过期
     const WORDS_SENSITIVE     = 50003; //含有敏感词
+    const SIGN_ERROR          = 20001; //签名错误
     const HEADER_ERROR        = 800; //请求头错误
     const SIGN_FAIL           = 995; //签名错误
     const SYSTEM_UNLOGIN      = 996; //请登录

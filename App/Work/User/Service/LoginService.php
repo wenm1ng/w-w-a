@@ -11,6 +11,8 @@ use Common\Common;
 use Common\CodeKey;
 use EasySwoole\Jwt\Jwt;
 use User\Models\WowUserModelNew;
+use EasySwoole\EasySwoole\Config;
+use App\Exceptions\CommonException;
 
 class LoginService
 {
@@ -121,5 +123,23 @@ class LoginService
             throw new \Exception($e->getMessage(), CodeKey::INVALID_TOKEN);
         }
         return $userInfo;
+    }
+
+    /**
+     * @desc       校验签名
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-06 15:58
+     * @param string $sign
+     */
+    public function checkSign(string $sign, string $time){
+        if (empty($sign)) {
+            CommonException::msgException('签名有误', CodeKey::SIGN_ERROR);
+        }
+
+        $systemSign = Config::getInstance()->getConf('app.SYSTEM_SIGN');
+
+        if(md5($systemSign. '_'. $time) !== $sign){
+            CommonException::msgException('签名有误', CodeKey::SIGN_ERROR);
+        }
     }
 }

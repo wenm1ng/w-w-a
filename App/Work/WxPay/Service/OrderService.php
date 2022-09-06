@@ -52,6 +52,7 @@ class OrderService{
             'type' => 1,
             'order_status' => 1,
             'order_money' => $params['money'],
+            'callback_json' => '',
             'wx_money' => $money,
             'order_id' => $outTradeNo,
             'user_id' => $userId,
@@ -89,10 +90,10 @@ class OrderService{
         }
         $fields = 'id,order_id,pay_type,amount,help_id,date_month,success_at';
         $list = WowOrderLogModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
-
+        $count = count($list);
         $list = Common::arrayGroup($list, 'date_month');
 
-        return ['list' => empty($list) ? false : $list];
+        return ['list' => empty($list) ? false : $list, 'count' => $count];
     }
 
     /**
@@ -110,7 +111,7 @@ class OrderService{
         if(!is_array($return) || empty($return['out_trade_no'])){
             CommonException::msgException('签名错误');
         }
-        $this->callbackUpdateOrder($return['out_trade_no'], $return['transaction_id'], $returnJson, $return['payer']['openid'], $return['amount']['total'], $return['amount']['payer_total']);
+        $this->callbackUpdateOrder($return['out_trade_no'], $return['transaction_id'], $returnJson, $return['payer']['openid'], $return['amount']['total'], $return['amount']['payer_total'], $return['success_time']);
         return [];
     }
 
@@ -121,7 +122,7 @@ class OrderService{
      * @param string $transactionId
      * @param string $callbackJson
      */
-    public function callbackUpdateOrder(string $tradeNo, string $transactionId, string $callbackJson, string $openId, float $money, float $payerMoney){
+    public function callbackUpdateOrder(string $tradeNo, string $transactionId, string $callbackJson, string $openId, float $money, float $payerMoney, string $successTime){
         try{
             Db::beginTransaction();
             //修改订单状态
@@ -133,18 +134,21 @@ class OrderService{
             WowOrderModel::query()->where('order_id', $tradeNo)->update($updateData);
 
             $userId = WowUserModelNew::query()->where('openId', $openId)->value('user_id');
+            $trueMoney = round($payerMoney / 100, 2);
             //记录订单日志
             $logData = [
                 'order_type' => 1, //1帮币
                 'order_id' => $tradeNo,
                 'wx_order_id' => $transactionId,
+                'date_month' => date('Y-m', strtotime($successTime)),
                 'pay_type' => 1, //1充值
                 'user_id' => !empty($userId) ? $userId : 0,
-                'amount' => $payerMoney
+                'success_at' => date('Y-m-d H:i:s', strtotime($successTime)),
+                'amount' => $trueMoney
             ];
             WowOrderLogModel::query()->insert($logData);
             //添加账户余额
-            WowUserWalletModel::incrementMoney(1, $userId, $payerMoney);
+            WowUserWalletModel::incrementMoney(1, $userId, $trueMoney);
             Db::commit();
         }catch (\Exception $e){
             Db::rollBack();

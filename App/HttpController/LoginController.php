@@ -9,6 +9,7 @@ use EasySwoole\Http\AbstractInterface\Controller;
 use Common\CodeKey;
 use User\Service\LoginService;
 use Common\Common;
+use App\Exceptions\CommonException;
 
 Class LoginController extends Controller{
 
@@ -19,20 +20,22 @@ Class LoginController extends Controller{
         try {
             //验证token
             $authorization = $this->request()->getHeader('authorization');
-            if (empty($authorization[0]))
-                return $status;
-
             $loginService = new LoginService();
 
-            if($authorization[0] === 'test_php'){
-                $userIds = $this->request()->getHeader('test_user_id');
-                if(empty($userIds[0])){
-                    $userIds = $this->request()->getHeader('testuserid');
+            if (!empty($authorization[0])){
+                if($authorization[0] === 'test_php'){
+                    $userIds = $this->request()->getHeader('test_user_id');
+                    if(empty($userIds[0])){
+                        $userIds = $this->request()->getHeader('testuserid');
+                    }
+                    $userId = $userIds[0] ?? 2;
+                    Common::setUserId($userId);
+                }else{
+                    $this->checkSign($loginService);
+                    $userId = $loginService->checkToken($authorization[0]);
                 }
-                $userId = $userIds[0] ?? 2;
-                Common::setUserId($userId);
             }else{
-                $userId = $loginService->checkToken($authorization[0]);
+                $this->checkSign($loginService);
             }
 
             //将用户id写进header头
@@ -43,10 +46,22 @@ Class LoginController extends Controller{
             //将解析出来的user_id重新写进body
             $this->request()->withBody(\GuzzleHttp\Psr7\stream_for(json_encode($body)));
         } catch (\Exception $exception) {
-            return $status;
+            if($exception->getCode() === CodeKey::SIGN_ERROR){
+                $this->writeJson($exception->getCode(), $exception->getMessage(), $exception->getMessage());
+                return false;
+            }
         }
 
         return $status;
+    }
+
+    private function checkSign(\User\Service\LoginService $loginService){
+        $signs = $this->request()->getHeader('signs');
+        if(empty($signs[0])){
+            CommonException::msgException('签名有误', CodeKey::SIGN_ERROR);
+        }
+        $time = $this->request()->getHeader('time');
+        $loginService->checkSign($signs[0], $time[0]);
     }
 
     /**

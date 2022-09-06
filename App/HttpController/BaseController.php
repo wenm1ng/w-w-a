@@ -11,6 +11,7 @@ use EasySwoole\Http\AbstractInterface\Controller;
 use Common\CodeKey;
 use Common\Common;
 use User\Service\LoginService;
+use App\Exceptions\CommonException;
 
 class BaseController extends Controller
 {
@@ -24,8 +25,8 @@ class BaseController extends Controller
             $authorization = $this->request()->getHeader('authorization');
             if (empty($authorization[0]))
                 throw new \Exception('非法访问, 缺少Authorization.');
-
             $loginService = new LoginService();
+            $this->checkSign($loginService);
 
             if($authorization[0] === 'test_php'){
                 $userIds = $this->request()->getHeader('test_user_id');
@@ -53,6 +54,15 @@ class BaseController extends Controller
         }
 
         return $status;
+    }
+
+    private function checkSign(\User\Service\LoginService $loginService){
+        $signs = $this->request()->getHeader('signs');
+        if(empty($signs[0])){
+            CommonException::msgException('签名有误', CodeKey::SIGN_ERROR);
+        }
+        $time = $this->request()->getHeader('time');
+        $loginService->checkSign($signs[0], $time[0]);
     }
 
     /**
