@@ -148,7 +148,7 @@ class OrderService{
             ];
             WowOrderLogModel::query()->insert($logData);
             //添加账户余额
-            WowUserWalletModel::incrementMoney(1, $userId, $trueMoney);
+            WowUserWalletModel::incrementMoney($trueMoney, $userId);
             Db::commit();
         }catch (\Exception $e){
             Db::rollBack();

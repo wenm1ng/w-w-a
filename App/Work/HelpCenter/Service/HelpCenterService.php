@@ -19,6 +19,8 @@ use App\Utility\Database\Db;
 use App\Work\Config;
 use App\Work\Common\File;
 use Wa\Models\WowWaCommentModel;
+use App\Work\WxPay\Models\WowUserWalletModel;
+use User\Service\WalletService;
 
 class HelpCenterService
 {
@@ -53,10 +55,8 @@ class HelpCenterService
         if(!empty($params['help_type'])){
             $where['where'][] = ['help_type', '=', $params['help_type']];
         }
-        if(!empty($params['adopt_type'])){
+        if(isset($params['adopt_type']) && $params['adopt_type'] != -1){
             $where['where'][] = ['is_adopt', '=', $params['adopt_type']];
-        }else{
-            $where['where'][] = ['is_adopt', '=', 0];
         }
         if(!empty($params['is_pay'])){
             $where['where'][] = ['is_pay', '=', $params['is_pay']];
@@ -71,7 +71,7 @@ class HelpCenterService
             $where['where'][] = ['user_id', '=', Common::getUserId()];
         }
 
-        $fields = 'id,version,occupation,help_type,title,user_id,image_url,description,modify_at,favorites_num,help_num,read_num, 0 as has_favor, 0 as has_answer,is_adopt';
+        $fields = 'id,version,occupation,help_type,title,user_id,image_url,description,modify_at,favorites_num,help_num,read_num, 0 as has_favor, 0 as has_answer,is_adopt,is_pay,coin';
         $list = WowHelpCenterModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
 
         $list = (new UserService())->mergeUserInfo($list);
@@ -256,7 +256,6 @@ class HelpCenterService
      * @return int
      */
     public function addHelp(array $params, \EasySwoole\Http\Request $request){
-        dump(1);
         $this->validator->checkAddHelp($params);
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
@@ -271,19 +270,23 @@ class HelpCenterService
             $fileName = saveFileDataImage($data, '/help', $filend);
             $imageUrl = getInterImageName($fileName);
         }
-        dump($imageUrl);
+        $userId = Common::getUserId();
         $insertData = [
             'title' => $params['title'],
             'description' => $params['description'],
             'help_type' => $params['help_type'],
             'version' => $params['version'],
-            'is_adopt' => 2,
             'image_url' => $imageUrl,
-            'user_id' => Common::getUserId(),
+            'user_id' => $userId,
             'status' => 1,
-            'is_pay' => $params['is_pay']
+            'is_pay' => $params['is_pay'],
+            'coin' => !empty($params['coin']) ? (int)$params['coin'] : 0
         ];
         $helpId = WowHelpCenterModel::query()->insertGetId($insertData);
+        if($params['is_pay'] == 1){
+            //如果是有偿求助，走付费流程
+            (new WalletService())->operateMoney(-$params['coin'], (int)$userId, 2, $helpId);
+        }
         return $helpId;
     }
 
@@ -442,18 +445,49 @@ class HelpCenterService
             CommonException::msgException($this->validator->getError()->__toString());
         }
 
-        $updateData = [
-            'is_adopt_answer' => 1,
-            'modify_at' => date('Y-m-d H:i:s')
-        ];
+        $info = WowHelpAnswerModel::query()->where('id', $params['id'])->first();
+        if(empty($info)){
+            CommonException::msgException('该回答不存在');
+        }
+        $helpInfo = WowHelpCenterModel::query()->where('id', $params['help_id'])->first();
+        if(empty($helpInfo)){
+            CommonException::msgException('该提问不存在');
+        }
+        $info = $info->toArray();
 
-        WowHelpAnswerModel::query()->where('id', $params['id'])->update($updateData);
+        try{
+            //设置回答为已采纳
+            $updateData = [
+                'is_adopt_answer' => 1,
+                'modify_at' => date('Y-m-d H:i:s')
+            ];
 
-        $updateData = [
-            'is_adopt' => 1,
-            'modify_at' => date('Y-m-d H:i:s')
-        ];
-        WowHelpCenterModel::query()->where('id', $params['help_id'])->update($updateData);
+            WowHelpAnswerModel::query()->where('id', $params['id'])->update($updateData);
+            //设置提问为已采纳提问
+            $updateData = [
+                'is_adopt' => 1,
+                'modify_at' => date('Y-m-d H:i:s')
+            ];
+            WowHelpCenterModel::query()->where('id', $params['help_id'])->update($updateData);
+
+            (new WalletService())->operateMoney((float)$helpInfo['coin'], (int)$info['user_id'], 3, $params['help_id']);
+
+            $userInfo = Common::getUserInfo();
+            //推送通知给用户
+            $pushData = [
+                'help_id' => $params['help_id'],
+                'type' => 1,
+                'user_id' => $info['user_id'],
+                'model_data' => [mbSubStr($helpInfo['title'], 15), $userInfo['user_name'], mbSubStr($helpInfo['description'], 15), date('Y-m-d H:i:s')]
+            ];
+            try{
+                (new CommonService())->pushWxMessage($pushData);
+            }catch(\Exception $e){
+                Common::log('errMsg:'.$userInfo['user_id'].'--'.$e->getMessage(), 'pushMessage');
+            }
+        }catch (\Exception $e){
+            CommonException::msgException('异常错误');
+        }
 
         return null;
     }
@@ -500,5 +534,16 @@ class HelpCenterService
         $this->incrementHelpAnswerNum($params['help_id'], -1);
 
         return [];
+    }
+
+    /**
+     * @desc       获取有偿帮忙数量
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-08 17:21
+     * @return array
+     */
+    public function getPayHelpNum(){
+        $count = WowHelpCenterModel::query()->where('is_pay', 1)->where('is_adopt', 0)->where('status', 1)->count();
+        return ['count' => $count];
     }
 }

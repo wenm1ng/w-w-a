@@ -180,6 +180,9 @@ class Router extends AbstractRouter
         $collector->get('/help-center/user-answer-list',$basePath.'HelpCenter/HelpCenterL/getUserAnswerList');
         //用户本人的帮助列表
         $collector->get('/help-center/user-list',$basePath.'HelpCenter/HelpCenterL/getUserHelpList');
+        //获取有偿帮忙数量
+        $collector->get('/help-center/get-pay-help-num',$basePath.'HelpCenter/HelpCenter/getPayHelpNum');
+
     }
 
     public function order(RouteCollector $collector, string $basePath = '')

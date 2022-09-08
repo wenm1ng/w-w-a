@@ -67,4 +67,15 @@ class HelpCenter extends LoginController
         });
     }
 
+    /**
+     * @desc       获取有偿帮忙数量
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-08 17:21
+     * @return bool
+     */
+    public function getPayHelpNum(){
+        return $this->apiResponse(function () {
+            return (new HelpCenterService())->getPayHelpNum();
+        });
+    }
 }

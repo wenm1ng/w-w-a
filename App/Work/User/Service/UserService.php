@@ -94,7 +94,7 @@ class UserService{
             //新增用户
             $userInfo['user_id'] = WowUserModelNew::query()->insertGetId($dbData);
             //添加钱包数据
-            WowUserWalletModel::incrementMoney(1, $userInfo['user_id']);
+            WowUserWalletModel::incrementMoney(0, $userInfo['user_id']);
         }else{
             //修改用户
             $dbData['update_at'] = date('Y-m-d H:i:s');

@@ -6,6 +6,9 @@
  */
 namespace App\Work\Validator;
 
+use User\Service\WalletService;
+use App\Exceptions\CommonException;
+
 class HelpCenterValidator extends BaseValidator
 {
     public function checkRoom()
@@ -26,6 +29,15 @@ class HelpCenterValidator extends BaseValidator
         $this->addColumn('description')->notEmpty('求助详细描述不能为空');
         $this->addColumn('is_pay')->required('是否有偿求助不能为空');
         $this->checkText($params['description']);
+        if($params['is_pay'] == 1){
+            if(empty($params['coin'])){
+                CommonException::msgException('奖励币数不能为空');
+            }
+            $return = (new WalletService())->getMoney(['type' => 1]);
+            if(!empty($return['coin']) && $return['coin'] < $params['money'] ){
+                CommonException::msgException('奖励币数不足');
+            }
+        }
     }
 
     public function checkId(){
@@ -34,7 +46,7 @@ class HelpCenterValidator extends BaseValidator
 
     public function checkAdopt(){
         $this->addColumn('id')->notEmpty('id不能为空');
-        $this->addColumn('help')->notEmpty('帮助id不能为空');
+        $this->addColumn('help_id')->notEmpty('帮助id不能为空');
     }
 
     public function checkAddAnswer(array $params){

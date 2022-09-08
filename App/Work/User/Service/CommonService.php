@@ -28,7 +28,7 @@ class CommonService
     }
 
     /**
-     * @desc       获取用户推送次数
+     * @desc       添加用户推送次数
      * @author     文明<736038880@qq.com>
      * @date       2022-09-01 12:15
      * @param array $params
