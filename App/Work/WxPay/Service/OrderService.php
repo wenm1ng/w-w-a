@@ -79,7 +79,12 @@ class OrderService{
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
-        $where = ['order' => ['success_at' => 'desc', 'id' => 'desc']];
+        $where = [
+            'where' => [
+                ['user_id', '=', Common::getUserId()]
+            ],
+            'order' => ['success_at' => 'desc', 'id' => 'desc']
+        ];
 
         if(!empty($params['pay_type'])){
             $where['where'][] = ['pay_type', '=', $params['pay_type']];

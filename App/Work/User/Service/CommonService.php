@@ -117,7 +117,7 @@ class CommonService
         if(empty(Config::$pushModels[$params['type']])){
             CommonException::msgException('推送类型不存在');
         }
-        $pushNum = WowUserPushModel::query()->where('user_id', Common::getUserId())->where('model_id', Config::$pushModels[$params['type']])->value('push_num');
+        $pushNum = WowUserPushModel::query()->where('user_id', $params['user_id'])->where('model_id', Config::$pushModels[$params['type']])->value('push_num');
         if($pushNum <= 0){
             CommonException::msgException('推送数量不足');
         }
