@@ -55,8 +55,8 @@ class EasySwooleEvent implements Event
 //        $register->set($register::onClose, function ($ws, $fd) {
 //            echo "client-{$fd} is closed\n";
 //        });
-        $ChatService = new ChatService();
-        $ChatService->run($register);
+//        $ChatService = new ChatService();
+//        $ChatService->run($register);
     }
 
     public static function onRequest(Request $request, Response $response): bool
