@@ -45,4 +45,9 @@ class UserValidate extends Validate
     public function checkGetMoney(){
         $this->addColumn('type')->notEmpty('类型不能为空');
     }
+
+    public function checkBoardGetList(){
+        $this->addColumn('week')->notEmpty('周数不能为空');
+        $this->addColumn('year')->notEmpty('年份不能为空');
+    }
 }

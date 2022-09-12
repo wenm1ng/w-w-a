@@ -107,6 +107,9 @@ class Router extends AbstractRouter
         $collector->get('/user/get-model-id',$basePath.'User/Login/getModelId');
         //获取钱包余额
         $collector->get('/user/wallet/get-money',$basePath.'User/Wallet/getMoney');
+        //获取排行榜列表
+        $collector->get('/user/leader-board-list',$basePath.'User/leaderBoard/getList');
+
     }
 
     public function damage(RouteCollector $collector, string $basePath = ''){

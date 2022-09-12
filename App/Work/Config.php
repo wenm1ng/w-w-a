@@ -10,6 +10,7 @@ Class Config{
     const IMAGE_DIR = '/data/www/image';
     const IMAGE_HOST = 'https://mingtongct.com/images';
     const ACCESS_TOKEN_KEY = 'access_token';
+    const REDIS_KEY_BOARD = 'leaderBoard';
     //获取天赋树技能列表的redis key
     public static function getTalentSkillTreeRedisKey($version, $oc){
         return "talent_tree_list:{$version}:{$oc}";
