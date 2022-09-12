@@ -108,7 +108,7 @@ class Router extends AbstractRouter
         //获取钱包余额
         $collector->get('/user/wallet/get-money',$basePath.'User/Wallet/getMoney');
         //获取排行榜列表
-        $collector->get('/user/leader-board-list',$basePath.'User/leaderBoard/getList');
+        $collector->get('/user/leader-board-list',$basePath.'User/Login/getLeaderBoardList');
 
     }
 
@@ -145,6 +145,7 @@ class Router extends AbstractRouter
         $collector->get('/test',$basePath.'File/File/uploadImageToBlog');
         $collector->get('/test-new',$basePath.'Test/Test/test');
         $collector->post('/upload',$basePath.'File/File/uploadImage');
+        $collector->post('/sync-redis',$basePath.'Test/Test/aKeySyncRedis');
     }
 
     public function chatRoom(RouteCollector $collector, string $basePath = ''){

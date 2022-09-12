@@ -10,6 +10,7 @@ use Common\Common;
 use Common\CodeKey;
 use App\HttpController\LoginController;
 use User\Service\UserService;
+use User\Service\LeaderBoardService;
 use User\Service\CommonService;
 
 class Login extends LoginController
@@ -75,4 +76,16 @@ class Login extends LoginController
         });
     }
 
+    /**
+     * @desc       排行榜列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-12 10:44
+     * @return bool
+     */
+    public function getLeaderBoardList(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new LeaderBoardService())->getList($params);
+        });
+    }
 }

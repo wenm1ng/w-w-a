@@ -10,19 +10,21 @@ use Common\Common;
 use Common\CodeKey;
 use Wa\Service\WaService;
 use User\Service\UserService;
+use User\Service\LeaderBoardService;
 
 class Test extends LoginController
 {
     /**
-     * @desc        获取tab列表
-     * @example
+     * @desc       同步缓存
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-12 10:45
      * @return bool
      */
-    public function test()
+    public function aKeySyncRedis()
     {
         return $this->apiResponse(function () {
             $params = $this->getRequestJsonData();
-            return (new UserService())->getAccessToken();
+            return (new LeaderBoardService())->aKeySyncRedis();
         });
     }
 }

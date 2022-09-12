@@ -19,7 +19,6 @@ class CommonController extends Controller
     protected function commonRequest(?string $action, int $isCheckLogin = 1): ?bool
     {
         $status = true;
-
         try {
             //验证token
             $authorization = $this->request()->getHeader('authorization');
@@ -35,7 +34,11 @@ class CommonController extends Controller
                 Common::setUserId($userId);
             }else{
                 $this->checkSign($loginService);
-                $userId = $loginService->checkToken($auth);
+                if($isCheckLogin){
+                    $userId = $loginService->checkToken($auth);
+                }else{
+                    $userId = 0;
+                }
             }
 
             //将用户id写进header头

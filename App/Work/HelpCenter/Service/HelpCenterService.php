@@ -21,6 +21,7 @@ use App\Work\Common\File;
 use Wa\Models\WowWaCommentModel;
 use App\Work\WxPay\Models\WowUserWalletModel;
 use User\Service\WalletService;
+use User\Models\LeaderBoardModel;
 
 class HelpCenterService
 {
@@ -325,7 +326,10 @@ class HelpCenterService
         ];
 
         $id = WowHelpAnswerModel::query()->insertGetId($insertData);
+        //添加回答数量
         $this->incrementHelpAnswerNum($params['help_id'], 1);
+        //积分记录
+        LeaderBoardModel::incrementScore($userId, 2);
 
         $info = WowHelpCenterModel::query()->where('id', $params['help_id'])->first();
         if(!empty($info)){
@@ -469,8 +473,10 @@ class HelpCenterService
                 'modify_at' => date('Y-m-d H:i:s')
             ];
             WowHelpCenterModel::query()->where('id', $params['help_id'])->update($updateData);
-
+            //操作记录相关日志
             (new WalletService())->operateMoney((float)$helpInfo['coin'], (int)$info['user_id'], 3, $params['help_id']);
+            //积分记录
+            LeaderBoardModel::incrementScore($info['user_id'], 1);
 
             $userInfo = Common::getUserInfo();
             //推送通知给用户

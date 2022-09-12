@@ -10,7 +10,32 @@ Class Config{
     const IMAGE_DIR = '/data/www/image';
     const IMAGE_HOST = 'https://mingtongct.com/images';
     const ACCESS_TOKEN_KEY = 'access_token';
+    //排行榜积分缓存名
     const REDIS_KEY_BOARD = 'leaderBoard';
+    //排行榜详细信息缓存名
+    const REDIS_KEY_BOARD_INFO = 'leaderBoardInfo';
+    //用户缓存名
+    const REDIS_KEY_USER = 'user';
+    //周数偏移量
+    const WEEK_OFFSET = -1;
+    //奖励
+    public static $award = [
+        0 => '敬请期待',
+        1 => '敬请期待',
+        2 => '敬请期待',
+    ];
+
+    //类型对应的字段
+    public static $typeColumnLink = [
+        1 => 'adopt_num', //采纳
+        2 => 'answer_num' //回答
+    ];
+    //采纳和回答对应分数
+    public static $scoreLink = [
+        1 => 3,
+        2 => 1
+    ];
+
     //获取天赋树技能列表的redis key
     public static function getTalentSkillTreeRedisKey($version, $oc){
         return "talent_tree_list:{$version}:{$oc}";
