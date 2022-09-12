@@ -17,7 +17,7 @@ Class Config{
     //用户缓存名
     const REDIS_KEY_USER = 'user';
     //周数偏移量
-    const WEEK_OFFSET = -1;
+    const WEEK_OFFSET = 1;
     //奖励
     public static $award = [
         0 => '敬请期待',

@@ -329,7 +329,7 @@ class HelpCenterService
         //添加回答数量
         $this->incrementHelpAnswerNum($params['help_id'], 1);
         //积分记录
-        LeaderBoardModel::incrementScore($userId, 2);
+        LeaderBoardModel::incrementScore($userId, 2, date('Y-m-d H:i:s'));
 
         $info = WowHelpCenterModel::query()->where('id', $params['help_id'])->first();
         if(!empty($info)){
@@ -476,7 +476,7 @@ class HelpCenterService
             //操作记录相关日志
             (new WalletService())->operateMoney((float)$helpInfo['coin'], (int)$info['user_id'], 3, $params['help_id']);
             //积分记录
-            LeaderBoardModel::incrementScore($info['user_id'], 1);
+            LeaderBoardModel::incrementScore($info['user_id'], 1, date('Y-m-d H:i:s'));
 
             $userInfo = Common::getUserInfo();
             //推送通知给用户
@@ -525,11 +525,12 @@ class HelpCenterService
      * @return array
      */
     public function delAnswer(array $params){
-        $info = WowHelpAnswerModel::query()->where('id', $params['id'])->first(['user_id','is_adopt_answer']);
+        $info = WowHelpAnswerModel::query()->where('id', $params['id'])->first(['user_id','is_adopt_answer','create_at']);
         if(empty($info)){
             CommonException::msgException('回答不存在');
         }
-        if($info['user_id'] != Common::getUserId()){
+        $userId = Common::getUserId();
+        if($info['user_id'] != $userId){
             CommonException::msgException('删除失败');
         }
         if(!empty($info['is_adopt_answer'])){
@@ -539,6 +540,7 @@ class HelpCenterService
 
         $this->incrementHelpAnswerNum($params['help_id'], -1);
 
+        LeaderBoardModel::incrementScore($userId, 2, $info['create_at'], -1);
         return [];
     }
 

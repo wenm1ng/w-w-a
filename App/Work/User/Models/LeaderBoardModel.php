@@ -8,6 +8,7 @@ namespace User\Models;
 
 use App\Common\EasyModel;
 use App\Work\config;
+use App\Utility\Database\Db;
 
 class LeaderBoardModel extends EasyModel
 {
@@ -19,9 +20,9 @@ class LeaderBoardModel extends EasyModel
 
     protected $keyType = 'int';
 
-    public static function incrementScore($userId, int $type, int $isDel = 0){
-         $year = date('Y');
-         $week = date('W') + config::WEEK_OFFSET;
+    public static function incrementScore($userId, int $type, string $dateTime, int $num = 1){
+         $year = date('Y', strtotime($dateTime));
+         $week = date('W', strtotime($dateTime)) + config::WEEK_OFFSET;
          $model = self::query();
          $id = $model
              ->where('year', $year)
@@ -29,19 +30,26 @@ class LeaderBoardModel extends EasyModel
              ->where('user_id', $userId)
              ->value('id');
 
-         if(empty($id)){
+         $column = config::$typeColumnLink[$type];
+         $value = config::$scoreLink[$type];
+         $score = $value * $num;
+         if(empty($id) && $num >= 1){
              //没有记录，添加
              $insertData = [
                  'year' => $year,
                  'week' => $week,
                  'user_id' => $userId,
-                 'score' => config::$scoreLink[$type],
+                 'score' => $score,
              ];
-             $insertData[config::$typeColumnLink[$type]] = 1;
+             $insertData[$column] = $value;
              $model->insert($insertData);
          }else{
              //increment
-             $model->increment(config::$typeColumnLink[$type]);
+             $updateData = [
+                 $column => Db::raw("{$column} + {$num}"),
+                 'score' => Db::raw("score + {$score}"),
+             ];
+             $model->where('id', $id)->update($updateData);
          }
     }
 }
