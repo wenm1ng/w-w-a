@@ -110,8 +110,9 @@ class HelpCenterService
             ],
         ];
 
-        $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num,is_adopt_answer';
+        $fields = 'id,help_id,user_id,image_url,description,modify_at,favorites_num,comment_num,is_adopt_answer,wa_content';
         if($isMyself){
+            $where['order'] = ['id' => 'desc'];
             $where['where'][] = ['user_id', '=', Common::getUserId()];
             $list = WowHelpAnswerModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
         }else{
@@ -121,10 +122,17 @@ class HelpCenterService
         $list = (new UserService())->mergeUserInfo($list);
         $waIds = array_column($list, 'id');
         $list = $this->mergeCount($list, $waIds, 4);
+        $isAnswer = 0;
+        $userId = Common::getUserId();
         foreach ($list as &$val) {
             $val['modify_at'] = getTimeFormat($val['modify_at']);
+            $val['wa_content_show'] = !empty($val['wa_content']) ? substr($val['wa_content'], 0, 30).'...' : '';
+            if(!empty($userId) && $val['user_id'] == $userId){
+                $isAnswer = 1;
+            }
         }
-        return ['list' => $list];
+
+        return ['list' => $list, 'is_answer' => $isAnswer];
     }
 
 
@@ -320,6 +328,9 @@ class HelpCenterService
         $insertData = [
             'help_id' => $params['help_id'],
             'description' => $params['description'],
+            'description_num' => call_user_func(function()use($params){
+                return mb_strlen(str_replace(' ', '', $params['description']));
+            }),
             'wa_content' => $params['wa_content'] ?? '',
             'image_url' => $imageUrl,
             'user_id' => $userId
@@ -329,7 +340,7 @@ class HelpCenterService
         //添加回答数量
         $this->incrementHelpAnswerNum($params['help_id'], 1);
         //积分记录
-        LeaderBoardModel::incrementScore($userId, 2, date('Y-m-d H:i:s'));
+        LeaderBoardModel::incrementScore($userId, 2, date('Y-m-d H:i:s'), 1, $insertData['description_num']);
 
         $info = WowHelpCenterModel::query()->where('id', $params['help_id'])->first();
         if(!empty($info)){
@@ -513,6 +524,7 @@ class HelpCenterService
         $list = [$info->toArray()];
         $list = (new UserService())->mergeUserInfo($list);
         $list = $this->mergeCount($list, [$id], 4);
+        $list[0]['wa_content_show'] = !empty($info['wa_content']) ? substr($info['wa_content'], 0, 30).'...' : '';
 
         return $list[0];
     }
@@ -525,7 +537,7 @@ class HelpCenterService
      * @return array
      */
     public function delAnswer(array $params){
-        $info = WowHelpAnswerModel::query()->where('id', $params['id'])->first(['user_id','is_adopt_answer','create_at']);
+        $info = WowHelpAnswerModel::query()->where('id', $params['id'])->first(['user_id','is_adopt_answer','create_at','description_num']);
         if(empty($info)){
             CommonException::msgException('回答不存在');
         }
@@ -540,7 +552,7 @@ class HelpCenterService
 
         $this->incrementHelpAnswerNum($params['help_id'], -1);
 
-        LeaderBoardModel::incrementScore($userId, 2, $info['create_at'], -1);
+        LeaderBoardModel::incrementScore($userId, 2, $info['create_at'], -1, -$info['description_num']);
         return [];
     }
 

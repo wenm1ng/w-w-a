@@ -20,7 +20,7 @@ class LeaderBoardModel extends EasyModel
 
     protected $keyType = 'int';
 
-    public static function incrementScore($userId, int $type, string $dateTime, int $num = 1){
+    public static function incrementScore($userId, int $type, string $dateTime, int $num = 1, int $descriptionNum = 0){
          $year = date('Y', strtotime($dateTime));
          $week = date('W', strtotime($dateTime)) + config::WEEK_OFFSET;
          $model = self::query();
@@ -40,6 +40,7 @@ class LeaderBoardModel extends EasyModel
                  'week' => $week,
                  'user_id' => $userId,
                  'score' => $score,
+                 'description_num' => $descriptionNum
              ];
              $insertData[$column] = $value;
              $model->insert($insertData);
@@ -48,6 +49,7 @@ class LeaderBoardModel extends EasyModel
              $updateData = [
                  $column => Db::raw("{$column} + {$num}"),
                  'score' => Db::raw("score + {$score}"),
+                 'description_num' => Db::raw('description_num + '.$descriptionNum)
              ];
              $model->where('id', $id)->update($updateData);
          }
