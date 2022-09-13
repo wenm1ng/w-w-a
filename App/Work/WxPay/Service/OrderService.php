@@ -40,7 +40,7 @@ class OrderService{
 
         $userInfo = Common::getUserInfo();
         $userId = $userInfo['user_id'];
-        $params['money'] = 0.01;
+//        $params['money'] = 0.01;
         $money = $params['money'] * 100;
         $outTradeNo = date('YmdHis').getRandomStr(18);
         $result = (new WxPayService())->wxAddOrder($money, $userInfo['openId'], $outTradeNo);
