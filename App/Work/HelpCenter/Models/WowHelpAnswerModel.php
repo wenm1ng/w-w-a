@@ -17,4 +17,8 @@ class WowHelpAnswerModel extends EasyModel
     protected $primaryKey = 'id';
 
     protected $keyType = 'int';
+
+    public function help_info(){
+        return $this->belongsTo('App\Work\HelpCenter\Models\WowHelpCenterModel','help_id','id');
+    }
 }

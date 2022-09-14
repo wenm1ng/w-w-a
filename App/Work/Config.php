@@ -18,6 +18,17 @@ Class Config{
     const REDIS_KEY_USER = 'user';
     //周数偏移量
     const WEEK_OFFSET = 1;
+    //回答有积分字数限制长度值
+    const SCORE_DESCRIPTION_LENGTH = 15;
+    //针对wow前端组件做的周数容错
+    public static $yearLinkWeek = [
+        2021 => 1,
+        2022 => 1,
+        2023 => 1,
+        2024 => 1,
+        2025 => 1,
+        2026 => 0,
+    ];
     //奖励
     public static $award = [
         0 => '敬请期待',

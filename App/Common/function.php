@@ -36,6 +36,48 @@ function handleErrorMsg($e){
 }
 
 /**
+ * @desc       获取小程序周和年
+ * @author     文明<736038880@qq.com>
+ * @date       2022-09-14 15:11
+ * @param string $dateTime
+ *
+ * @return array
+ */
+function getWowWeekYear(string $dateTime){
+    $time = strtotime($dateTime);
+    $year = date('Y', $time);
+    $month = (int)date('m', $time);
+    $week = (int)date('W', $time);
+    if($week > 40 && $month == 1){
+        //第二年的头几天，当成前一年最后一周算
+        $year = $year - 1;
+    }
+    $week = $week + workConfig::$yearLinkWeek[$year];
+
+    return ['year' => $year, 'week' => $week];
+}
+
+/**
+ * @desc       二维数组根据二级键值排序
+ * @author     文明<736038880@qq.com>
+ * @date       2022-09-14 16:13
+ * @param array  $array
+ * @param string $key
+ * @param bool   $isAsc
+ *
+ * @return array
+ */
+function arrayKeySort(array $array, string $key, $isAsc = false) {
+    $sort = $isAsc ? SORT_ASC : SORT_DESC;
+    $keysValue = [];
+    foreach ($array as $k => $v) {
+        $keysValue[$k] = $v[$key];
+    }
+    array_multisort($keysValue, $sort, $array);
+    return $array;
+}
+
+/**
  * @desc       获取时间格式（多久前）
  * @author     文明<736038880@qq.com>
  * @date       2022-07-28 17:10

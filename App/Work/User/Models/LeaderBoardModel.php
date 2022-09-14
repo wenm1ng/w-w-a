@@ -7,7 +7,7 @@
 namespace User\Models;
 
 use App\Common\EasyModel;
-use App\Work\config;
+use App\Work\Config;
 use App\Utility\Database\Db;
 
 class LeaderBoardModel extends EasyModel
@@ -21,8 +21,13 @@ class LeaderBoardModel extends EasyModel
     protected $keyType = 'int';
 
     public static function incrementScore($userId, int $type, string $dateTime, int $num = 1, int $descriptionNum = 0){
-         $year = date('Y', strtotime($dateTime));
-         $week = date('W', strtotime($dateTime)) + config::WEEK_OFFSET;
+         //如果描述字数大于0，说明是回答，需要>=15才予积分
+         if($descriptionNum > 0 && $descriptionNum < Config::SCORE_DESCRIPTION_LENGTH){
+             return;
+         }
+         $timeData = getWowWeekYear($dateTime);
+         $year = $timeData['year'];
+         $week = $timeData['week'];
          $model = self::query();
          $id = $model
              ->where('year', $year)
@@ -30,8 +35,8 @@ class LeaderBoardModel extends EasyModel
              ->where('user_id', $userId)
              ->value('id');
 
-         $column = config::$typeColumnLink[$type];
-         $value = config::$scoreLink[$type];
+         $column = Config::$typeColumnLink[$type];
+         $value = Config::$scoreLink[$type];
          $score = $value * $num;
          if(empty($id) && $num >= 1){
              //没有记录，添加

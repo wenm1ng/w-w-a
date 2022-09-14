@@ -15,6 +15,8 @@ use EasySwoole\EasySwoole\Config as SettingConfig;
 use App\Utility\Common;
 use App\Work\Chat\Service\ChatService;
 use Common\Common as CommonCommon;
+use EasySwoole\EasySwoole\Crontab\Crontab;
+use App\Crontab\WowLeaderBoardCrontab;
 
 class EasySwooleEvent implements Event
 {
@@ -39,8 +41,12 @@ class EasySwooleEvent implements Event
     {
         //助手函数
         require_once "App/Common/function.php";
+        //只有线上跑排行榜定时任务
+        if(config('app.environment') === 'dev'){
+            Crontab::getInstance()->addTask(WowLeaderBoardCrontab::class);
+        }
 
-        self::hotReload();
+//        self::hotReload();
         //开启聊天websocket
 //        $register->set($register::onOpen, function ($ws, $request) {
 ////            var_dump($request->fd, $request->server);

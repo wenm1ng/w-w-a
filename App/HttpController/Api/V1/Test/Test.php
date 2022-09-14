@@ -11,6 +11,8 @@ use Common\CodeKey;
 use Wa\Service\WaService;
 use User\Service\UserService;
 use User\Service\LeaderBoardService;
+use EasySwoole\EasySwoole\Task\TaskManager;
+use App\Task\WowLeaderBoardTask;
 
 class Test extends LoginController
 {
@@ -25,6 +27,20 @@ class Test extends LoginController
         return $this->apiResponse(function () {
             $params = $this->getRequestJsonData();
             return (new LeaderBoardService())->aKeySyncRedis();
+        });
+    }
+
+    /**
+     * @desc       手动执行定时任务
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-14 16:43
+     * @return bool
+     */
+    public function handLeaderBoard(){
+        return $this->apiResponse(function () {
+            // 定时任务的执行逻辑
+            $task = TaskManager::getInstance();
+            return $task->async(new WowLeaderBoardTask());
         });
     }
 }
