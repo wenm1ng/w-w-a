@@ -21,8 +21,8 @@ class WowLeaderBoardCrontab extends AbstractCronTask
         //分 时 日 月 周
         //0  0  *  *  1
         //每周1的00 : 01执行
-//        return '1 0 * * 1';
-        return '27 18 * * *';
+        return '1 0 * * 1';
+//        return '27 18 * * *';
     }
 
     public static function getTaskName(): string

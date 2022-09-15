@@ -98,7 +98,11 @@ class LoginService
                     $userInfo['user_id'] = $jwtObject->getAud();
 //                    $jwtObject->getAlg();
 //                    $jwtObject->getAud();
-                    $userInfo = array_merge($userInfo, $jwtObject->getData());
+                    $data = $jwtObject->getData();
+                    if(empty($data['openId'])){
+                        throw new \Exception('Authorization过期，请重新登录', CodeKey::EXPIRED_TOKEN);
+                    }
+                    $userInfo = array_merge($userInfo, $data);
 //                    $jwtObject->getAlg();
 //                    $jwtObject->getAud();
 //                    $jwtObject->getData();

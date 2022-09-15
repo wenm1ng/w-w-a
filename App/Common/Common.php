@@ -185,7 +185,7 @@ Class Common{
         $token = Common::getUserToken();
         if($token === 'test_php'){
             $userId = self::getFixUserId();
-            $userInfo = ['user_id' => $userId, 'parent_id' => $userId, 'user_name' => 'test_user', 'agent_id' => 3];
+            $userInfo = ['user_id' => $userId, 'parent_id' => $userId, 'user_name' => 'test_user'];
         }else{
             $userInfo = $token ? (new LoginService())->checkToken($token) : '';
         }
@@ -199,9 +199,17 @@ Class Common{
         return $userId;
     }
 
+    public static function getUserOpenId()
+    {
+        $userInfo = self::getUserInfo();
+        $userId = $userInfo['openId'] ?? '';
+
+        return $userId;
+    }
+
     public static function getFixUserId(){
         global $_USER_INFO;
-        return $_USER_INFO['user_id'] ?? 1013;
+        return $_USER_INFO['user_id'] ?? 2;
     }
 
     /**

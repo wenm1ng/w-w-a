@@ -47,6 +47,6 @@ class WaValidator extends BaseValidator
     public function checkComment(array $params){
         $this->addColumn('content')->notEmpty('评论内容不能为空');
         $this->addColumn('wa_id')->notEmpty('所属wa不能为空');
-        $this->checkText($params['content']);
+        $this->checkText($params['content'], 2);
     }
 }

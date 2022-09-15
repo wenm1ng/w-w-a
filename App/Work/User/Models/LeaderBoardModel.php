@@ -23,7 +23,7 @@ class LeaderBoardModel extends EasyModel
     public static function incrementScore($userId, int $type, string $dateTime, int $num = 1, int $descriptionNum = 0){
          //如果描述字数大于0，说明是回答，需要>=15才予积分
          if($descriptionNum > 0 && $descriptionNum < Config::SCORE_DESCRIPTION_LENGTH){
-             return;
+             $descriptionNum = 0;
          }
          $timeData = getWowWeekYear($dateTime);
          $year = $timeData['year'];

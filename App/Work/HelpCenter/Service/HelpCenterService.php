@@ -552,7 +552,7 @@ class HelpCenterService
 
         $this->incrementHelpAnswerNum($params['help_id'], -1);
 
-        LeaderBoardModel::incrementScore($userId, 2, $info['create_at'], -1, -$info['description_num']);
+        LeaderBoardModel::incrementScore($userId, 2, $info['create_at'], -1, $info['description_num']);
         return [];
     }
 

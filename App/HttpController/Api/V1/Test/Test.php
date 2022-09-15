@@ -13,6 +13,7 @@ use User\Service\UserService;
 use User\Service\LeaderBoardService;
 use EasySwoole\EasySwoole\Task\TaskManager;
 use App\Task\WowLeaderBoardTask;
+use User\Service\CommonService;
 
 class Test extends LoginController
 {
@@ -42,5 +43,11 @@ class Test extends LoginController
             $task = TaskManager::getInstance();
             return $task->async(new WowLeaderBoardTask());
         });
+    }
+
+    public function test(){
+        $url = 'http://wenming.online/public/uploads/20220713/35141348beb9ec3881d842c6b715db56.jpg';
+        $openId = 'osEzx5LPUZz_Tq08nRqgBX4RPxEs';
+        (new CommonService())->wxCheckImage($url, $openId);
     }
 }

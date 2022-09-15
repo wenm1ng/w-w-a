@@ -38,6 +38,8 @@ class Router extends AbstractRouter
             $this->order($collector, $apiBasePathOpenV1);
             //微信支付
             $this->wxPay($collector, $apiBasePathOpenV1);
+            //微信回调
+            $this->wxCallBack($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -204,5 +206,11 @@ class Router extends AbstractRouter
     {
         //支付回调
         $collector->post('/wx-pay/callback',$basePath.'Order/WxPay/wxPayCallback');
+    }
+
+    public function wxCallBack(RouteCollector $collector, string $basePath = '')
+    {
+        //消息回调
+        $collector->get('/wx-callback',$basePath.'WxCallBack/WxCallBack/callBack');
     }
 }

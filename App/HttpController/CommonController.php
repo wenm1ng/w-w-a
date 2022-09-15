@@ -16,50 +16,75 @@ use App\Exceptions\CommonException;
 class CommonController extends Controller
 {
 
+    // 白名单列表, 注意请求方式
+    protected $uriWhiteList = [
+        '/api/v1/wx-pay/callback'=> ['POST'],
+        '/api/v1/wx-callback' => ['POST'],
+    ];
+
+    /**
+     * 是否包含在白名单
+     * @return bool
+     */
+    public function includedInWhiteList()
+    {
+        $servers = $this->request()->getServerParams();
+        //获取当前路由uri
+        if ( array_key_exists( $servers['request_uri'], $this->uriWhiteList) ) {
+            if (in_array($servers['request_method'], $this->uriWhiteList[$servers['request_uri']])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     protected function commonRequest(?string $action, int $isCheckLogin = 1): ?bool
     {
         $status = true;
-        try {
-            //验证token
-            $authorization = $this->request()->getHeader('authorization');
+        if(!$this->includedInWhiteList()) {
 
-            $loginService = new LoginService();
-            $auth = !empty($authorization[0]) ? $authorization[0] : '';
-            if($auth === 'test_php'){
-                $userIds = $this->request()->getHeader('test_user_id');
-                if(empty($userIds[0])){
-                    $userIds = $this->request()->getHeader('testuserid');
+            try {
+                //验证token
+                $authorization = $this->request()->getHeader('authorization');
+
+                $loginService = new LoginService();
+                $auth = !empty($authorization[0]) ? $authorization[0] : '';
+                if ($auth === 'test_php') {
+                    $userIds = $this->request()->getHeader('test_user_id');
+                    if (empty($userIds[0])) {
+                        $userIds = $this->request()->getHeader('testuserid');
+                    }
+                    $userId = $userIds[0] ?? 2;
+                    Common::setUserId($userId);
+                } else {
+                    $this->checkSign($loginService);
+                    if ($isCheckLogin) {
+                        $userId = $loginService->checkToken($auth);
+                    } else {
+                        $userId = 0;
+                    }
                 }
-                $userId = $userIds[0] ?? 2;
-                Common::setUserId($userId);
-            }else{
-                $this->checkSign($loginService);
-                if($isCheckLogin){
-                    $userId = $loginService->checkToken($auth);
-                }else{
-                    $userId = 0;
+
+                //将用户id写进header头
+                $this->request()->withAddedHeader('user_id', $userId);
+                $body = json_decode($this->request()->getBody()->__toString(), true);
+                $body['user_id'] = $userId;
+                Common::setUserToken($auth);
+                //将解析出来的user_id重新写进body
+                $this->request()->withBody(\GuzzleHttp\Psr7\stream_for(json_encode($body)));
+            } catch (\Exception $exception) {
+                if ($exception->getCode() === CodeKey::SIGN_ERROR) {
+                    $status = false;
+                    $this->writeJson($exception->getCode() ?? CodeKey::EXPIRED_TOKEN, $exception->getMessage(), $exception->getMessage());
+                } elseif ($isCheckLogin) {
+                    $status = false;
+                    $this->writeJson($exception->getCode() ?? CodeKey::EXPIRED_TOKEN, $exception->getMessage(), $exception->getMessage());
                 }
-            }
 
-            //将用户id写进header头
-            $this->request()->withAddedHeader('user_id', $userId);
-            $body = json_decode($this->request()->getBody()->__toString(), true);
-            $body['user_id'] = $userId;
-            Common::setUserToken($auth);
-            //将解析出来的user_id重新写进body
-            $this->request()->withBody(\GuzzleHttp\Psr7\stream_for(json_encode($body)));
-        } catch (\Exception $exception) {
-            if($exception->getCode() === CodeKey::SIGN_ERROR){
-                $status = false;
-                $this->writeJson($exception->getCode() ?? CodeKey::EXPIRED_TOKEN, $exception->getMessage(), $exception->getMessage());
-            }elseif($isCheckLogin){
-                $status = false;
-                $this->writeJson($exception->getCode() ?? CodeKey::EXPIRED_TOKEN, $exception->getMessage(), $exception->getMessage());
+                Common::log('刊登BaseController Exception:' . $exception->getMessage(), 'BaseController');
             }
-
-            Common::log('刊登BaseController Exception:' . $exception->getMessage(), 'BaseController');
         }
-
         return $status;
     }
 

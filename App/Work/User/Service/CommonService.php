@@ -158,6 +158,67 @@ class CommonService
     }
 
     /**
+     * @desc       wx检测文本是否规格
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-15 10:22
+     * @param string $text
+     * @param string $openId
+     * @param int    $scene 2评论 3论坛
+     *
+     * @return int
+     */
+    public function wxCheckText(string $text, string $openId, int $scene){
+
+        $accessToken = $this->getAccessToken();
+        $url = 'https://api.weixin.qq.com/wxa/msg_sec_check?access_token='. $accessToken;
+        $requestData = [
+            'version' => 2,
+            'openid' => $openId,
+            'scene' => $scene,
+            'content' => $text,
+        ];
+        Common::log('requestData:'.json_encode($requestData, JSON_UNESCAPED_UNICODE), 'wxCheckText');
+        $result = httpClientCurl($url, json_encode($requestData));
+        Common::log('responseData:'.json_encode($result, JSON_UNESCAPED_UNICODE), 'wxCheckText');
+        if($result['errcode'] === 0){
+            if($result['detail']['label'] == 100){
+                //成功
+                return 1;
+            }else{
+                //包含违规内容
+                return 0;
+            }
+        }
+        //请求失败
+        return -1;
+    }
+
+    /**
+     * @desc       微信违规图片校验
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-15 15:06
+     * @param string $imageUrl
+     * @param string $openId
+     *
+     * @return array
+     */
+    public function wxCheckImage(string $imageUrl, string $openId){
+        $accessToken = $this->getAccessToken();
+        $url = 'https://api.weixin.qq.com/wxa/media_check_async?access_token='. $accessToken;
+        $requestData = [
+            'version' => 2,
+            'openid' => $openId,
+            'media_type' => 2,
+            'scene' => 3,
+            'media_url' => $imageUrl,
+        ];
+        Common::log('requestData:'.json_encode($requestData, JSON_UNESCAPED_UNICODE), 'wxCheckImage');
+        $result = httpClientCurl($url, json_encode($requestData));
+        Common::log('responseData:'.json_encode($result, JSON_UNESCAPED_UNICODE), 'wxCheckImage');
+        return [];
+    }
+
+    /**
      * @desc       获取access_token
      * @author     文明<736038880@qq.com>
      * @date       2022-09-01 10:10
@@ -175,7 +236,7 @@ class CommonService
         $accessToken = '';
         if(!empty($return['access_token'])){
             $accessToken = $return['access_token'];
-            redis()->set(Config::ACCESS_TOKEN_KEY, $return['access_token'], 7200);
+            redis()->set(Config::ACCESS_TOKEN_KEY, $return['access_token'], 7100);
         }
         return $accessToken;
     }

@@ -28,7 +28,8 @@ class HelpCenterValidator extends BaseValidator
         $this->addColumn('help_type')->notEmpty('求助类型不能为空');
         $this->addColumn('description')->notEmpty('求助详细描述不能为空');
         $this->addColumn('is_pay')->required('是否有偿求助不能为空');
-        $this->checkText($params['description']);
+        $this->checkText($params['description'], 3);
+        $this->checkText($params['title'], 3);
         if($params['is_pay'] == 1){
             if(empty($params['coin'])){
                 CommonException::msgException('奖励币数不能为空');
@@ -52,13 +53,22 @@ class HelpCenterValidator extends BaseValidator
     public function checkAddAnswer(array $params){
         $this->addColumn('help_id')->notEmpty('求助id不能为空');
         $this->addColumn('description')->notEmpty('描述不能为空');
-        $this->checkText($params['description']);
+        $this->checkText($params['description'], 3);
+
+        //wa检测
+        if(!empty($params['wa_content'])){
+            if(strpos($params['wa_content'], '!') !== 0){
+                CommonException::msgException('WA字符串格式有误', 408);
+            }
+            $checkWaContent = mb_substr($params['wa_content'], 0, 30);
+            $this->checkText($checkWaContent, 3);
+        }
     }
 
     public function checkUpdateAnswer(array $params){
         $this->checkId();
         $this->addColumn('help_id')->notEmpty('求助id不能为空');
         $this->addColumn('description')->notEmpty('描述不能为空');
-        $this->checkText($params['description']);
+        $this->checkText($params['description'], 3);
     }
 }
