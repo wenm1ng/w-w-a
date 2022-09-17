@@ -149,6 +149,7 @@ class Router extends AbstractRouter
         $collector->post('/upload',$basePath.'File/File/uploadImage');
         $collector->post('/sync-redis',$basePath.'Test/Test/aKeySyncRedis');
         $collector->post('/hand-leader-board',$basePath.'Test/Test/handLeaderBoard');
+        $collector->post('/test/collet-mount',$basePath.'Test/Test/collectMount');
 
     }
 
