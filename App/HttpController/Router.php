@@ -40,6 +40,8 @@ class Router extends AbstractRouter
             $this->wxPay($collector, $apiBasePathOpenV1);
             //微信回调
             $this->wxCallBack($collector, $apiBasePathOpenV1);
+            //坐骑相关
+            $this->mount($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -214,4 +216,13 @@ class Router extends AbstractRouter
         //消息回调
         $collector->get('/wx-callback',$basePath.'WxCallBack/WxCallBack/callBack');
     }
+
+    public function mount(RouteCollector $collector, string $basePath = '')
+    {
+        //坐骑列表
+        $collector->get('/mount/list',$basePath.'Mount/Mount/getList');
+        //进行坐骑抽奖
+        $collector->post('/mount/lottery',$basePath.'Mount/Mount/doLottery');
+    }
+
 }

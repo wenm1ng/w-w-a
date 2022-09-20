@@ -14,6 +14,8 @@ Class Config{
     const REDIS_KEY_BOARD = 'leaderBoard';
     //排行榜详细信息缓存名
     const REDIS_KEY_BOARD_INFO = 'leaderBoardInfo';
+    //坐骑列表缓存名
+    const REDIS_KEY_MOUNT_LIST = 'mountMember';
     //用户缓存名
     const REDIS_KEY_USER = 'user';
     //周数偏移量
