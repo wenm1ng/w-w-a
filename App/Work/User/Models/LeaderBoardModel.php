@@ -38,6 +38,7 @@ class LeaderBoardModel extends EasyModel
          $column = Config::$typeColumnLink[$type];
          $value = Config::$scoreLink[$type];
          $score = $value * $num;
+        $descriptionNum = $descriptionNum * $num;
          if(empty($id) && $num >= 1){
              //没有记录，添加
              $insertData = [
