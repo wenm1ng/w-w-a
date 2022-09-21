@@ -39,4 +39,16 @@ class Mount extends BaseController
         });
     }
 
+    /**
+     * @desc       获取抽奖记录日志列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-21 16:09
+     * @return bool
+     */
+    public function getLotteryLogList(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new MountService())->getLotteryLogList($params);
+        });
+    }
 }

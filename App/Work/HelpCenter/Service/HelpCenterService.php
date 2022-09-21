@@ -279,23 +279,32 @@ class HelpCenterService
             $fileName = saveFileDataImage($data, '/help', $filend);
             $imageUrl = getInterImageName($fileName);
         }
-        $userId = Common::getUserId();
-        $insertData = [
-            'title' => $params['title'],
-            'description' => $params['description'],
-            'help_type' => $params['help_type'],
-            'version' => $params['version'],
-            'image_url' => $imageUrl,
-            'user_id' => $userId,
-            'status' => 1,
-            'is_pay' => $params['is_pay'],
-            'coin' => !empty($params['coin']) ? (int)$params['coin'] : 0
-        ];
-        $helpId = WowHelpCenterModel::query()->insertGetId($insertData);
-        if($params['is_pay'] == 1){
-            //如果是有偿求助，走付费流程
-            (new WalletService())->operateMoney(-$params['coin'], (int)$userId, 2, $helpId);
+        try{
+            DB::beginTransaction();
+            $userId = Common::getUserId();
+            $insertData = [
+                'title' => $params['title'],
+                'description' => $params['description'],
+                'help_type' => $params['help_type'],
+                'version' => $params['version'],
+                'image_url' => $imageUrl,
+                'user_id' => $userId,
+                'status' => 1,
+                'is_pay' => $params['is_pay'],
+                'coin' => !empty($params['coin']) ? (int)$params['coin'] : 0
+            ];
+            $helpId = WowHelpCenterModel::query()->insertGetId($insertData);
+            if($params['is_pay'] == 1){
+                //如果是有偿求助，走付费流程
+                (new WalletService())->operateMoney(-$params['coin'], (int)$userId, 2, $helpId);
+            }
+            DB::commit();
+        }catch (\Exception $e){
+            DB::rollBack();
+            Common::log($e->getMessage().'_'.$e->getFile().'_'.$e->getLine(), 'sqlTransaction');
+            CommonException::msgException('系统错误');
         }
+
         return $helpId;
     }
 
@@ -325,22 +334,31 @@ class HelpCenterService
         $userInfo = Common::getUserInfo();
         $userId = $userInfo['user_id'];
 
-        $insertData = [
-            'help_id' => $params['help_id'],
-            'description' => $params['description'],
-            'description_num' => call_user_func(function()use($params){
-                return mb_strlen(str_replace(' ', '', $params['description']));
-            }),
-            'wa_content' => $params['wa_content'] ?? '',
-            'image_url' => $imageUrl,
-            'user_id' => $userId
-        ];
+        try{
+            DB::beginTransaction();
+            $insertData = [
+                'help_id' => $params['help_id'],
+                'description' => $params['description'],
+                'description_num' => call_user_func(function()use($params){
+                    return mb_strlen(str_replace(' ', '', $params['description']));
+                }),
+                'wa_content' => $params['wa_content'] ?? '',
+                'image_url' => $imageUrl,
+                'user_id' => $userId
+            ];
 
-        $id = WowHelpAnswerModel::query()->insertGetId($insertData);
-        //添加回答数量
-        $this->incrementHelpAnswerNum($params['help_id'], 1);
-        //积分记录
-        LeaderBoardModel::incrementScore($userId, 2, date('Y-m-d H:i:s'), 1, $insertData['description_num']);
+            $id = WowHelpAnswerModel::query()->insertGetId($insertData);
+            //添加回答数量
+            $this->incrementHelpAnswerNum($params['help_id'], 1);
+            //积分记录
+            LeaderBoardModel::incrementScore($userId, 2, date('Y-m-d H:i:s'), 1, $insertData['description_num']);
+            DB::commit();
+        }catch (\Exception $e){
+            DB::rollBack();
+            Common::log($e->getMessage().'_'.$e->getFile().'_'.$e->getLine(), 'sqlTransaction');
+            CommonException::msgException('系统错误');
+        }
+
 
         $info = WowHelpCenterModel::query()->where('id', $params['help_id'])->first();
         if(!empty($info)){

@@ -223,6 +223,8 @@ class Router extends AbstractRouter
         $collector->get('/mount/list',$basePath.'Mount/Mount/getList');
         //进行坐骑抽奖
         $collector->post('/mount/lottery',$basePath.'Mount/Mount/doLottery');
+        //坐骑抽奖日志列表
+        $collector->get('/mount/lottery-log-list',$basePath.'Mount/Mount/getLotteryLogList');
     }
 
 }

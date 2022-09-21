@@ -46,14 +46,14 @@ class Lottery{
         // 中奖 id
         $rid = self::get_rand($arr);
         if($rid == 2){
-            $mountId = '';
             $awardName = self::$defaultAward[$randNum-1]['name'];
             $imageUrl = self::$defaultAward[$randNum-1]['image_url'];
         }
         $return = [
             'id' => $mountId,
             'name' => $awardName,
-            'image_url' => $imageUrl
+            'image_url' => $imageUrl,
+            'is_bingo' => $rid == 2 ? 0 : 1,
         ];
         return $return;
 

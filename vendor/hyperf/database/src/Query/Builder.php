@@ -2273,6 +2273,7 @@ class Builder
     public function update(array $values)
     {
         $sql = $this->grammar->compileUpdate($this, $values);
+        \EasySwoole\EasySwoole\Logger::getInstance()->log($sql . " - ", \EasySwoole\EasySwoole\Logger::LOG_LEVEL_INFO, 'sql_debug');
 
         return $this->connection->update($sql, $this->cleanBindings($this->grammar->prepareBindingsForUpdate($this->bindings, $values)));
     }

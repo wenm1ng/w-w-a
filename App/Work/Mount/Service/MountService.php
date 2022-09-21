@@ -119,46 +119,109 @@ class MountService
         return $return;
     }
 
+    /**
+     * @desc       记录抽奖日志
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-21 10:51
+     * @param array $params
+     *
+     * @return bool
+     */
     private function addLotteryLog(array $params){
         $mountIds = array_filter(array_column($params, 'id'));
         if(empty($mountIds)){
-            return;
+            return false;
         }
-        $userId = Common::getUserId();
-        $list = WowMountLogModel::query()->whereIn('mount_id', $mountIds)->where('user_id', $userId)->select(DB::raw('mount_id,times,suc_times'))->get()->toArray();
-        $list = array_column($list, null, 'mount_id');
-        $insertData = [];
-        foreach ($params as $val) {
-            $list[$val['id']]['times']++;
-            if(empty($val['id'])){
-                continue;
-            }
-            if(!isset($list[$val['id']])){
-                //新增
-                $insertData[$val['id']] = [
-                    'user_id' => $userId,
-                    'mount_id' => $val['id'],
-                    'times' => 1,
-                    'suc_times' => '1'
-                ];
-                $list[$val['id']] = [
-                    'times' => 1,
-                    'suc_times' => '1'
-                ];
-                continue;
-            }
-            //编辑
-            if(isset($insertData[$val['id']])){
-                $insertData[$val['id']]['times']++;
-                $insertData[$val['id']]['suc_times'] .= ','. $insertData[$val['id']]['times'];
-                continue;
-            }
 
-            $updateData = [
-                'times' => DB::raw('times + 1'),
-                'suc_times' => DB::raw('concat(suc_times, ",", '.$list[$val['id']].')')
-            ];
-            WowMountLogModel::query()->where('id', $val['id'])->update($updateData);
+        try{
+            DB::beginTransaction();
+            $userId = Common::getUserId();
+            $list = WowMountLogModel::query()->whereIn('mount_id', $mountIds)->where('user_id', $userId)->select(DB::raw('id,mount_id,times,suc_times_record,suc_times'))->get()->toArray();
+            $list = array_column($list, null, 'mount_id');
+            $insertData = [];
+            foreach ($params as $val) {
+                $list[$val['id']]['times'] = (!empty($list[$val['id']]['times']) ? $list[$val['id']]['times'] : 0) + 1;
+                $list[$val['id']]['suc_times'] = (!empty($list[$val['id']]['suc_times']) ? $list[$val['id']]['suc_times'] : 0) + ($val['is_bingo'] ? 1 : 0);
+                if(!isset($list[$val['id']]['suc_times_record'])){
+                    //新增
+                    $insertData[$val['id']] = [
+                        'user_id' => $userId,
+                        'mount_id' => $val['id'],
+                        'times' => 1,
+                        'suc_times' => $val['is_bingo'] ? 1 : 0,
+                        'suc_times_record' => $val['is_bingo'] ? ',1' : '',
+                    ];
+                    $list[$val['id']]['suc_times_record'] = $insertData[$val['id']]['suc_times_record'];
+                    continue;
+                }
+                //此次抽奖出现多次 DB没有记录的坐骑
+                if(isset($insertData[$val['id']])){
+                    $insertData[$val['id']]['times'] = $list[$val['id']]['times'];
+                    $insertData[$val['id']]['suc_times'] = $list[$val['id']]['suc_times'];
+                    if($val['is_bingo']){
+                        $insertData[$val['id']]['suc_times_record'] .= ','. $list[$val['id']]['times'];
+                    }
+                    continue;
+                }
+                //编辑
+                $list[$val['id']]['suc_times_record'] .= ','.$list[$val['id']]['times'];
+                $updateData = [
+                    'times' => DB::raw('times + 1'),
+                ];
+                if($val['is_bingo']){
+                    $updateData['suc_times_record'] = DB::raw('concat(suc_times_record, ",", '.$list[$val['id']]['times'].')');
+                    $updateData['suc_times'] = DB::raw('suc_times + 1');
+                }
+                WowMountLogModel::query()->where('id', $list[$val['id']]['id'])->update($updateData);
+            }
+            if(!empty($insertData)){
+                $insertData = array_values($insertData);
+                WowMountLogModel::query()->insert($insertData);
+            }
+            DB::commit();
+        }catch (\Exception $e){
+            DB::rollBack();
+            Common::log($e->getMessage().'_'.$e->getFile().'_'.$e->getLine(), 'sqlTransaction');
+            CommonException::msgException('系统错误');
         }
+        return true;
+    }
+
+    /**
+     * @desc       获取坐骑抽奖记录列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-21 16:06
+     * @param array $params
+     *
+     * @return array
+     */
+    public function getLotteryLogList(array $params){
+        $this->validator->checkPage();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+
+        if (!empty($params['order']) && !empty($params['sort'])) {
+            $where['order'] = [$params['order'] => $params['sort'], 'id' => 'desc'];
+        } else {
+            $where['order'] = ['times' => 'desc', 'id' => 'desc'];
+        }
+        $fields = 'id,mount_id,times,suc_times_record,suc_times';
+        $list = WowMountLogModel::baseQuery($where)
+            ->with([
+                'mount_info'=>function($query){
+                    $query->select('id','name');
+                }
+            ])
+            ->whereHas('mount_info',function($query)use ($params){
+                if (!empty($params['name'])){
+                    $query->where('name','like','%' . $params['name'] . '%');
+                }
+            })
+            ->select(Db::raw($fields))
+            ->limit($params['pageSize'])->offset($params['pageSize'] * ($params['page'] - 1))
+            ->get()->toArray();
+
+        return ['list' => $list, 'page' => $params['page']];
     }
 }

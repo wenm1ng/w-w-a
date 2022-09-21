@@ -17,4 +17,8 @@ class WowMountLogModel extends EasyModel
     protected $primaryKey = 'id';
 
     protected $keyType = 'int';
+
+    public function mount_info(){
+        return $this->belongsTo('App\Work\Mount\Models\WowMountModel','mount_id','id');
+    }
 }
