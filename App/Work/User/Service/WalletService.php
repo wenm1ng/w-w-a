@@ -15,6 +15,8 @@ use User\Validator\UserValidate;
 use App\Work\WxPay\Models\WowUserWalletModel;
 use App\Work\WxPay\Models\WowOrderLogModel;
 use App\Exceptions\CommonException;
+use App\Work\Config;
+use App\Utility\Database\Db;
 
 class WalletService
 {
@@ -64,5 +66,54 @@ class WalletService
             'help_id' => $helpId
         ];
         WowOrderLogModel::query()->insert($logData);
+    }
+
+    /**
+     * @desc       转换币种
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-22 13:12
+     * @param $params
+     *
+     * @return array
+     */
+    public function transformMoney($params){
+//        int $originType, int $transformType, int $transformMoney
+        $this->validator->checkTransformMoney();
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+        $userId = Common::getUserId();
+        //替换类型字段映射
+        $transformLink = [
+            1 => 'money',
+            2 => 'lucky_coin'
+        ];
+        $nowMoney = WowUserWalletModel::query()->where('user_id', $userId)->value($transformLink[$params['origin_type']]);
+        if($nowMoney < $params['transform_money']){
+            CommonException::msgException('帮币余额不足');
+        }
+        try{
+            DB::beginTransaction();
+            //替换类型倍数映射
+            $multipleLink = [
+                2 => 100
+            ];
+            $resultMoney = $params['transform_money'] * $multipleLink[$params['transform_type']];
+            $updateData = [
+                $transformLink[$params['origin_type']] => Db::raw("`{$transformLink[$params['origin_type']]}` - {$params['transform_money']}"),
+                $transformLink[$params['transform_type']] => Db::raw("`{$transformLink[$params['transform_type']]}` + ".$resultMoney),
+            ];
+            WowUserWalletModel::query()->where('user_id', $userId)->update($updateData);
+            //扣减帮币
+            WowOrderLogModel::addSimpleOrderLog($params['origin_type'], 7, $userId, $params['transform_money']);
+            //添加幸运币
+            WowOrderLogModel::addSimpleOrderLog($params['transform_type'], 6, $userId, $resultMoney);
+            DB::commit();
+        }catch (\Exception $e){
+            DB::rollBack();
+            Common::log($e->getMessage().'_'.$e->getFile().'_'.$e->getLine(), 'sqlTransaction');
+            CommonException::msgException('系统错误');
+        }
+        return [];
     }
 }

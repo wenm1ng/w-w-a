@@ -54,19 +54,19 @@ class WowUserWalletModel extends EasyModel
      * @param int       $userId
      * @param float|int $money
      */
-    public static function incrementFreezeMoney(float $money, int $userId, int $type = 1)
+    public static function incrementLuckyCoin(int $coin, int $userId)
     {
-        $id = self::query()->where('user_id', $userId)->where('type', $type)->value('id');
+        $id = self::query()->where('user_id', $userId)->value('id');
         if(empty($id)){
             //新增钱包数据
             $insertData = [
-                'type' => $type,
-                'freeze_money' => $money,
+                'type' => 1,
+                'lucky_coin' => $coin,
                 'user_id' => $userId
             ];
             self::query()->insert($insertData);
         }else{
-            self::query()->where('id', $id)->update(['freeze_money' => Db::raw('freeze_money + '. $money)]);
+            self::query()->where('id', $id)->update(['lucky_coin' => Db::raw('lucky_coin + '. $coin)]);
         }
     }
 

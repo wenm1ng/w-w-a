@@ -42,6 +42,8 @@ class Router extends AbstractRouter
             $this->wxCallBack($collector, $apiBasePathOpenV1);
             //坐骑相关
             $this->mount($collector, $apiBasePathOpenV1);
+            //钱包相关
+            $this->wallet($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -227,4 +229,9 @@ class Router extends AbstractRouter
         $collector->get('/mount/lottery-log-list',$basePath.'Mount/Mount/getLotteryLogList');
     }
 
+    public function wallet(RouteCollector $collector, string $basePath = '')
+    {
+        //帮币转换幸运币
+        $collector->post('/wallet/add-lucky-coin',$basePath.'Wallet/Wallet/transformMoney');
+    }
 }

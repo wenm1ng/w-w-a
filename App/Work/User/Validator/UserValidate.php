@@ -50,4 +50,11 @@ class UserValidate extends Validate
         $this->addColumn('week')->notEmpty('周数不能为空');
         $this->addColumn('year')->notEmpty('年份不能为空');
     }
+
+    public function checkTransformMoney(){
+        //        int $originType, int $transformType, int $transformMoney
+        $this->addColumn('origin_type')->notEmpty('初始类型不能为空')->inArray([1], true, '初始类型错误');
+        $this->addColumn('transform_type')->notEmpty('替换类型不能为空')->inArray([2], true, '替换类型错误');
+        $this->addColumn('transform_money')->notEmpty('替换金额不能为空');
+    }
 }

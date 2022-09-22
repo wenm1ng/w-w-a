@@ -90,10 +90,14 @@ class OrderService{
             $where['where'][] = ['pay_type', '=', $params['pay_type']];
         }
 
+        if(!empty($params['order_type'])){
+            $where['where'][] = ['order_type', '=', $params['order_type']];
+        }
+
         if(!empty($params['month'])){
             $where['where'][] = ['date_month', '=', $params['month']];
         }
-        $fields = 'id,order_id,pay_type,amount,help_id,date_month,success_at';
+        $fields = 'id,order_id,order_type,pay_type,amount,help_id,date_month,success_at';
         $list = WowOrderLogModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
         $count = count($list);
         $list = Common::arrayGroup($list, 'date_month');

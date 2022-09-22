@@ -37,6 +37,7 @@ class CodeKey
     const FILE_UPLOAD_FAIL    = 1012; // 文件上传失败
 
     const WXPAY_ERROR     = 60001; //含有敏感词
+    const COIN_NOT_ENOUGH = 40001; //幸运币不足
 
 
     const SUCCESSMSG = 'Success';
