@@ -54,6 +54,9 @@ class Lottery{
             'name' => $awardName,
             'image_url' => $imageUrl,
             'is_bingo' => $rid == 2 ? 0 : 1,
+            'is_open' => 0,
+            'title' => '点击开刷',
+            'is_show_image' => 0
         ];
         return $return;
 
