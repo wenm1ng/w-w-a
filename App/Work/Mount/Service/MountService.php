@@ -53,11 +53,17 @@ class MountService
             $where['where'][] = ['name', 'like', "%{$params['name']}%"];
         }
         if (!empty($params['order']) && !empty($params['sort'])) {
+            if($params['order'] !== 'rate'){
+                CommonException::msgException('排序参数有误');
+            }
+            if(!in_array($params['sort'], ['desc','asc'])){
+                CommonException::msgException('排序参数有误');
+            }
             $where['order'] = [$params['order'] => $params['sort'], 'id' => 'desc'];
         } else {
             $where['order'] = ['rate' => 'asc', 'id' => 'desc'];
         }
-        $fields = 'id,name,image_url';
+        $fields = 'id,name,image_url,rate';
         $list = WowMountModel::baseQuery($where)->select(Db::raw($fields))->get()->toArray();
 
         return ['list' => $list];
@@ -129,6 +135,16 @@ class MountService
                 $return[] = Lottery::doDraw($list[$randNum-1]['name'], $list[$randNum-1]['rate'], $list[$randNum-1]['image_url'], $list[$randNum-1]['id']);
             }
         }
+        //测试代码
+//        foreach ($return as $key => &$val) {
+//            if(in_array($key, [0,1,3])){
+//                $val['is_bingo'] = 1;
+//                $val['image_url'] = 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg';
+//                $val['name'] = '奥利瑟拉佐尔的烈焰之爪';
+//                continue;
+//            }
+//            $val['is_bingo'] = 0;
+//        }
         $this->addLotteryLog($return);
         return $return;
     }
@@ -229,23 +245,34 @@ class MountService
             CommonException::msgException($this->validator->getError()->__toString());
         }
 
-        if (!empty($params['order']) && !empty($params['sort'])) {
-            $where['order'] = [$params['order'] => $params['sort'], 'id' => 'desc'];
-        } else {
-            $where['order'] = ['times' => 'desc', 'id' => 'desc'];
+        $userId = Common::getUserId();
+        $where = [
+            'where' => [
+                ['user_id', '=', $userId]
+            ]
+        ];
+
+        if(!empty($params['name'])){
+            $where['where'][] = ['m.name', 'like', "%{$params['name']}%"];
         }
-        $fields = 'id,mount_id,times,suc_times_record,suc_times';
-        $list = WowMountLogModel::baseQuery($where)
-            ->with([
-                'mount_info'=>function($query){
-                    $query->select('id','name');
-                }
-            ])
-            ->whereHas('mount_info',function($query)use ($params){
-                if (!empty($params['name'])){
-                    $query->where('name','like','%' . $params['name'] . '%');
-                }
-            })
+        if (!empty($params['order']) && !empty($params['sort'])) {
+            if(!in_array($params['order'], ['times','suc_times','rate'])){
+                CommonException::msgException('排序参数有误');
+            }
+            if(!in_array($params['sort'], ['desc','asc'])){
+                CommonException::msgException('排序参数有误');
+            }
+            $where['order'] = [$params['order'] => $params['sort'], 'l.id' => 'desc'];
+
+            if($params['order'] === 'suc_times'){
+                $where['order'] = [$params['order'] => $params['sort'], 'times' => 'desc', 'l.id' => 'desc'];
+            }
+        } else {
+            $where['order'] = ['times' => 'desc','suc_times' => 'desc', 'l.id' => 'desc'];
+        }
+        $fields = 'l.id,l.mount_id,l.times,l.suc_times_record,l.suc_times,m.image_url,m.name';
+        $list = WowMountLogModel::baseQuery($where)->from('wow_mount_log as l')
+            ->leftJoin('wow_mount as m', 'l.mount_id', 'm.id')
             ->select(Db::raw($fields))
             ->limit($params['pageSize'])->offset($params['pageSize'] * ($params['page'] - 1))
             ->get()->toArray();
