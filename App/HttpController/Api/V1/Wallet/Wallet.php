@@ -27,4 +27,17 @@ class Wallet extends BaseController
             return (new WalletService())->transformMoney($params);
         });
     }
+
+    /**
+     * @desc       获取幸运币
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-28 18:11
+     * @return bool
+     */
+    public function getLuckyCoin(){
+        return $this->apiResponse(function (){
+            return (new WalletService())->getLuckyCoin();
+        });
+    }
+
 }

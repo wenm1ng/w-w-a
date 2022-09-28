@@ -233,5 +233,7 @@ class Router extends AbstractRouter
     {
         //帮币转换幸运币
         $collector->post('/wallet/add-lucky-coin',$basePath.'Wallet/Wallet/transformMoney');
+        //获取幸运币
+        $collector->post('/wallet/get-lucky-coin',$basePath.'Wallet/Wallet/getLuckyCoin');
     }
 }

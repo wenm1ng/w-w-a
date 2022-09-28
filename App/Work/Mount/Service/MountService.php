@@ -82,11 +82,11 @@ class MountService
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
-
+        dump($params);
         //检查幸运币数量
         $userId = Common::getUserId();
         $luckyCoin = WowUserWalletModel::query()->where('user_id', $userId)->value('lucky_coin');
-        $this->reduceCoin = $params['type'] == 1 ? 1 : 10;
+        $this->reduceCoin = $params['type'] == 1 ? 1 : 9;
         if($luckyCoin < $this->reduceCoin){
             CommonException::msgException('幸运币不足', CodeKey::COIN_NOT_ENOUGH);
         }
@@ -129,8 +129,8 @@ class MountService
             $randNum = mt_rand(1, $count);
             $return[] = Lottery::doDraw($list[$randNum-1]['name'], $list[$randNum-1]['rate'], $list[$randNum-1]['image_url'], $list[$randNum-1]['id']);
         }else{
-            //10连抽
-            for ($i = 0; $i < 10; $i++) {
+            //9连抽
+            for ($i = 0; $i < 9; $i++) {
                 $randNum = mt_rand(1, $count);
                 $return[] = Lottery::doDraw($list[$randNum-1]['name'], $list[$randNum-1]['rate'], $list[$randNum-1]['image_url'], $list[$randNum-1]['id']);
             }

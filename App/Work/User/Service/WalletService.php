@@ -44,6 +44,17 @@ class WalletService
     }
 
     /**
+     * @desc       获取幸运币
+     * @author     文明<736038880@qq.com>
+     * @date       2022-09-28 18:10
+     * @return array
+     */
+    public function getLuckyCoin(){
+        $luckyCoin = WowUserWalletModel::query()->where('user_id', Common::getUserId())->value('lucky_coin');
+        return ['lucky_coin' => $luckyCoin];
+    }
+
+    /**
      * @desc       金额操作及记录相关日志
      * @author     文明<736038880@qq.com>
      * @date       2022-09-08 16:16
