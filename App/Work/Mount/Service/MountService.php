@@ -82,7 +82,7 @@ class MountService
         if (!$this->validator->validate($params)) {
             CommonException::msgException($this->validator->getError()->__toString());
         }
-        dump($params);
+//        dump($params);
         //检查幸运币数量
         $userId = Common::getUserId();
         $luckyCoin = WowUserWalletModel::query()->where('user_id', $userId)->value('lucky_coin');
@@ -146,6 +146,7 @@ class MountService
 //            $val['is_bingo'] = 0;
 //        }
         $this->addLotteryLog($return);
+        $return = ['list' => $return, 'lucky_coin' => $params['type'] == 1 ? 1 : 9];
         return $return;
     }
 
