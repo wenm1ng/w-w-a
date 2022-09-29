@@ -40,4 +40,9 @@ class Wallet extends BaseController
         });
     }
 
+    public function getCoin(){
+        return $this->apiResponse(function (){
+            return (new WalletService())->getCoin();
+        });
+    }
 }

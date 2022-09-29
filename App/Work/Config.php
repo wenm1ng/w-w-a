@@ -22,6 +22,8 @@ Class Config{
     const WEEK_OFFSET = 1;
     //回答有积分字数限制长度值
     const SCORE_DESCRIPTION_LENGTH = 15;
+    //帮币兑换幸运币汇率
+    const MONEY_CHANGE_LUCKY_RATE = 100;
     //针对wow前端组件做的周数容错
     public static $yearLinkWeek = [
         2021 => 1,

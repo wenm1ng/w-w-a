@@ -85,11 +85,11 @@ class MountService
 //        dump($params);
         //检查幸运币数量
         $userId = Common::getUserId();
-        $luckyCoin = WowUserWalletModel::query()->where('user_id', $userId)->value('lucky_coin');
-        $this->reduceCoin = $params['type'] == 1 ? 1 : 9;
-        if($luckyCoin < $this->reduceCoin){
-            CommonException::msgException('幸运币不足', CodeKey::COIN_NOT_ENOUGH);
-        }
+//        $luckyCoin = WowUserWalletModel::query()->where('user_id', $userId)->value('lucky_coin');
+//        $this->reduceCoin = $params['type'] == 1 ? 1 : 9;
+//        if($luckyCoin < $this->reduceCoin){
+//            CommonException::msgException('幸运币不足', CodeKey::COIN_NOT_ENOUGH);
+//        }
 
         $where = [
             'where' => [
@@ -209,20 +209,20 @@ class MountService
                 $insertData = array_values($insertData);
                 WowMountLogModel::query()->insert($insertData);
             }
-            //扣减幸运币
-            WowUserWalletModel::incrementLuckyCoin(-$this->reduceCoin, $userId);
-            //添加幸运币扣减日志
-            $logData = [
-                'order_type' => 2, //2幸运币
-                'order_id' => date('YmdHis').getRandomStr(18),
-                'wx_order_id' => '',
-                'date_month' => date('Y-m'),
-                'pay_type' => 5, //5幸运币扣减
-                'user_id' => !empty($userId) ? $userId : 0,
-                'success_at' => date('Y-m-d H:i:s'),
-                'amount' => $this->reduceCoin
-            ];
-            WowOrderLogModel::query()->insert($logData);
+//            //扣减幸运币
+//            WowUserWalletModel::incrementLuckyCoin(-$this->reduceCoin, $userId);
+//            //添加幸运币扣减日志
+//            $logData = [
+//                'order_type' => 2, //2幸运币
+//                'order_id' => date('YmdHis').getRandomStr(18),
+//                'wx_order_id' => '',
+//                'date_month' => date('Y-m'),
+//                'pay_type' => 5, //5幸运币扣减
+//                'user_id' => !empty($userId) ? $userId : 0,
+//                'success_at' => date('Y-m-d H:i:s'),
+//                'amount' => $this->reduceCoin
+//            ];
+//            WowOrderLogModel::query()->insert($logData);
             DB::commit();
         }catch (\Exception $e){
             DB::rollBack();

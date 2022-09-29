@@ -44,6 +44,8 @@ class Router extends AbstractRouter
             $this->mount($collector, $apiBasePathOpenV1);
             //钱包相关
             $this->wallet($collector, $apiBasePathOpenV1);
+            //公共类接口
+            $this->common($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -224,9 +226,9 @@ class Router extends AbstractRouter
         //坐骑列表
         $collector->get('/mount/list',$basePath.'Mount/Mount/getList');
         //进行坐骑抽奖
-        $collector->post('/mount/lottery',$basePath.'Mount/Mount/doLottery');
+        $collector->post('/mount/lottery',$basePath.'Mount/MountL/doLottery');
         //坐骑抽奖日志列表
-        $collector->get('/mount/lottery-log-list',$basePath.'Mount/Mount/getLotteryLogList');
+        $collector->get('/mount/lottery-log-list',$basePath.'Mount/MountL/getLotteryLogList');
     }
 
     public function wallet(RouteCollector $collector, string $basePath = '')
@@ -235,5 +237,15 @@ class Router extends AbstractRouter
         $collector->post('/wallet/add-lucky-coin',$basePath.'Wallet/Wallet/transformMoney');
         //获取幸运币
         $collector->post('/wallet/get-lucky-coin',$basePath.'Wallet/Wallet/getLuckyCoin');
+        //获取所有币值
+        $collector->get('/wallet/get-coin',$basePath.'Wallet/Wallet/getCoin');
+
+    }
+
+    public function common(RouteCollector $collector, string $basePath = '')
+    {
+        //获取工具列表
+        $collector->get('/tool/list',$basePath.'Common/Tool/getToolList');
+
     }
 }
