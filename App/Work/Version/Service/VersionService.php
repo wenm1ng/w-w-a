@@ -23,8 +23,8 @@ class VersionService
 //        $versionList = WowVersionModelNew::query()->get()->toArray();
 //        redis()->set('version_list', json_encode($versionList), 3600);
         $versionList = [
-            ['wv_id' => 4, 'version' => 4, 'name' => 'WLK'],
             ['wv_id' => 1, 'version' => 1, 'name' => '正式服'],
+            ['wv_id' => 4, 'version' => 4, 'name' => 'WLK'],
             ['wv_id' => 2, 'version' => 3, 'name' => 'TBC'],
             ['wv_id' => 3, 'version' => 2, 'name' => '经典旧世'],
         ];
