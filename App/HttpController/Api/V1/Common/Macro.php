@@ -28,4 +28,18 @@ class Macro extends LoginController
         });
     }
 
+    /**
+     * @desc       保存宏记录
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-06 17:40
+     * @return bool
+     */
+    public function save()
+    {
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+
+            return (new MacroService())->save($params);
+        });
+    }
 }

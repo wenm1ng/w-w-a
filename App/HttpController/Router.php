@@ -256,5 +256,7 @@ class Router extends AbstractRouter
     {
         //组合技能宏
         $collector->post('/macro/group',$basePath.'Common/Macro/group');
+        //保存宏记录
+        $collector->post('/macro/save',$basePath.'Common/Macro/save');
     }
 }

@@ -21,7 +21,7 @@ class MacroService
      * @date       2022-10-06 15:14
      * @param array $params
      *
-     * @return string
+     * @return array
      */
     public function group(array $params)
     {
@@ -32,8 +32,8 @@ class MacroService
                 $str .= $enum[$key].$val."\r\n";
             }
         }
-        $this->addLog(Common::getUserId(), $str);
-        return $str;
+        $logId = $this->addLog(Common::getUserId(), $str);
+        return ['content' => $str, 'id' => $logId];
     }
 
     /**
@@ -45,8 +45,25 @@ class MacroService
      */
     private function addLog(int $userId, string $macroContent){
         if($macroContent === "#showtooltip\r\n"){
-            return;
+            return 0;
         }
-        WowMacroLogModel::query()->insert(['user_id' => $userId, 'macro_content' => $macroContent]);
+        return WowMacroLogModel::query()->insertGetId(['user_id' => $userId, 'macro_content' => $macroContent]);
+    }
+
+    /**
+     * @desc       保存用户宏记录
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-06 17:43
+     * @param array $params
+     *
+     * @return array
+     */
+    public function save(array $params){
+        if(empty($params['id'])){
+           CommonException::msgException('id不能为空');
+        }
+
+        WowMacroLogModel::query()->where('id', $params['id'])->update(['status' => 1, 'user_id' => Common::getUserId()]);
+        return [];
     }
 }
