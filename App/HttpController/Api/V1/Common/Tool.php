@@ -25,4 +25,19 @@ class Tool extends LoginController
             return (new ToolService())->getToolList();
         });
     }
+
+    /**
+     * @desc       获取工具子列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-06 11:19
+     * @return bool
+     */
+    public function getToolChildList()
+    {
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new ToolService())->getToolChildList($params);
+        });
+    }
+
 }

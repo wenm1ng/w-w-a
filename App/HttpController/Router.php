@@ -46,6 +46,8 @@ class Router extends AbstractRouter
             $this->wallet($collector, $apiBasePathOpenV1);
             //公共类接口
             $this->common($collector, $apiBasePathOpenV1);
+            //宏命令相关接口
+            $this->macro($collector, $apiBasePathOpenV1);
         });
 
     }
@@ -246,6 +248,13 @@ class Router extends AbstractRouter
     {
         //获取工具列表
         $collector->get('/tool/list',$basePath.'Common/Tool/getToolList');
+        //获取工具子列表
+        $collector->get('/tool/child-list',$basePath.'Common/Tool/getToolChildList');
+    }
 
+    public function macro(RouteCollector $collector, string $basePath = '')
+    {
+        //组合技能宏
+        $collector->post('/macro/group',$basePath.'Common/Macro/group');
     }
 }
