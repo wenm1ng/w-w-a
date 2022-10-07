@@ -42,4 +42,16 @@ class Macro extends LoginController
             return (new MacroService())->save($params);
         });
     }
+
+    /**
+     * @desc       获取手动创建宏菜单列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-07 14:44
+     * @return bool
+     */
+    public function getHandMacroList(){
+        return $this->apiResponse(function () {
+            return (new MacroService())->getHandMacroList();
+        });
+    }
 }

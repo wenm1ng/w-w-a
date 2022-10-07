@@ -66,4 +66,14 @@ class MacroService
         WowMacroLogModel::query()->where('id', $params['id'])->update(['status' => 1, 'user_id' => Common::getUserId()]);
         return [];
     }
+
+    /**
+     * @desc       获取手动创建宏菜单列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-07 14:43
+     * @return array
+     */
+    public function getHandMacroList(){
+        return MacroConfig::getHandList();
+    }
 }
