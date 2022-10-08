@@ -260,5 +260,7 @@ class Router extends AbstractRouter
         $collector->post('/macro/save',$basePath.'Common/Macro/save');
         //获取手动创建宏菜单列表
         $collector->get('/macro/tab-list',$basePath.'Common/Macro/getHandMacroList');
+        //组合手动创建宏
+        $collector->post('/macro/hand-combine',$basePath.'Common/Macro/handCombine');
     }
 }

@@ -28,20 +28,71 @@ class MacroConfig{
      */
     public static $useEnum = [
         [
-            'name' => '普通按键',
-            'code' => 'nomod'
+            'name' => '当前目标',
+            'code' => '@target'
         ],
         [
-            'name' => 'shift按键',
-            'code' => 'mod:shift'
+            'name' => '以焦点为目标',
+            'code' => '@focus'
         ],
         [
-            'name' => 'ctrl按键',
-            'code' => 'mod:ctrl'
+            'name' => '以鼠标指向为目标',
+            'code' => '@mouseover'
         ],
         [
-            'name' => 'alt按键',
-            'code' => 'mod:alt'
+            'name' => '在鼠标位置施放',
+            'code' => '@cursor'
+        ],
+        [
+            'name' => '以自己为目标',
+            'code' => '@player'
+        ],
+        [
+            'name' => '以目标的目标为目标',
+            'code' => '@targettarget'
+        ],
+        [
+            'name' => '以宠物为目标',
+            'code' => '@pet'
+        ],
+//        [
+//            'name' => '目标：友方',
+//            'code' => 'help'
+//        ],
+//        [
+//            'name' => '目标：敌方',
+//            'code' => 'harm'
+//        ],
+//        [
+//            'name' => '目标：存活',
+//            'code' => 'nodead'
+//        ],
+//        [
+//            'name' => '目标：死亡',
+//            'code' => 'dead'
+//        ],
+//        [
+//            'name' => '目标：存在',
+//            'code' => 'exists'
+//        ],
+//        [
+//            'name' => 'shift按键',
+//            'code' => 'mod:shift'
+//        ],
+//        [
+//            'name' => 'ctrl按键',
+//            'code' => 'mod:ctrl'
+//        ],
+//        [
+//            'name' => 'alt按键',
+//            'code' => 'mod:alt'
+//        ]
+    ];
+
+    public static $checkboxCamp = [
+        [
+            'name' => '不加此条件',
+            'code' => ''
         ],
         [
             'name' => '目标：友方',
@@ -50,6 +101,13 @@ class MacroConfig{
         [
             'name' => '目标：敌方',
             'code' => 'harm'
+        ],
+    ];
+
+    public static $checkboxStatus = [
+        [
+            'name' => '不加此条件',
+            'code' => ''
         ],
         [
             'name' => '目标：存活',
@@ -62,37 +120,27 @@ class MacroConfig{
         [
             'name' => '目标：存在',
             'code' => 'exists'
-        ],
-        [
-            'name' => '以自己为目标',
-            'code' => 'player'
-        ],
-        [
-            'name' => '以焦点为目标',
-            'code' => 'focus'
-        ],
-        [
-            'name' => '以鼠标指向为目标',
-            'code' => 'mouseover'
-        ],
-        [
-            'name' => '在鼠标位置施放',
-            'code' => 'cursor'
-        ],
-        [
-            'name' => '当前目标',
-            'code' => 'target'
-        ],
-        [
-            'name' => '以目标的目标为目标',
-            'code' => 'targettarget'
-        ],
-        [
-            'name' => '以宠物为目标',
-            'code' => 'pet'
-        ],
+        ]
     ];
 
+    public static $checkboxButton = [
+        [
+            'name' => '不加此条件',
+            'code' => ''
+        ],
+        [
+            'name' => 'shift按键',
+            'code' => 'mod:shift'
+        ],
+        [
+            'name' => 'ctrl按键',
+            'code' => 'mod:ctrl'
+        ],
+        [
+            'name' => 'alt按键',
+            'code' => 'mod:alt'
+        ]
+    ];
     /**
      * @var array 手动创建宏枚举
      */
@@ -190,6 +238,7 @@ class MacroConfig{
             if(is_array($val['child'])){
                 //多级菜单
                 foreach ($val['child'] as $k => &$v) {
+                    $selectListSecond[$key][] = $v['name'];
                     if(!empty($v['child'])){
                         $temp = $v['child'];
                         $v['child'] = self::$$temp;
@@ -203,6 +252,8 @@ class MacroConfig{
                 $selectListSecond[$key] = array_column($val['child'], 'name');
             }
         }
-        return ['list' => $handEnum, 'select_first_list' => $selectListFirst, 'select_second_list' => $selectListSecond, 'select_third_list' => $selectListThird];
+        $selectList = [$selectListFirst, $selectListSecond, $selectListThird];
+
+        return ['list' => $handEnum, 'select_list' => $selectList, 'checkbox_status_list' => array_column(self::$checkboxStatus, 'name'), 'checkbox_button_list' => array_column(self::$checkboxButton,'name'), 'checkbox_camp_list' => array_column(self::$checkboxCamp, 'name')];
     }
 }

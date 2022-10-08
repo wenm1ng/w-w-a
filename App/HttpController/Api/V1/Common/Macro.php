@@ -54,4 +54,17 @@ class Macro extends LoginController
             return (new MacroService())->getHandMacroList();
         });
     }
+
+    /**
+     * @desc       组合手动创建宏
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-08 15:52
+     * @return bool
+     */
+    public function handCombine(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new MacroService())->handCombine($params);
+        });
+    }
 }

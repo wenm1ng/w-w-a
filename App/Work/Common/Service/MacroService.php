@@ -76,4 +76,14 @@ class MacroService
     public function getHandMacroList(){
         return MacroConfig::getHandList();
     }
+
+    public function handCombine(array $params){
+        if(empty($params['action'])){
+            CommonException::msgException('参数有误');
+        }
+        $handList = $this->getHandMacroList();
+        $actionArr = $params['action'];
+        $action = $handList['list'][$actionArr[0]]; //首级 /cast 动作指令等
+        $
+    }
 }
