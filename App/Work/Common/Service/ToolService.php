@@ -32,7 +32,7 @@ class ToolService
         if(empty($params['id'])){
             CommonException::msgException('id不能为空');
         }
-        $fields = 'id,name,icon_name,page_path';
+        $fields = 'id,name,icon_name,page_path,is_login';
         $list = WowToolChildModel::query()->where('tool_id', $params['id'])->where('status', 1)
             ->select(Db::raw($fields))->orderBy('sort', 'asc')->orderBy('id', 'asc')->get()->toArray();
         return $list;

@@ -192,7 +192,7 @@ class MacroConfig{
             'child' => [
                 [
                     'name' => '宠物释放技能',
-                    'code' => '/cast [pet:%s]',
+                    'code' => '/cast',
                     'child' => 'useEnum'
                 ],
                 [

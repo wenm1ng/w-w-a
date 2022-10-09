@@ -262,5 +262,7 @@ class Router extends AbstractRouter
         $collector->get('/macro/tab-list',$basePath.'Common/Macro/getHandMacroList');
         //组合手动创建宏
         $collector->post('/macro/hand-combine',$basePath.'Common/Macro/handCombine');
+        //用户宏列表
+        $collector->get('/macro/list',$basePath.'Common/Macro/getList');
     }
 }

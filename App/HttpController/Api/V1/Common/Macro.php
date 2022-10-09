@@ -67,4 +67,18 @@ class Macro extends LoginController
             return (new MacroService())->handCombine($params);
         });
     }
+
+    /**
+     * @desc       用户宏列表
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-09 17:50
+     * @return bool
+     */
+    public function getList(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new MacroService())->getList($params);
+        });
+    }
+
 }
