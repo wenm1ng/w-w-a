@@ -78,6 +78,22 @@ class MacroService
     }
 
     /**
+     * @desc       删除宏
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-10 17:18
+     * @param array $params
+     *
+     * @return array
+     */
+    public function del(array $params){
+        if(empty($params['id'])){
+            CommonException::msgException('id不能为空');
+        }
+        WowMacroLogModel::query()->where('id', $params['id'])->update(['status' => 2]);
+        return [];
+    }
+
+    /**
      * @desc       获取手动创建宏菜单列表
      * @author     文明<736038880@qq.com>
      * @date       2022-10-07 14:43
@@ -176,7 +192,7 @@ class MacroService
             ]
         ];
         if (!empty($params['name'])) {
-            $where['where'][] = ['name', 'like', "%{$params['name']}%"];
+            $where['where'][] = ['macro_name', 'like', "%{$params['name']}%"];
         }
         if (!empty($params['order']) && !empty($params['sort'])) {
             if(!in_array($params['order'], ['update_at'])){
@@ -191,7 +207,10 @@ class MacroService
         }
         $fields = 'id,macro_name,macro_content,update_at';
         $list = WowMacroLogModel::getPageOrderList($where, $params['page'], $fields, $params['pageSize']);
-
+        if($params['page'] == 1){
+            array_unshift($list, []);
+            array_unshift($list, []);
+        }
         return ['list' => $list];
     }
 }

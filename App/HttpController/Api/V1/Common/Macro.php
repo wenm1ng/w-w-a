@@ -44,6 +44,21 @@ class Macro extends LoginController
     }
 
     /**
+     * @desc       删除宏
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-10 17:18
+     * @return bool
+     */
+    public function del()
+    {
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+
+            return (new MacroService())->del($params);
+        });
+    }
+
+    /**
      * @desc       获取手动创建宏菜单列表
      * @author     文明<736038880@qq.com>
      * @date       2022-10-07 14:44
