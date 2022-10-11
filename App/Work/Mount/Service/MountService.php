@@ -145,6 +145,89 @@ class MountService
 //            }
 //            $val['is_bingo'] = 0;
 //        }
+//        $return = [
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 1,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 1,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 0,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 0,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 0,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 0,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 0,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 0,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//            [
+//                'id' => 604,
+//                'name' => 'test',
+//                'image_url' => 'https://mingtongct.com/images/mount/argusfelstalkermountred.jpg',
+//                'is_bingo' => 0,
+//                'is_open' => 0,
+//                'title' => '点击开刷',
+//                'is_show_image' => 0
+//            ],
+//        ];
         $this->addLotteryLog($return);
         $return = ['list' => $return, 'lucky_coin' => $params['type'] == 1 ? 1 : 9];
         return $return;
