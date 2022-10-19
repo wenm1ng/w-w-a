@@ -135,7 +135,7 @@ class MacroService
             //本级
             $targetCode = !empty($action['child'][$actionArr[1]]['code']) ? $action['child'][$actionArr[1]]['code'] : ''; // @focus 等
         }
-        $campCode = $buttonCode = $statusCode = ''; //条件
+        $campCode = $buttonCode = $statusCode = $commonCode = ''; //条件
 
         if(!empty(MacroConfig::$checkboxCamp[$params['camp_index']]['code'])){
             //help
@@ -149,6 +149,10 @@ class MacroService
             //exists
             $statusCode = MacroConfig::$checkboxStatus[$params['status_index']]['code'];
         }
+        if(!empty(MacroConfig::$checkboxCommon[$params['common_index']]['code'])){
+            //common 公共
+            $commonCode = MacroConfig::$checkboxCommon[$params['common_index']]['code']."\r\n";
+        }
 
         $conditionStr = '['. implode(',', array_filter([$targetCode, $campCode, $buttonCode, $statusCode])). ']';
         //技能名称
@@ -160,7 +164,7 @@ class MacroService
 
         //组合宏
         $macroStr = strpos($params['macro_str'], '#showtooltips') !== false ? $params['macro_str'] : "#showtooltips {$content}\r\n";
-        $macroStr .= "\r\n{$actionCode} {$conditionStr} {$params['content']}";
+        $macroStr .= "\r\n{$commonCode}{$actionCode} {$conditionStr} {$params['content']}";
 
         $id = $params['id'];
         if(empty($params['id'])){

@@ -123,6 +123,37 @@ class MacroConfig{
         ]
     ];
 
+    public static $checkboxPlayerStatus = [
+        [
+            'name' => '不加此条件',
+            'code' => ''
+        ],
+        [
+            'name' => '玩家：战斗中',
+            'code' => 'combat'
+        ],
+        [
+            'name' => '玩家：非战斗中',
+            'code' => 'nocombat'
+        ],
+        [
+            'name' => '玩家：潜行中',
+            'code' => 'stealth'
+        ],
+        [
+            'name' => '玩家：非潜行中',
+            'code' => 'nostealth'
+        ],
+        [
+            'name' => '玩家：房间内',
+            'code' => 'indoors'
+        ],
+        [
+            'name' => '玩家：房间外',
+            'code' => 'outdoors'
+        ],
+    ];
+
     public static $checkboxButton = [
         [
             'name' => '不加此条件',
@@ -141,6 +172,21 @@ class MacroConfig{
             'code' => 'mod:alt'
         ]
     ];
+
+    /**
+     * @var array 一些公共的配置
+     */
+    public static $checkboxCommon = [
+        [
+            'name' => '不加此条件',
+            'code' => ''
+        ],
+        [
+            'name' => '强制打断当前施法',
+            'code' => '/stopcasting'
+        ],
+    ];
+
     /**
      * @var array 手动创建宏枚举
      */
@@ -222,6 +268,22 @@ class MacroConfig{
                 ]
             ]
         ],
+        [
+            'name' => '焦点相关',
+            'code' => '',
+            'child' => [
+                [
+                    'name' => '设置焦点',
+                    'code' => '/focus',
+                    'child' => 'useEnum',
+                ],
+                [
+                    'name' => '清除焦点',
+                    'code' => '/clearfocus',
+                    'child' => []
+                ]
+            ]
+        ]
     ];
 
     /**
@@ -254,6 +316,6 @@ class MacroConfig{
         }
         $selectList = [$selectListFirst, $selectListSecond, $selectListThird];
 
-        return ['list' => $handEnum, 'select_list' => $selectList, 'checkbox_status_list' => array_column(self::$checkboxStatus, 'name'), 'checkbox_button_list' => array_column(self::$checkboxButton,'name'), 'checkbox_camp_list' => array_column(self::$checkboxCamp, 'name')];
+        return ['list' => $handEnum, 'select_list' => $selectList, 'checkbox_status_list' => array_column(self::$checkboxStatus, 'name'), 'checkbox_button_list' => array_column(self::$checkboxButton,'name'), 'checkbox_camp_list' => array_column(self::$checkboxCamp, 'name'), 'checkbox_common_list' => array_column(self::$checkboxCommon, 'name'), 'checkbox_player_list' => array_column(self::$checkboxPlayerStatus, 'name')];
     }
 }
