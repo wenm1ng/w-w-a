@@ -124,7 +124,7 @@ class Router extends AbstractRouter
 
     public function damage(RouteCollector $collector, string $basePath = ''){
 
-        $collector->post('/test',$basePath.'Damage/Damage/test');
+        $collector->get('/damage/skill-list',$basePath.'Damage/Damage/getDamageSkillList');
     }
 
     public function wa(RouteCollector $collector, string $basePath = ''){
@@ -154,6 +154,8 @@ class Router extends AbstractRouter
     {
         $collector->get('/test',$basePath.'File/File/uploadImageToBlog');
         $collector->get('/test-new',$basePath.'Test/Test/test');
+        $collector->post('/crawler-skill',$basePath.'Test/Test/crawlerSkill');
+
         $collector->post('/upload',$basePath.'File/File/uploadImage');
         $collector->post('/sync-redis',$basePath.'Test/Test/aKeySyncRedis');
         $collector->post('/hand-leader-board',$basePath.'Test/Test/handLeaderBoard');

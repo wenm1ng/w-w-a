@@ -15,6 +15,7 @@ use EasySwoole\EasySwoole\Task\TaskManager;
 use App\Task\WowLeaderBoardTask;
 use User\Service\CommonService;
 use App\Work\Mount\Models\WowMountModel;
+use Damage\Service\DamageService;
 
 class Test extends LoginController
 {
@@ -54,6 +55,19 @@ class Test extends LoginController
         for ($i = 1; $i <= $count; $i++) {
 
         }
+    }
+
+    /**
+     * @desc       技能数据爬虫
+     * @author     文明<736038880@qq.com>
+     * @date       2022-10-26 13:19
+     * @return bool
+     */
+    public function crawlerSkill(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return(new DamageService())->crawlerSkill($params);
+        });
     }
 
     public function test(){

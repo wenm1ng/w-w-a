@@ -7,10 +7,11 @@
 namespace Damage\Service;
 
 use Common\Common;
-use Damage\Models\WowSkillModel;
+use Damage\Models\WowSkillNewModel;
 use Talent\Models\WowTalentTreeModel;
 use App\Work\Config;
 use Talent\Service\TalentService;
+use App\Utility\Database\Db;
 
 class DamageService
 {
@@ -20,8 +21,8 @@ class DamageService
 
     public function __construct()
     {
-        $this->skillModel = new WowSkillModel();
-        $this->talentTreeModel = new WowTalentTreeModel();
+//        $this->skillModel = new WowSkillModel();
+//        $this->talentTreeModel = new WowTalentTreeModel();
     }
 
     public function test(){
@@ -55,25 +56,7 @@ class DamageService
 
     }
 
-    public function test1(){
-        $variationInfo = (new ShopeeProductVariationsRepositories())->getByCondition(['sp_id' => 9349],'*', 0, 1, 'sort ASC');
-
-        $ShopeeProductService = new ShopeeProductService();
-
-        $arr = [];
-        foreach($variationInfo as $key_index => $variation_row){
-            //1. 解析获得属性列表
-            $get_attribute_list = $ShopeeProductService->getAttributeMap('颜色分类,尺寸', $variation_row['name']);
-            //2. 合并 Map
-            $return_AttributeIndex = $ShopeeProductService->mergeAttributeMap($arr, $get_attribute_list);
-            //3. Api 查找索引位置
-            $variation_data[$key_index]['tier_index'] = $return_AttributeIndex;
-//            dump($get_attribute_list);
-//            dump($return_AttributeIndex);
-        }
-        dump($arr);
-        exit;
-
+    public function crawlerSkill(array $params){
 //        $result = (new \CloudKit\Tools\TranslateManage())->translateNaverInside(['from_lang' => 'ko', 'target_lang' => 'zh', 'content' => ['aa' => '티|셔|츠']]);
 //        dump($result);exit;
 //        dump(EASYSWOOLE_ROOT);exit;
@@ -104,62 +87,54 @@ class DamageService
 //            $rs[CodeKey::MSG] = $e->getMessage();
 //        }
 //        $this->writeResultJson($rs);
-
-        $rs = CodeKey::result();
-        $params = Common::getHttpParams($this->request());
-        try{
-            if(empty($params['result'])){
-                throw new \Exception('数据不对');
+        if(empty($params['result'])){
+            throw new \Exception('数据不对');
+        }
+        if(empty($params['oc'])){
+            throw new \Exception('职业不能为空');
+        }
+        $oc = $params['oc'];
+        $sql = [];
+        $skills = [];
+        $params = $params['result'];
+        foreach ($params as $talentNum => $talent) {
+            if(empty($talent)){
+                continue;
             }
-            if(empty($params['oc'])){
-                throw new \Exception('职业不能为空');
-            }
-            $oc = $params['oc'];
-            $sql = [];
-            $skills = [];
-            $params = $params['result'];
-            foreach ($params as $talentNum => $talent) {
-                if(empty($talent)){
+            foreach ($talent as $hangNum => $skill) {
+                if(empty($skill)){
                     continue;
                 }
-                foreach ($talent as $hangNum => $skill) {
-                    if(empty($skill)){
-                        continue;
-                    }
-                    unset($skill['id']);
-                    unset($skill['learnBook']);
-                    $skills[$skill['localesName']] = $skill;
+                unset($skill['id']);
+                unset($skill['learnBook']);
+                $skills[$skill['localesName']] = $skill;
 //                        $insertStr = implode("','", array_values($skill));
 //                        $insertStr = "'{$insertStr}'";
 //                        $sql[] = "insert into wow_skill (`version`,`occupation`,`talent_id`,`is_active`,`actReqSpecPoints`,`actReqTalPoints`,`actTarget2X`,`actTarget2Y`,`actTargetX`,`actTargetY`,`arrowType`,`content`,`currentActPoints`,`currentPoints`,`effect2End`,`effect2Init`,`effect2Per`,`effect3End`,`effect3Init`,`effect3Per`,`effect4End`,`effect4Init`,`effect4Per`,`effectEnd`,`effectInit`,`effectName1`,`effectName2`,`effectPer`,`icon`,`maxPoint`,`name`,`positionX`,`positionY`,`spec`,`wClass`) values(2,'',0,0,{$insertStr})";
-                }
             }
-
-            foreach ($skills as $val) {
-                $temp = array_values($val);
-//                $insertStr = str_replace("'", "\'", $temp);
-                $insertStr = implode("','", $temp);
-                $insertStr = "'{$insertStr}'";
-                preg_match("/(\d+).*?/", $val['costText'], $match);
-                $consume = $match[1] ?? 0;
-                preg_match("/(\d+)分钟.*?/", $val['coolDownText'], $match);
-                if(!empty($match[1])){
-                    $cool_time = $match[1] * 60;
-                }else{
-                    preg_match("/(\d+)秒.*?/", $val['coolDownText'], $match);
-                    $cool_time = $match[1] ?? 0;
-                }
-                preg_match("/(\d+).*?/", $val['spellTimeText'], $match);
-                $read_time = $match[1] ?? 0;
-                $hurtArr = $this->getHurtInfo($val['spellDescLoc']);
-                $sql[] = "insert into wow_skill (`version`,`occupation`,`is_active`,`consume`,`cool_time`,`read_time`,`hurt`,`max_hurt`,`keep_time`,`hurt_type`,`is_weapon_hurt`,`hurt_times`,`hurt_unit`,`coolDownText`,`costText`,`distanceText`,`icon`,`isTalent`,`localesName`,`name`,`rankDesc`,`reqClass`,`reqLevel`,`reqRace`,`reqSpec`,`spellDescLoc`,`spellTimeText`,`trainingCost`) values(2,'{$oc}',1,{$consume},{$cool_time},{$read_time},{$hurtArr['hurt']},{$hurtArr['max_hurt']},{$hurtArr['keep_time']},{$hurtArr['hurt_type']},{$hurtArr['is_weapon_hurt']},{$hurtArr['hurt_times']},{$hurtArr['hurt_unit']},{$insertStr})";
-            }
-            $rs[CodeKey::STATE] = CodeKey::SUCCESS;
-            $rs[CodeKey::DATA] = implode(";", $sql);
-        }catch (\Exception $e){
-            $rs[CodeKey::MSG] = $e->getMessage();
         }
-        $this->writeResultJson($rs);
+
+        foreach ($skills as $val) {
+            $temp = array_values($val);
+//                $insertStr = str_replace("'", "\'", $temp);
+            $insertStr = implode("','", $temp);
+            $insertStr = "'{$insertStr}'";
+            preg_match("/(\d+).*?/", $val['costText'], $match);
+            $consume = $match[1] ?? 0;
+            preg_match("/(\d+)分钟.*?/", $val['coolDownText'], $match);
+            if(!empty($match[1])){
+                $cool_time = $match[1] * 60;
+            }else{
+                preg_match("/(\d+)秒.*?/", $val['coolDownText'], $match);
+                $cool_time = $match[1] ?? 0;
+            }
+            preg_match("/(\d+).*?/", $val['spellTimeText'], $match);
+            $read_time = $match[1] ?? 0;
+            $hurtArr = $this->getHurtInfo($val['spellDescLoc']);
+            $sql[] = "insert into wow_skill (`version`,`occupation`,`is_active`,`consume`,`cool_time`,`read_time`,`hurt`,`max_hurt`,`keep_time`,`hurt_type`,`is_weapon_hurt`,`hurt_times`,`hurt_unit`,`coolDownText`,`costText`,`distanceText`,`icon`,`isTalent`,`localesName`,`name`,`rankDesc`,`reqClass`,`reqLevel`,`reqRace`,`reqSpec`,`spellDescLoc`,`spellTimeText`,`trainingCost`) values(4,'{$oc}',1,{$consume},{$cool_time},{$read_time},{$hurtArr['hurt']},{$hurtArr['max_hurt']},{$hurtArr['keep_time']},{$hurtArr['hurt_type']},{$hurtArr['is_weapon_hurt']},{$hurtArr['hurt_times']},{$hurtArr['hurt_unit']},{$insertStr})";
+        }
+
+        return $sql;
     }
 
     public function getHurtInfo($text){
@@ -262,15 +237,17 @@ class DamageService
      */
     public function getDamageSkillList($params){
         $version = $params['version'];
-        $talentId = $params['talent_id'];
         $oc = $params['oc'];
+        //        $talentId = $params['talent_id'];
+
         //获取天赋树技能
-        $talentService = new TalentService();
-        $treeList = $talentService->getTalentSkillTree($version, $talentId, $oc);
+//        $talentService = new TalentService();
+//        $treeList = $talentService->getTalentSkillTree($version, $talentId, $oc);
         //获取职业技能
         $ocSkillList = $this->getOcSkillList($version, $oc);
-        //将技能进行组合返回给前端
-        $this->dealSkillData($treeList, $ocSkillList, $params);
+//        //将技能进行组合返回给前端
+//        $this->dealSkillData($ocSkillList, $params);
+        return $ocSkillList;
     }
 
     /**
@@ -280,7 +257,7 @@ class DamageService
      * @param $treeList  //天赋树技能
      * @param $ocSkillList  //职业技能
      */
-    private function dealSkillData($treeList, $ocSkillList, $params){
+    private function dealSkillData($ocSkillList, $params){
         //获取角色各属性值
         //统一技能格式
         //设置好技能伤害、冷却时间等
@@ -299,14 +276,15 @@ class DamageService
      * @return array|mixed
      */
     public function getOcSkillList($version, $oc){
-        $redisKey = Config::getOcSkillRedisKey($version, $oc);
-        $list = redis()->get($redisKey);
-        $list = json_decode($list, true);
-        if(!empty($list) && is_array($list)){
-            return $list;
-        }
-        $list = $this->skillModel->all(['version' => $version, 'occupation' => $oc])->toRawArray();
-        redis()->set($redisKey, json_encode($list), 3600);
+//        $redisKey = Config::getOcSkillRedisKey($version, $oc);
+//        $list = redis()->get($redisKey);
+//        $list = json_decode($list, true);
+//        if(!empty($list) && is_array($list)){
+//            return $list;
+//        }
+        $fields = 'ws_id,version,occupation,is_active,consume,cool_time,read_time,is_weapon_hurt,hurt,second_hurt,every_second_hurt,target_num,max_hurt,keep_time,hurt_unit,hurt_type,hurt_times,tri_rate,icon,localesName as skill_name,spellDescLoc as skill_desc,costText as cost_text,spellTimeText as spell_text';
+        $list = WowSkillNewModel::query()->where('version', $version)->where('occupation', $oc)->whereIn('hurt_type', [1,2,3,4,7])->select(Db::raw($fields))->get()->toArray();
+//        redis()->set($redisKey, json_encode($list), 3600 * 24);
         return $list;
     }
 }

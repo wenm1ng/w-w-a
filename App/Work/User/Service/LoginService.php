@@ -18,7 +18,7 @@ class LoginService
 {
     protected $userModel;
     protected $secretKey = 'wow_wenming'; //token加密秘钥
-    protected $expirationTime = 3600 * 24 * 2; //token过期时间 暂定2天
+    protected $expirationTime = 3600 * 24 * 10; //token过期时间 暂定10天
     protected $keySign = 'yixiaoUserId'; //用户拼接标签
 
     public function __construct()
