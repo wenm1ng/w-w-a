@@ -282,7 +282,7 @@ class DamageService
 //        if(!empty($list) && is_array($list)){
 //            return $list;
 //        }
-        $fields = 'ws_id,version,occupation,is_active,consume,cool_time,read_time,is_weapon_hurt,hurt,second_hurt,every_second_hurt,target_num,max_hurt,keep_time,hurt_unit,hurt_type,hurt_times,tri_rate,icon,localesName as skill_name,spellDescLoc as skill_desc,costText as cost_text,spellTimeText as spell_text';
+        $fields = 'ws_id,version,occupation,is_active,consume,cool_time,read_time,is_weapon_hurt,hurt,second_hurt,every_second_hurt,target_num,max_hurt,keep_time,hurt_unit,hurt_type,hurt_times,tri_rate,icon,localesName as skill_name,spellDescLoc as skill_desc,costText as cost_text,spellTimeText as spell_text,hurt_take_times,hurt_times';
         $list = WowSkillNewModel::query()->where('version', $version)->where('occupation', $oc)->whereIn('hurt_type', [1,2,3,4,7])->select(Db::raw($fields))->get()->toArray();
 //        redis()->set($redisKey, json_encode($list), 3600 * 24);
         return $list;
