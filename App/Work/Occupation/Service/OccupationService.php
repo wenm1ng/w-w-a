@@ -30,7 +30,7 @@ class OccupationService
             $occupationList = json_decode($occupationList, true);
             return $occupationList;
         }
-        $occupationList = $this->occupationModel->where(['version' => (int)$version])->order(['sort' => 'ASC'])->all()->toArray();
+        $occupationList = WowOccupationModelNew::query()->where('version', $version)->orderBy('sort')->get()->toArray();
         if(!empty($occupationList)){
             redis()->set('occupation_list:'.$version, json_encode($occupationList), 3600);
         }

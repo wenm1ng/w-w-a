@@ -123,8 +123,19 @@ class Router extends AbstractRouter
     }
 
     public function damage(RouteCollector $collector, string $basePath = ''){
-
+        //技能列表
         $collector->get('/damage/skill-list',$basePath.'Damage/Damage/getDamageSkillList');
+        //技能爬虫
+        $collector->post('/damage/skill-save',$basePath.'Damage/Damage/singleSkillSave');
+        //所有技能
+        $collector->post('/damage/skill-all',$basePath.'Damage/Damage/allRequest');
+        //各职业毕业属性
+        $collector->get('/damage/get-oc-attribute',$basePath.'Damage/Damage/getOcAttribute');
+        //获取可用版本可用的
+        $collector->get('/damage/get-usage-version',$basePath.'Damage/Damage/getUsageVersion');
+        //获取版本团本阶段
+        $collector->get('/damage/get-version-stage',$basePath.'Damage/Damage/getVersionStage');
+
     }
 
     public function wa(RouteCollector $collector, string $basePath = ''){

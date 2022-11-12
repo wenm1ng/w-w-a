@@ -1062,6 +1062,7 @@ function httpClientCurl($url, $data = [], $add_args = [], $headers = [])
             $rs = $client->post();
         }
     }
+    dump($rs->getBody());
     $rsBody = json_decode(strval($rs->getBody()), true);
 
     return $rsBody;

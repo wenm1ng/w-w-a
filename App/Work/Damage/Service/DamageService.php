@@ -6,18 +6,37 @@
  */
 namespace Damage\Service;
 
+use App\Exceptions\CommonException;
 use Common\Common;
 use Damage\Models\WowSkillNewModel;
 use Talent\Models\WowTalentTreeModel;
 use App\Work\Config;
 use Talent\Service\TalentService;
 use App\Utility\Database\Db;
+use App\Work\Validator\DamageValidator;
+use Damage\Models\WowRoleAttributeModel;
 
 class DamageService
 {
 
     protected $skillModel;
     protected $talentTreeModel;
+
+    /**
+     * @var string[] 来源职业与系统职业枚举
+     */
+    protected $ocEnum = [
+        1 => 'zs',
+        2 => 'sq',
+        3 => 'lr',
+        4 => 'fs',
+        5 => 'ms',
+        6 => 'ss',
+        7 => 'dz',
+        8 => 'sm',
+        9 => 'xd',
+        10 => 'dk',
+    ];
 
     public function __construct()
     {
@@ -121,6 +140,75 @@ class DamageService
             $insertStr = "'{$insertStr}'";
             preg_match("/(\d+).*?/", $val['costText'], $match);
             $consume = $match[1] ?? 0;
+            $cool_time = 0;
+            if(!empty($val['coolDownText'])){
+                preg_match("/(\d+)分钟.*?/", $val['coolDownText'], $match);
+                if(!empty($match[1])){
+                    $cool_time = $match[1] * 60;
+                }else{
+                    preg_match("/(\d+)秒.*?/", $val['coolDownText'], $match);
+                    $cool_time = $match[1] ?? 0;
+                }
+            }
+
+            preg_match("/(\d+).*?/", $val['spellTimeText'], $match);
+            $read_time = $match[1] ?? 0;
+            $hurtArr = $this->getHurtInfo($val['descCn']);
+            $sql[] = "insert into wow_skill (`version`,`occupation`,`is_active`,`consume`,`cool_time`,`read_time`,`hurt`,`max_hurt`,`keep_time`,`hurt_type`,`is_weapon_hurt`,`hurt_times`,`hurt_unit`,`coolDownText`,`costText`,`distanceText`,`icon`,`isTalent`,`localesName`,`name`,`rankDesc`,`reqClass`,`reqLevel`,`reqRace`,`reqSpec`,`spellDescLoc`,`spellTimeText`,`trainingCost`) values(4,'{$oc}',1,{$consume},{$cool_time},{$read_time},{$hurtArr['hurt']},{$hurtArr['max_hurt']},{$hurtArr['keep_time']},{$hurtArr['hurt_type']},{$hurtArr['is_weapon_hurt']},{$hurtArr['hurt_times']},{$hurtArr['hurt_unit']},{$insertStr})";
+        }
+
+        return $sql;
+    }
+
+    public function allRequest(){
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://wlk.scarlet5.com/mini/db/spell/getClassSpellList?wClass=4',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+//            CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => 3,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS =>'{"wClass":4}',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Host: https://wlk.scarlet5.com'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        dump($response);
+
+    }
+
+    /**
+     * @desc       单个技能保存
+     * @author     文明<736038880@qq.com>
+     * @date       2022-11-03 11:29
+     * @param array $params
+     *
+     * @return array
+     */
+    public function singleSkillSave(array $params){
+        if(empty($params['data'])){
+            CommonException::msgException('参数有误');
+        }
+        $params = json_decode($params['data'], true);
+        if(empty($params['response_data']['result'])){
+            CommonException::msgException('参数有误');
+        }
+        $val = $params['response_data']['result'];
+        preg_match("/(\d+).*?/", $val['costText'], $match);
+        $consume = $match[1] ?? 0;
+        $cool_time = 0;
+        if(!empty($val['coolDownText'])){
             preg_match("/(\d+)分钟.*?/", $val['coolDownText'], $match);
             if(!empty($match[1])){
                 $cool_time = $match[1] * 60;
@@ -128,13 +216,39 @@ class DamageService
                 preg_match("/(\d+)秒.*?/", $val['coolDownText'], $match);
                 $cool_time = $match[1] ?? 0;
             }
-            preg_match("/(\d+).*?/", $val['spellTimeText'], $match);
-            $read_time = $match[1] ?? 0;
-            $hurtArr = $this->getHurtInfo($val['spellDescLoc']);
-            $sql[] = "insert into wow_skill (`version`,`occupation`,`is_active`,`consume`,`cool_time`,`read_time`,`hurt`,`max_hurt`,`keep_time`,`hurt_type`,`is_weapon_hurt`,`hurt_times`,`hurt_unit`,`coolDownText`,`costText`,`distanceText`,`icon`,`isTalent`,`localesName`,`name`,`rankDesc`,`reqClass`,`reqLevel`,`reqRace`,`reqSpec`,`spellDescLoc`,`spellTimeText`,`trainingCost`) values(4,'{$oc}',1,{$consume},{$cool_time},{$read_time},{$hurtArr['hurt']},{$hurtArr['max_hurt']},{$hurtArr['keep_time']},{$hurtArr['hurt_type']},{$hurtArr['is_weapon_hurt']},{$hurtArr['hurt_times']},{$hurtArr['hurt_unit']},{$insertStr})";
         }
 
-        return $sql;
+        preg_match("/(\d+).*?/", $val['spellTimeText'], $match);
+        $read_time = $match[1] ?? 0;
+        $hurtArr = $this->getHurtInfo($val['descCn']);
+
+        $data = array_merge([
+            'version' => 4,
+            'occupation' => $this->ocEnum[$val['wClass']],
+            'is_active' => 1,
+            'consume' => -$consume,
+            'cool_time' => $cool_time,
+            'read_time' => $read_time,
+            'coolDownText' => $val['coolDownText'] ?? '',
+            'costText' => $val['costText'] ?? '',
+            'distanceText' => $val['distanceText'] ?? '',
+            'icon' => $val['icon'] ?? '',
+            'isTalent' => $val['isTalent'] ?? '',
+            'localesName' => $val['nameCn'] ?? '',
+            'spellDescLoc' => $val['descCn'] ?? '',
+            'spellTimeText' => $val['spellTimeText'] ?? '',
+            'origin_id' => $val['id']
+        ], $hurtArr);
+
+        $id = WowSkillNewModel::query()->where('origin_id', $val['id'])->value('ws_id');
+        if(!empty($id)){
+            //修改
+            WowSkillNewModel::query()->where('ws_id', $id)->update($data);
+        }else{
+            //新增
+            WowSkillNewModel::query()->insert($data);
+        }
+        return [];
     }
 
     public function getHurtInfo($text){
@@ -154,7 +268,7 @@ class DamageService
 //
 //
 //        武器伤害
-        $return = ['hurt' => 0, 'max_hurt' => 0, 'is_weapon_hurt' => 0, 'keep_time' => 0, 'hurt_times' => 0, 'hurt_unit' => 1, 'hurt_type' => 1];
+        $return = ['hurt' => 0, 'max_hurt' => 0, 'is_weapon_hurt' => 0, 'keep_time' => 0, 'hurt_times' => 0, 'hurt_take_times' => 0, 'hurt_unit' => 1, 'hurt_type' => 1];
         //伤害数量
         if(preg_match("/.*?造成(\d+)到(\d+).*?/", $text, $match)){
             $return['hurt'] = $match[1];
@@ -222,6 +336,10 @@ class DamageService
         //累计次数
         if(preg_match("/.*?累加(\d+)次.*?/", $text, $match)){
             $return['hurt_times'] = $match[1];
+        }elseif(preg_match("/.*?(\d+)次.*?/", $text, $match)){
+            $return['hurt_take_times'] = $match[1];
+        }elseif(preg_match("/.*?下一个.*?/", $text, $match)){
+            $return['hurt_take_times'] = 1;
         }
 
         return $return;
@@ -286,5 +404,61 @@ class DamageService
         $list = WowSkillNewModel::query()->where('version', $version)->where('occupation', $oc)->whereIn('hurt_type', [1,2,3,4,7])->select(Db::raw($fields))->get()->toArray();
 //        redis()->set($redisKey, json_encode($list), 3600 * 24);
         return $list;
+    }
+
+    /**
+     * @desc       获取各个职业毕业属性信息
+     * @author     文明<736038880@qq.com>
+     * @date       2022-11-10 14:52
+     * @param array $params
+     *
+     * @return array
+     */
+    public function getOcAttribute(array $params){
+        $validator = new DamageValidator();
+        $validator->checkAttribute();
+        if (!$validator->validate($params)) {
+            CommonException::msgException($validator->getError()->__toString());
+        }
+
+        $where = [
+            'where' => [
+                ['version', '=', $params['version']],
+                ['stage_name', '=', $params['stage_name']],
+                ['oc', '=', $params['oc']]
+            ]
+        ];
+
+        $info = WowRoleAttributeModel::baseQuery($where)->first()->toArray();
+        return $info;
+    }
+
+    /**
+     * @desc       获取可用的版本
+     * @author     文明<736038880@qq.com>
+     * @date       2022-11-10 16:04
+     * @return \int[][]
+     */
+    public function getUsageVersion(){
+        return [
+            ['version' => 4, 'name' => 'WLK','status' => 1],
+            ['version' => 1, 'name' => '正式服','status' => 0],
+            ['version' => 2, 'name' => '经典旧世','status' => 0],
+        ];
+    }
+
+    /**
+     * @desc       获取版本对的阶段名称
+     * @author     文明<736038880@qq.com>
+     * @date       2022-11-10 16:04
+     * @return \string[][]
+     */
+    public function getVersionStage(array $params){
+        $data = [
+            4 => [['stage_name' => 'P1']],
+            1 => [],
+            2 => []
+        ];
+        return $data[$params['version']] ?? [];
     }
 }
