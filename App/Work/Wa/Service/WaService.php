@@ -11,7 +11,9 @@ use Wa\Models\WowWaTabTitleModel;
 use Wa\Models\WowWaTabModel;
 use Version\Models\WowVersionModelNew;
 use Wa\Models\WowWaImageModel;
+use Wa\Models\WowWaImagePythonModel;
 use Wa\Models\WowWaContentModel;
+use Wa\Models\WowWaContentPythonModel;
 use Wa\Models\WowWaContentHistoryModel;
 use Wa\Models\WowUserLikesModel;
 use Wa\Models\WowWaCommentModel;
@@ -609,4 +611,72 @@ class WaService
         return null;
     }
 
+    /**
+     * @desc   采集数据转移
+     * @return null
+     */
+    public static function savePythonWa(){
+//        WowWaImagePythonModel
+        $pythonList = WowWaContentPythonModel::get()->toArray();
+        $originIds = array_column($pythonList, 'origin_id');
+        $originLink = WowWaContentModel::query()->whereIn('origin_id', $originIds)->pluck('origin_id', 'origin_id');
+        $file = new File();
+        foreach ($pythonList as $val) {
+            if(isset($originLink[$val['origin_id']])){
+                //已经转换跳过
+                continue;
+            }
+            $imageList = WowWaImagePythonModel::where('wa_id', $val['id'])->get()->toArray();
+            if(empty($imageList)){
+                continue;
+            }
+            $isSuc = 0;
+            $images = [];
+            foreach ($imageList as $image) {
+                $rs = $file->uploadImage(['url' => [$image['origin_image_url']]]);
+                \Co::sleep(0.5);
+                if(!isset($rs[$image['origin_image_url']])){
+                    continue;
+                }
+                $isSuc = 1;
+                WowWaImagePythonModel::where(['id' => $image['id']])->update(['image_url' => $rs[$image['origin_image_url']]]);
+                $images[] = ['origin_image_url' => $image['origin_image_url'], 'image_url' => $rs[$image['origin_image_url']]];
+            }
+
+            //有图片才保存wa
+            if(!$isSuc){
+                continue;
+            }
+            $insertData = [
+                'version' => $val['version'],
+                'occupation' => $val['occupation'],
+                'talent_name' => $val['talent_name'],
+                'tips' => $val['tips'],
+                'type' => $val['type'],
+                'data_from' => $val['data_from'],
+                'status' => 0,
+                'tt_id' => $val['tt_id'],
+                'title' => $val['origin_title'],
+                'origin_title' => $val['origin_title'],
+                'origin_id' => $val['origin_id'],
+                'origin_url' => $val['origin_url'],
+                'description' => $val['origin_description'],
+                'origin_description' => $val['origin_description'],
+                'wa_content' => $val['wa_content']
+            ];
+            $waId = WowWaContentModel::insertGetId($insertData);
+            $imageData = [];
+            foreach ($images as $image) {
+                $imageData[] = [
+                    'wa_id' => $waId,
+                    'origin_image_url' => $image['origin_image_url'],
+                    'image_url' => $image['image_url']
+                ];
+            }
+            WowWaImageModel::insert($imageData);
+            echo '新wa_id:'.$waId;
+        }
+        dump('数据转移成功');
+        return null;
+    }
 }

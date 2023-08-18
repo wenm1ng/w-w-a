@@ -83,4 +83,14 @@ class Wa extends LoginController
             return (new WaService())->saveFiddlerWaData($params);
         });
     }
+
+    /**
+     * @desc   采集数据转移
+     * @return bool
+     */
+    public function savePythonWa(){
+        return $this->apiResponse(function (){
+            return WaService::savePythonWa();
+        });
+    }
 }

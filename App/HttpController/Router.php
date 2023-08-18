@@ -148,6 +148,9 @@ class Router extends AbstractRouter
         $collector->get('/wa/get-comment-all',$basePath.'Wa/WaL/getCommentAll');
         //保存爬虫数据
         $collector->post('/wa/save-fiddler-data',$basePath.'Wa/Wa/saveFiddlerData');
+        //爬虫数据转移到正式
+        $collector->post('/wa/save-python-wa',$basePath.'Wa/Wa/savePythonWa');
+
     }
 
     public function test(RouteCollector $collector, string $basePath = '')
