@@ -20,6 +20,7 @@ class CommonController extends Controller
     protected $uriWhiteList = [
         '/api/v1/wx-pay/callback'=> ['POST'],
         '/api/v1/wx-callback' => ['POST'],
+        '/gzh/validate' => ['GET'],
     ];
 
     /**
