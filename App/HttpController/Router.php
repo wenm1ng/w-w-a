@@ -124,6 +124,10 @@ class Router extends AbstractRouter
         $collector->get('/user/wallet/get-money',$basePath.'User/Wallet/getMoney');
         //获取排行榜列表
         $collector->get('/user/leader-board-list',$basePath.'User/Login/getLeaderBoardList');
+        //保存用户昵称
+        $collector->post('/user/save_nickname',$basePath.'User/User/saveNickname');
+        //保存用户头像
+        $collector->post('/user/save_head_image',$basePath.'User/User/saveHeadImage');
 
     }
 
