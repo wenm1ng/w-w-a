@@ -76,7 +76,7 @@ class UserService{
         $data = $params;
 //        $this->userModel::create()->connection('default')
         //保存用户信息
-        $userInfo = WowUserModelNew::query()->where('openId', $sessionInfo['openid'])->select(['user_id','nickName','avatarUrl'])->first();
+        $userInfo = WowUserModelNew::query()->where('openId', $sessionInfo['openid'])->select(['user_id','nickName','avatarUrl','is_save_avatar','is_save_nickname'])->first();
         if(!empty($userInfo)){
             $userInfo = $userInfo->toArray();
         }
@@ -92,8 +92,10 @@ class UserService{
         ];
         if(empty($userInfo)){
             //新增用户
-            $userInfo['nickName'] = $data['userInfo']['nickName'];
+            $userInfo['nickName'] = '微信用户'.random(6, 'all');
             $userInfo['avatarUrl'] = $data['userInfo']['avatarUrl'];
+            $userInfo['is_save_avatar'] = $dbData['is_save_avatar'] = 0; //新用户头像为默认
+            $userInfo['is_save_nickname'] = $dbData['is_save_nickname'] = 0; //新用户昵称为默认
             $userInfo['user_id'] = WowUserModelNew::query()->insertGetId($dbData);
             //添加钱包数据
             WowUserWalletModel::incrementMoney(0, $userInfo['user_id']);
@@ -111,6 +113,8 @@ class UserService{
         $data['userInfo']['token'] = $return['Authorization'];
         $data['userInfo']['is_new_user'] = empty($userInfo);
         $data['userInfo']['expire_time'] = $return['expire_time'];
+        $data['userInfo']['is_save_avatar'] = $userInfo['is_save_avatar'];
+        $data['userInfo']['is_save_nickname'] = $userInfo['is_save_nickname'];
         return $data['userInfo'];
     }
 
@@ -403,7 +407,7 @@ class UserService{
         if (!$this->validate->validate($params)) {
             CommonException::msgException($this->validate->getError()->__toString());
         }
-        WowUserModelNew::where('user_id', Common::getUserId())->update(['nickName' => $params['nickname']]);
+        WowUserModelNew::where('user_id', Common::getUserId())->update(['nickName' => $params['nickname'], 'is_save_nickname' => 1]);
         return [];
     }
 
@@ -426,7 +430,7 @@ class UserService{
         if(!$imageUrl){
             CommonException::msgException('上传失败');
         }
-        WowUserModelNew::where('user_id', Common::getUserId())->update(['avatarUrl' => $imageUrl]);
+        WowUserModelNew::where('user_id', Common::getUserId())->update(['avatarUrl' => $imageUrl, 'is_save_avatar' => 1]);
         return ['avatarUrl' => $imageUrl];
     }
 }
