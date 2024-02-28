@@ -656,11 +656,11 @@ class WaService
                 'data_from' => $val['data_from'],
                 'status' => 0,
                 'tt_id' => $val['tt_id'],
-                'title' => $val['origin_title'],
+                'title' => $val['title'],
                 'origin_title' => $val['origin_title'],
                 'origin_id' => $val['origin_id'],
                 'origin_url' => $val['origin_url'],
-                'description' => $val['origin_description'],
+                'description' => $val['description'],
                 'origin_description' => $val['origin_description'],
                 'wa_content' => $val['wa_content']
             ];

@@ -22,6 +22,7 @@ class SavePythonWa implements CommandInterface
 
     public function exec(): ?string
     {
+        require_once "App/Common/function.php";
 //        // 获取用户输入的命令参数
 //        $argv = CommandManager::getInstance()->getOriginArgv();
 //
@@ -69,7 +70,11 @@ class SavePythonWa implements CommandInterface
 //                echo "the action {$action} is not existed!" . PHP_EOL;
 //        }
 //        return null;
-        WaService::savePythonWa();
+//        WaService::savePythonWa();
+        $str = '/www/images/c4V9d9qEnAt4NxtBR8dY.gif';
+//        $file = getThumb($str, 400, 400);
+        $file = thumbGif($str);
+        dump($file);
         return null;
     }
 

@@ -17,6 +17,7 @@ use App\Utility\Company;
 use EasySwoole\HttpClient\HttpClient;
 use App\Work\Config as workConfig;
 use App\Work\Lib\SensitiveWords\TrieTree;
+use Grafika\Grafika;
 
 //use App\Pool\RedisPool;
 /* 谷歌翻译CURL请求（不用代理）
@@ -421,6 +422,162 @@ function saveInterImage($url, $dir)
     $fileName = $path . '/' . random(20) . '.' . $filend;
     file_put_contents($fileName, $file);
     return $fileName;
+}
+
+function thumbGif(string $sourceFile){
+    //判断该图片是否存在
+    if(!file_exists($sourceFile)){
+        dump(1);
+        return $sourceFile;
+    }
+    //判断图片格式(图片文件后缀)
+    $extend = explode("." , $sourceFile);
+    $attach_fileext = strtolower($extend[count($extend) - 1]);
+    if (!in_array($attach_fileext, array('gif'))){
+        dump(2);
+        return '';
+    }
+    //压缩图片文件名称
+    $suff = 'gif';
+    $sFileNameS = str_replace(".".$attach_fileext, "_".$suff.'_'.'.'.$attach_fileext, $sourceFile);
+    dump($sFileNameS);
+    $editor = Grafika::createEditor();
+
+    $editor->open( $image, $sourceFile );
+
+    $editor->resizeFit( $image, 250, 128 );
+
+    $editor->save( $image, $sFileNameS );
+    return $sFileNameS;
+
+//    //判断该图片是否存在
+//    if(!file_exists($sourceFile)){
+//        dump(1);
+//        return $sourceFile;
+//    }
+//    //判断图片格式(图片文件后缀)
+//    $extend = explode("." , $sourceFile);
+//    $attach_fileext = strtolower($extend[count($extend) - 1]);
+//    if (!in_array($attach_fileext, array('gif'))){
+//        dump(2);
+//        return '';
+//    }
+//    // 创建 Imagick 对象并读取 GIF 动画
+//    $image = new \Imagick($sourceFile);
+//    //压缩图片文件名称
+//    $suff = 'gif';
+//    $sFileNameS = str_replace(".".$attach_fileext, "_".$suff.'_'.'.'.$attach_fileext, $sourceFile);
+//// 遍历GIF中的所有帧
+//    foreach ($image as $frame) {
+//        // 设置压缩质量
+//        $frame->setImageCompressionQuality(50); // 这里可以根据需求调整压缩质量，数值在0-100之间
+//
+//        // 如果还需要调整尺寸，请注意要对每一帧都做同样的处理
+//        // $frame->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1); // 注意：这一步会改变动画的帧尺寸
+//
+//        // 你还可以尝试其他优化措施，比如裁剪、去除元数据等
+//    }
+//
+//// 将处理过的帧重新组合成新的GIF动画
+//    $image->coalesceImages(); // 先合并所有修改过的帧
+//    $image->deconstructImages(); // 分解回原始帧序列，这对于某些操作（如压缩）是必要的
+//    $image->optimizeImages(); // 优化图片，可能会进一步减少文件大小，特别是对于动画GIF
+//
+//// 保存压缩后的GIF图片
+//    $image->writeImages($sFileNameS, true); // 第二个参数为true表示写入多帧动画
+//
+//// 清理资源
+//    $image->clear();
+//    $image->destroy();
+//    return $sFileNameS;
+}
+
+function getThumb($sFile,$iWidth,$iHeight,$tmpFilePath = ''){
+    //图片公共路径
+    $public_path = '';
+    //判断该图片是否存在
+    if(!file_exists($public_path.$sFile)){
+        dump(1);
+        return $sFile;
+    }
+    //判断图片格式(图片文件后缀)
+    $extend = explode("." , $sFile);
+    $attach_fileext = strtolower($extend[count($extend) - 1]);
+    if (!in_array($attach_fileext, array('jpg','png','jpeg'))){
+        dump(2);
+        return '';
+    }
+    //压缩图片文件名称
+    $sFileNameS = str_replace(".".$attach_fileext, "_".$iWidth.'_'.$iHeight.'.'.$attach_fileext, $sFile);
+    //判断是否已压缩图片，若是则返回压缩图片路径
+    if(file_exists($public_path.$sFileNameS)){
+        dump(3);
+        return $sFileNameS;
+    }
+    //生成压缩图片，并存储到原图同路径下
+     resizeImage($public_path.$sFile, $public_path.$sFileNameS, $iWidth, $iHeight);
+//    resizeImage($public_path.$sFile,$tmpFilePath, $iWidth, $iHeight);
+    if(!file_exists($public_path.$sFileNameS)){
+        return $sFile;
+    }
+    return $sFileNameS;
+}
+
+function resizeImage($im, $dest, $maxwidth, $maxheight) {
+    $img = getimagesize($im);
+    switch ($img[2]) {
+        case 1:
+            $im = @imagecreatefromgif($im);
+            break;
+        case 2:
+            $im = @imagecreatefromjpeg($im);
+            break;
+        case 3:
+            $im = @imagecreatefrompng($im);
+            break;
+    }
+
+    $pic_width = imagesx($im);
+    $pic_height = imagesy($im);
+    $resizewidth_tag = false;
+    $resizeheight_tag = false;
+    if (($maxwidth && $pic_width > $maxwidth) || ($maxheight && $pic_height > $maxheight)) {
+        if ($maxwidth && $pic_width > $maxwidth) {
+            $widthratio = $maxwidth / $pic_width;
+            $resizewidth_tag = true;
+        }
+
+        if ($maxheight && $pic_height > $maxheight) {
+            $heightratio = $maxheight / $pic_height;
+            $resizeheight_tag = true;
+        }
+
+        if ($resizewidth_tag && $resizeheight_tag) {
+            if ($widthratio < $heightratio)
+                $ratio = $widthratio;
+            else
+                $ratio = $heightratio;
+        }
+        if ($resizewidth_tag && !$resizeheight_tag)
+            $ratio = $widthratio;
+        if ($resizeheight_tag && !$resizewidth_tag)
+            $ratio = $heightratio;
+        $newwidth = $pic_width * $ratio;
+        $newheight = $pic_height * $ratio;
+
+        if (function_exists("imagecopyresampled")) {
+            $newim = imagecreatetruecolor($newwidth, $newheight);
+            imagecopyresampled($newim, $im, 0, 0, 0, 0, $newwidth, $newheight, $pic_width, $pic_height);
+        } else {
+            $newim = imagecreate($newwidth, $newheight);
+            imagecopyresized($newim, $im, 0, 0, 0, 0, $newwidth, $newheight, $pic_width, $pic_height);
+        }
+
+        imagejpeg($newim, $dest);
+        imagedestroy($newim);
+    } else {
+        imagejpeg($im, $dest);
+    }
 }
 
 /**
