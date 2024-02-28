@@ -138,4 +138,26 @@ class User extends BaseController
         });
     }
 
+    /**
+     * @desc   保存昵称
+     * @return bool
+     */
+    public function saveNickname(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->saveNickname($params);
+        });
+    }
+
+    /**
+     * @desc   保存用户头像
+     * @return bool
+     */
+    public function saveHeadImage(){
+        return $this->apiResponse(function (){
+            $params = $this->getRequestJsonData();
+            return (new UserService())->saveHeadImage($this->request());
+        });
+    }
+
 }

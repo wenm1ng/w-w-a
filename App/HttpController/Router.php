@@ -49,7 +49,12 @@ class Router extends AbstractRouter
             //宏命令相关接口
             $this->macro($collector, $apiBasePathOpenV1);
         });
+        $routeCollector->addGroup('/gzh', function (RouteCollector $collector) {
 
+            $apiBasePathOpenV1 = 'Gzh/';
+            //公众号
+            $this->wxGzh($collector, $apiBasePathOpenV1);
+        });
     }
 
     public function talent(RouteCollector $collector, string $basePath = ''){
@@ -119,6 +124,10 @@ class Router extends AbstractRouter
         $collector->get('/user/wallet/get-money',$basePath.'User/Wallet/getMoney');
         //获取排行榜列表
         $collector->get('/user/leader-board-list',$basePath.'User/Login/getLeaderBoardList');
+        //保存用户昵称
+        $collector->post('/user/save_nickname',$basePath.'User/User/saveNickname');
+        //保存用户头像
+        $collector->post('/user/save_head_image',$basePath.'User/User/saveHeadImage');
 
     }
 
@@ -224,6 +233,12 @@ class Router extends AbstractRouter
     {
         //消息回调
         $collector->get('/wx-callback',$basePath.'WxCallBack/WxCallBack/callBack');
+    }
+
+    public function wxGzh(RouteCollector $collector, string $basePath = '')
+    {
+        //消息回调
+        $collector->get('/validate',$basePath.'Validate/index');
     }
 
     public function mount(RouteCollector $collector, string $basePath = '')

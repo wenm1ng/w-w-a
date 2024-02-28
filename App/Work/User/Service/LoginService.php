@@ -7,6 +7,7 @@
 
 namespace User\Service;
 
+use App\Work\Config\Model\ConfigModel;
 use Common\Common;
 use Common\CodeKey;
 use EasySwoole\Jwt\Jwt;
@@ -44,6 +45,9 @@ class LoginService
         if (empty($userInfo)) {
             throw new \Exception('用户不存在');
         }
+        $expirationTime = ConfigModel::getExpireTime();
+        $this->expirationTime = $expirationTime ?: 3600 * 24 * 2;
+
         $userInfo = $userInfo->toArray();
 
         $jwtObject = Jwt::getInstance()
@@ -69,7 +73,7 @@ class LoginService
         // 最终生成的token
         $token = $jwtObject->__toString();
 
-        return ['Authorization' => $token];
+        return ['Authorization' => $token, 'expire_time' => $this->expirationTime];
     }
 
     /**

@@ -76,27 +76,33 @@ class UserService{
         $data = $params;
 //        $this->userModel::create()->connection('default')
         //保存用户信息
-        $userInfo = WowUserModelNew::query()->where('openId', $sessionInfo['openid'])->select(['user_id'])->first();
+        $userInfo = WowUserModelNew::query()->where('openId', $sessionInfo['openid'])->select(['user_id','nickName','avatarUrl','is_save_avatar','is_save_nickname'])->first();
         if(!empty($userInfo)){
             $userInfo = $userInfo->toArray();
         }
         $dbData = [
-            'nickName' => $data['userInfo']['nickName'],
+//            'nickName' => $data['userInfo']['nickName'],
             'gender' => $data['userInfo']['gender'],
             'language' => $data['userInfo']['language'],
             'city' => $data['userInfo']['city'],
             'province' => $data['userInfo']['province'],
             'country' => $data['userInfo']['country'],
-            'avatarUrl' => $data['userInfo']['avatarUrl'],
+//            'avatarUrl' => $data['userInfo']['avatarUrl'],
             'openId' => $sessionInfo['openid']
         ];
         if(empty($userInfo)){
             //新增用户
+            $userInfo['nickName'] = '微信用户'.random(6, 'all');
+            $userInfo['avatarUrl'] = $data['userInfo']['avatarUrl'];
+            $userInfo['is_save_avatar'] = $dbData['is_save_avatar'] = 0; //新用户头像为默认
+            $userInfo['is_save_nickname'] = $dbData['is_save_nickname'] = 0; //新用户昵称为默认
             $userInfo['user_id'] = WowUserModelNew::query()->insertGetId($dbData);
             //添加钱包数据
             WowUserWalletModel::incrementMoney(0, $userInfo['user_id']);
         }else{
             //修改用户
+            $data['userInfo']['nickName'] = $userInfo['nickName'];
+            $data['userInfo']['avatarUrl'] = $userInfo['avatarUrl'];
             $dbData['update_at'] = date('Y-m-d H:i:s');
             WowUserModelNew::query()->where('user_id', $userInfo['user_id'])->update($dbData);
         }
@@ -105,6 +111,10 @@ class UserService{
         $return = $loginService->setToken(['user_id' => $userInfo['user_id']]);
         $data['userInfo']['id'] = $userInfo['user_id'];
         $data['userInfo']['token'] = $return['Authorization'];
+        $data['userInfo']['is_new_user'] = empty($userInfo);
+        $data['userInfo']['expire_time'] = $return['expire_time'];
+        $data['userInfo']['is_save_avatar'] = $userInfo['is_save_avatar'];
+        $data['userInfo']['is_save_nickname'] = $userInfo['is_save_nickname'];
         return $data['userInfo'];
     }
 
@@ -384,5 +394,43 @@ class UserService{
             return '';
         }
         return (string)$count;
+    }
+
+    /**
+     * @desc  保存昵称
+     * @param array $params
+     *
+     * @return array
+     */
+    public function saveNickname(array $params){
+        $this->validate->checkSaveNickname();
+        if (!$this->validate->validate($params)) {
+            CommonException::msgException($this->validate->getError()->__toString());
+        }
+        WowUserModelNew::where('user_id', Common::getUserId())->update(['nickName' => $params['nickname'], 'is_save_nickname' => 1]);
+        return [];
+    }
+
+    /**
+     * @desc  保存头像
+     * @param \EasySwoole\Http\Request $request
+     *
+     * @return string[]
+     */
+    public function saveHeadImage(\EasySwoole\Http\Request $request){
+        $file = $request->getUploadedFile('file');
+        $imageUrl = '';
+        if (!empty($file) && $file->getSize()) {
+            $fileName = $file->getClientFileName();
+            $filend = pathinfo($fileName, PATHINFO_EXTENSION);
+            $data = file_get_contents($file->getTempName());
+            $fileName = saveFileDataImage($data, '/userHead', $filend);
+            $imageUrl = getInterImageName($fileName);
+        }
+        if(!$imageUrl){
+            CommonException::msgException('上传失败');
+        }
+        WowUserModelNew::where('user_id', Common::getUserId())->update(['avatarUrl' => $imageUrl, 'is_save_avatar' => 1]);
+        return ['avatarUrl' => $imageUrl];
     }
 }
