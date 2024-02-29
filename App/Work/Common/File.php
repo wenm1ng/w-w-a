@@ -59,6 +59,11 @@ class File{
         $return = [];
         foreach ($params['url'] as $url) {
            $imageUrl = saveInterImage($url, $path);
+           //压缩图片
+           $thumbUrl = getThumb($imageUrl, 400, 400);
+           if($thumbUrl){
+               $imageUrl = $thumbUrl;
+           }
            $imageUrl = str_replace($trim, $replace, $imageUrl);
            $return[$url] = $imageUrl;
            file_put_contents($this->dir.$path.'/image.txt', $url.'----'.$imageUrl."\n");

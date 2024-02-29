@@ -17,7 +17,7 @@ use App\Utility\Company;
 use EasySwoole\HttpClient\HttpClient;
 use App\Work\Config as workConfig;
 use App\Work\Lib\SensitiveWords\TrieTree;
-use Grafika\Grafika;
+use App\Work\Lib\Grafika\Grafika;
 
 //use App\Pool\RedisPool;
 /* 谷歌翻译CURL请求（不用代理）
@@ -497,30 +497,27 @@ function getThumb($sFile,$iWidth,$iHeight,$tmpFilePath = ''){
     $public_path = '';
     //判断该图片是否存在
     if(!file_exists($public_path.$sFile)){
-        dump(1);
         return $sFile;
     }
     //判断图片格式(图片文件后缀)
     $extend = explode("." , $sFile);
     $attach_fileext = strtolower($extend[count($extend) - 1]);
     if (!in_array($attach_fileext, array('jpg','png','jpeg'))){
-        dump(2);
         return '';
     }
     //压缩图片文件名称
-    $sFileNameS = str_replace(".".$attach_fileext, "_".$iWidth.'_'.$iHeight.'.'.$attach_fileext, $sFile);
-    //判断是否已压缩图片，若是则返回压缩图片路径
-    if(file_exists($public_path.$sFileNameS)){
-        dump(3);
-        return $sFileNameS;
-    }
-    //生成压缩图片，并存储到原图同路径下
-     resizeImage($public_path.$sFile, $public_path.$sFileNameS, $iWidth, $iHeight);
+//    $sFileNameS = str_replace(".".$attach_fileext, "_".$iWidth.'_'.$iHeight.'.'.$attach_fileext, $sFile);
+//    //判断是否已压缩图片，若是则返回压缩图片路径
+//    if(file_exists($public_path.$sFileNameS)){
+//        return $sFileNameS;
+//    }
+    //生成压缩图片，并存储到原图同路径下（改为直接用原图）
+     resizeImage($public_path.$sFile, $public_path.$sFile, $iWidth, $iHeight);
 //    resizeImage($public_path.$sFile,$tmpFilePath, $iWidth, $iHeight);
-    if(!file_exists($public_path.$sFileNameS)){
-        return $sFile;
-    }
-    return $sFileNameS;
+//    if(!file_exists($public_path.$sFileNameS)){
+//        return $sFile;
+//    }
+    return $sFile;
 }
 
 function resizeImage($im, $dest, $maxwidth, $maxheight) {

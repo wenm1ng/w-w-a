@@ -71,9 +71,9 @@ class SavePythonWa implements CommandInterface
 //        }
 //        return null;
 //        WaService::savePythonWa();
-        $str = '/www/images/c4V9d9qEnAt4NxtBR8dY.gif';
-//        $file = getThumb($str, 400, 400);
-        $file = thumbGif($str);
+        $str = '/www/images/1.jpeg';
+        $file = getThumb($str, 400, 400);
+//        $file = thumbGif($str);
         dump($file);
         return null;
     }
