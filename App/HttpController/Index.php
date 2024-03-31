@@ -32,6 +32,6 @@ class Index extends Controller
 //        }
 //        $this->response()->write(file_get_contents($file));
         $this->response()->withStatus(404);
-        return $this->writeJson(404, '', 'File not found');
+        return $this->writeJson(404, '', 'File not found !');
     }
 }
