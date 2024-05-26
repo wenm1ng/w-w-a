@@ -234,6 +234,121 @@ class MountService
     }
 
     /**
+     * @desc        一发入魂抽奖
+     * @example
+     * @param array $params
+     *
+     * @return array
+     */
+    public function brushedLottery(array $params){
+        $this->validator->checkBrushedLottery($params);
+        if (!$this->validator->validate($params)) {
+            CommonException::msgException($this->validator->getError()->__toString());
+        }
+//        dump($params);
+        //检查幸运币数量
+//        $userId = Common::getUserId();
+
+        $where = [
+            'where' => [
+                ['status', '=', 1]
+            ]
+        ];
+        $where['whereIn'][] = ['id', $params['id']];
+        $fields = 'id,name,description,image_url,rate';
+        $info = WowMountModel::baseQuery($where)->select(DB::raw($fields))->first();
+        if(!$info){
+            CommonException::msgException('找不到坐骑');
+        }
+        $info = $info->toArray();
+
+        $time = time();
+        //刷坐骑结束时间
+        $endTime = mt_rand(5, 11);
+        //刷坐骑次数
+        $times = 0;
+        $return = [];
+        if($info['rate'] == 100){
+            //百分百坐骑，取1次抽奖
+            $return[] = Lottery::doDraw($info['name'], $info['rate'], $info['image_url'], $info['id']);
+            $times++;
+        }else{
+            for ($i = 0; $i < 8; $i++) {
+                $return[] = Lottery::getDefaultReward($info['id']);
+            }
+            $return[] = self::recursionDraw($info, $time, $endTime, $times);
+        }
+
+        //保存日志
+        self::saveLotteryLog($info['id'], $times);
+        $return = ['list' => $return, 'lucky_coin' => 9, 'times' => $times, 'type' => $info['rate'] == 100 ? 1 : 2];
+        return $return;
+    }
+
+    /**
+     * @desc        递归刷坐骑
+     * @example
+     * @param array $info
+     * @param int   $time
+     * @param int   $endTime
+     * @param int   $times
+     *
+     * @return array
+     */
+    public static function recursionDraw(array $info, int $time, int $endTime, int &$times){
+        if($time + $endTime <= time()){
+            return [
+                'id' => $info['id'],
+                'name' => $info['name'],
+                'image_url' => $info['image_url'],
+                'is_bingo' => 1,
+                'is_open' => 0,
+                'title' => '点击开刷',
+                'is_show_image' => 0
+            ];
+        }else{
+            $times++;
+            $result = Lottery::doDraw($info['name'], $info['rate'], $info['image_url'], $info['id']);
+            if(!$result['is_bingo']){
+                return self::recursionDraw($info, $time, $endTime, $times);
+            }else{
+                return $result;
+            }
+        }
+    }
+
+    /**
+     * @desc      保存刷坐骑日志
+     * @example
+     * @param int $mountId
+     * @param int $times
+     */
+    private static function saveLotteryLog(int $mountId, int $times){
+        $userId = Common::getUserId();
+        $info = WowMountLogModel::query()->where('mount_id', $mountId)->where('user_id', $userId)->select(DB::raw('id,mount_id,times,suc_times_record,suc_times'))->first();
+        if(!$info){
+            //新增
+            $saveData = [
+                'user_id' => $userId,
+                'mount_id' => $mountId,
+                'times' => $times,
+                'suc_times_record' => ','. $times,
+                'suc_times' => 1
+            ];
+            WowMountLogModel::insert($saveData);
+        }else{
+            //编辑
+            $info = $info->toArray();
+            $updateData = [
+                'times' => DB::raw('times + '.$times),
+            ];
+            $updateData['suc_times_record'] = DB::raw('concat(suc_times_record, ",", '. $times.')');
+            $updateData['suc_times'] = DB::raw('suc_times + 1');
+            WowMountLogModel::where('id', $info['id'])->update($updateData);
+        }
+    }
+
+    /**
      * @desc       记录抽奖日志
      * @author     文明<736038880@qq.com>
      * @date       2022-09-21 10:51

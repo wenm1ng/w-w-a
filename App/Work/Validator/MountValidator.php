@@ -24,4 +24,9 @@ class MountValidator extends BaseValidator
         }
         $this->addColumn('type')->notEmpty('类型不能为空')->inArray([1,2,'1','2'], true, '类型不合法');
     }
+
+    public function checkBrushedLottery(array $params)
+    {
+        $this->addColumn('id')->notEmpty('ID不能为空')->isArray('ID必须为数组');
+    }
 }

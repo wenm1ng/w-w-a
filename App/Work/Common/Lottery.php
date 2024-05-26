@@ -26,6 +26,26 @@ class Lottery{
     ];
 
     /**
+     * @desc      获取默认奖励
+     * @example
+     * @param int $mountId
+     *
+     * @return array
+     */
+    public static function getDefaultReward(int $mountId){
+        $randNum = mt_rand(1, self::DEFAULT_NUM);
+        return [
+            'id' => $mountId,
+            'name' => self::$defaultAward[$randNum-1]['name'],
+            'image_url' => self::$defaultAward[$randNum-1]['image_url'],
+            'is_bingo' => 0,
+            'is_open' => 0,
+            'title' => '点击开刷',
+            'is_show_image' => 0
+        ];
+    }
+
+    /**
      * 抽奖方法
      * @return [array] [抽奖情况]
      */

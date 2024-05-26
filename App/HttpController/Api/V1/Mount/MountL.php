@@ -38,4 +38,11 @@ class MountL extends BaseController
             return (new MountService())->getLotteryLogList($params);
         });
     }
+
+    public function brushedLottery(){
+        return $this->apiResponse(function () {
+            $params = $this->getRequestJsonData();
+            return (new MountService())->brushedLottery($params);
+        });
+    }
 }
