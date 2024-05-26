@@ -66,7 +66,7 @@ class MountService
         $fields = 'id,name,image_url,rate';
         $list = WowMountModel::baseQuery($where)->select(Db::raw($fields))->get()->toArray();
 
-        return ['list' => $list];
+        return ['list' => $list, 'times' => 3];
     }
 
     /**
