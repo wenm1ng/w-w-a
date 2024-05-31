@@ -91,9 +91,9 @@ class UserService{
             'openId' => $sessionInfo['openid']
         ];
         if(empty($userInfo)){
-            //新增用户
-            $userInfo['nickName'] = '微信用户'.random(6, 'all');
-            $userInfo['avatarUrl'] = $data['userInfo']['avatarUrl'];
+            //新增用户 random(6, 'all')
+            $userInfo['nickName'] = $dbData['nickName'] = '微信用户';
+            $userInfo['avatarUrl'] = $dbData['avatarUrl'] = $data['userInfo']['avatarUrl'];
             $userInfo['is_save_avatar'] = $dbData['is_save_avatar'] = 0; //新用户头像为默认
             $userInfo['is_save_nickname'] = $dbData['is_save_nickname'] = 0; //新用户昵称为默认
             $userInfo['user_id'] = WowUserModelNew::query()->insertGetId($dbData);
