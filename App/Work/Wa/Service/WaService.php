@@ -617,36 +617,41 @@ class WaService
      */
     public static function savePythonWa(){
 //        WowWaImagePythonModel
-        $pythonList = WowWaContentPythonModel::get()->toArray();
+        $pythonList = WowWaContentPythonModel::where('status', 0)->get()->toArray();
         $originIds = array_column($pythonList, 'origin_id');
         $originLink = WowWaContentModel::query()->whereIn('origin_id', $originIds)->pluck('origin_id', 'origin_id');
         $file = new File();
         foreach ($pythonList as $val) {
+
+            $isUpdate = 0;
             if(isset($originLink[$val['origin_id']])){
-                //已经转换跳过
-                continue;
+                //修改
+                $isUpdate = 1;
             }
-            $imageList = WowWaImagePythonModel::where('wa_id', $val['id'])->get()->toArray();
-            if(empty($imageList)){
-                continue;
-            }
-            $isSuc = 0;
-            $images = [];
-            foreach ($imageList as $image) {
-                $rs = $file->uploadImage(['url' => [$image['origin_image_url']]]);
-                \Co::sleep(0.5);
-                if(!isset($rs[$image['origin_image_url']])){
+            if(!$isUpdate){
+                $imageList = WowWaImagePythonModel::where('wa_id', $val['id'])->get()->toArray();
+                if(empty($imageList)){
                     continue;
                 }
-                $isSuc = 1;
-                WowWaImagePythonModel::where(['id' => $image['id']])->update(['image_url' => $rs[$image['origin_image_url']]]);
-                $images[] = ['origin_image_url' => $image['origin_image_url'], 'image_url' => $rs[$image['origin_image_url']]];
+                $isSuc = 0;
+                $images = [];
+                foreach ($imageList as $image) {
+                    $rs = $file->uploadImage(['url' => [$image['origin_image_url']]]);
+                    \Co::sleep(0.5);
+                    if(!isset($rs[$image['origin_image_url']])){
+                        continue;
+                    }
+                    $isSuc = 1;
+                    WowWaImagePythonModel::where(['id' => $image['id']])->update(['image_url' => $rs[$image['origin_image_url']]]);
+                    $images[] = ['origin_image_url' => $image['origin_image_url'], 'image_url' => $rs[$image['origin_image_url']]];
+                }
+
+                //有图片才保存wa
+                if(!$isSuc){
+                    continue;
+                }
             }
 
-            //有图片才保存wa
-            if(!$isSuc){
-                continue;
-            }
             $insertData = [
                 'version' => $val['version'],
                 'occupation' => $val['occupation'],
@@ -664,17 +669,25 @@ class WaService
                 'origin_description' => $val['origin_description'],
                 'wa_content' => $val['wa_content']
             ];
-            $waId = WowWaContentModel::insertGetId($insertData);
-            $imageData = [];
-            foreach ($images as $image) {
-                $imageData[] = [
-                    'wa_id' => $waId,
-                    'origin_image_url' => $image['origin_image_url'],
-                    'image_url' => $image['image_url']
-                ];
+            if($isUpdate){
+                $waId = WowWaContentModel::where('origin_id', $val['origin_id'])->update($insertData);
+                echo '旧wa_id:'.$waId;
+            }else{
+                $waId = WowWaContentModel::insertGetId($insertData);
+                $imageData = [];
+                foreach ($images as $image) {
+                    $imageData[] = [
+                        'wa_id' => $waId,
+                        'origin_image_url' => $image['origin_image_url'],
+                        'image_url' => $image['image_url']
+                    ];
+                }
+                WowWaImageModel::insert($imageData);
+                echo '新wa_id:'.$waId;
             }
-            WowWaImageModel::insert($imageData);
-            echo '新wa_id:'.$waId;
+            WowWaContentPythonModel::where('id', $val['id'])->update([
+                'status' => 1
+            ]);
         }
         dump('数据转移成功');
         return null;
