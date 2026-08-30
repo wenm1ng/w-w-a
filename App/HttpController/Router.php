@@ -55,6 +55,12 @@ class Router extends AbstractRouter
             //公众号
             $this->wxGzh($collector, $apiBasePathOpenV1);
         });
+        $routeCollector->addGroup('/wx', function (RouteCollector $collector) {
+
+            $apiBasePathOpenV1 = 'TxMap/';
+            //公众号
+            $this->txMap($collector, $apiBasePathOpenV1);
+        });
     }
 
     public function talent(RouteCollector $collector, string $basePath = ''){
@@ -239,6 +245,12 @@ class Router extends AbstractRouter
     {
         //消息回调
         $collector->get('/validate',$basePath.'Validate/index');
+    }
+
+    public function txMap(RouteCollector $collector, string $basePath = '')
+    {
+        //消息回调
+        $collector->get('/enter',$basePath.'TencentMapProxy/enter');
     }
 
     public function mount(RouteCollector $collector, string $basePath = '')
