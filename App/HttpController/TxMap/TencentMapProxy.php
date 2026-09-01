@@ -15,7 +15,8 @@ class TencentMapProxy extends CommonController
 {
     // ========== 配置项，建议放到.env环境变量，不要硬编码 ==========
     const TENCENT_MAP_KEY = 'RNJBZ-BU3ET-TXQXR-VBCJT-WD3ME-D6F3B';
-    const TENCENT_MAP_SK  = 'OGp7Q4EKvP0BfAd0A0Ikf6ON0qHlSfyT';
+    // 已关闭腾讯控制台签名校验，SK不再使用，注释
+    //const TENCENT_MAP_SK  = 'OGp7Q4EKvP0BfAd0A0Ikf6ON0qHlSfyT';
     const TENCENT_API_HOST = 'https://apis.map.qq.com/ws';
 
     /**
@@ -33,44 +34,53 @@ class TencentMapProxy extends CommonController
         }
     }
 
-
     /**
-     * 统一入口，匹配 /maps-api/ws/{path}
+     * 统一入口，访问路由：/wx/enter/xxx
      */
     public function enter()
     {
-        // 1. 获取请求路径，截取 /maps-api/ws/ 后面的部分
-        $pathInfo = $this->request()->getUri()->getPath();
-        $prefix = '/TencentMapProxy/enter';
+        // 获取swoole底层原始请求uri，不需要nginx
+        $swooleReq = $this->request()->getSwooleRequest();
+        $rawRequestUri = $swooleReq->server['request_uri'];
+        $pathInfo = explode('?', $rawRequestUri)[0];
+
+        $prefix = '/wx/enter/';
         if (strpos($pathInfo, $prefix) === false) {
             return $this->jsons([
                 'status' => 404,
-                'message' => 'api not found'
+                'message' => 'api not found, pathInfo:'.$pathInfo
             ], 404);
         }
         $apiPath = ltrim(substr($pathInfo, strlen($prefix)), '/');
-        // 2. 获取前端GET全部query参数
+
+        if(trim($apiPath) === ''){
+            return $this->jsons([
+                'status' =>400,
+                'message'=>'缺少地图接口子路径'
+            ],400);
+        }
+
         $clientQuery = $this->request()->getQueryParams();
+        unset($clientQuery['key']);
 
-        // --- 生产环境：这里校验前端传入的key作为租户token，示例跳过鉴权 ---
-        $clientToken = $clientQuery['key'] ?? '';
-        unset($clientQuery['key']); // 删除前端传的key，不能传给腾讯！
-
-        // 3. 组装给腾讯的请求参数：加入服务端真实key
         $tencentQuery = $clientQuery;
         $tencentQuery['key'] = self::TENCENT_MAP_KEY;
 
-        // 4. 按照腾讯规则计算 sig 签名
-        $sig = $this->calcSig($apiPath, $tencentQuery, self::TENCENT_MAP_SK);
-        $tencentQuery['sig'] = $sig;
+        $trimApiPath = rtrim($apiPath, '/');
+        $tencentUrl = self::TENCENT_API_HOST . '/' . $trimApiPath;
 
-        // 5. 拼接腾讯完整URL
-        $tencentUrl = self::TENCENT_API_HOST . '/' . $apiPath;
+        var_dump('rawRequestUri:'.$rawRequestUri);
+        var_dump('pathInfo:'.$pathInfo);
+        var_dump('apiPath:'.$apiPath);
+        var_dump('trimApiPath:'.$trimApiPath);
+        var_dump('tencentQuery',$tencentQuery);
+        var_dump('tencentUrl:'.$tencentUrl);
 
-        // 6. 协程HTTP客户端请求腾讯接口
         $httpClient = new HttpClient($tencentUrl);
         $httpClient->setTimeout(10);
-        $resp = $httpClient->get($tencentQuery);
+        // =========关键修复：用setQuery设置get查询参数，不要给get()传数组=========
+        $httpClient->setQuery($tencentQuery);
+        $resp = $httpClient->get();
 
         if ($resp === false) {
             return $this->jsons([
@@ -82,13 +92,16 @@ class TencentMapProxy extends CommonController
         $body = $resp->getBody();
         $statusCode = $resp->getStatusCode();
 
-        // 原样透传腾讯返回给小程序，不修改数据结构，兼容SDK handleData解析
         $this->response()->withStatus($statusCode);
         $this->response()->withHeader('Content-Type', 'application/json;charset=utf-8');
         $this->response()->write($body);
     }
 
+
+
+
     /**
+     * 【现在已经不用，保留代码备查，不再调用】
      * 按照腾讯WebService规则计算sig签名
      * 参考官方文档：参数key=xxx&a=xxx 排序后拼接路径?k=v&k=v + sk，再md5
      * @param string $apiPath 接口路径，如 place/v1/search
@@ -111,7 +124,7 @@ class TencentMapProxy extends CommonController
 
     protected function actionNotFound(?string $action): void
     {
-        $this->jsonss(['status' =>404, 'message'=>'action not found'],404);
+        $this->jsons(['status' =>404, 'message'=>'action not found'],404);
     }
 
     private function jsons(array $data, int $httpCode = 200)

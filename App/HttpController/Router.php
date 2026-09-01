@@ -63,6 +63,12 @@ class Router extends AbstractRouter
         });
     }
 
+    public function txMap(RouteCollector $collector, string $basePath = '')
+    {
+        //消息回调
+        $collector->get('/enter/{path:.*}',$basePath.'TencentMapProxy/enter');
+    }
+
     public function talent(RouteCollector $collector, string $basePath = ''){
         //天赋列表
         $collector->get('/talent/get-talent-list',$basePath.'Talent/Talent/getTalentList');
@@ -245,12 +251,6 @@ class Router extends AbstractRouter
     {
         //消息回调
         $collector->get('/validate',$basePath.'Validate/index');
-    }
-
-    public function txMap(RouteCollector $collector, string $basePath = '')
-    {
-        //消息回调
-        $collector->get('/enter',$basePath.'TencentMapProxy/enter');
     }
 
     public function mount(RouteCollector $collector, string $basePath = '')
